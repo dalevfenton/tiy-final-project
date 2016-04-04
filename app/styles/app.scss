@@ -45,3 +45,23 @@ img {
   font-size: 14px;
   font-weight: bold;
 }
+.login{
+  position: absolute;
+  width: 50%;
+  padding: 20px;
+  left: 25%;
+  top: 10%;
+  background: rgba(212,212,212,.8);
+}
+.login-container{
+  input, button{
+    width: 100%;
+    margin-bottom: 16px;
+  }
+  a{
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+  }
+
+}

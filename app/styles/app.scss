@@ -22,8 +22,8 @@ img {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgb(50,50,50);
-  color: white;
+  background: white;
+  color: rgb(50,50,50);
 }
 #map{
   position: absolute;
@@ -34,4 +34,14 @@ img {
 }
 .map-overlay{
   position: relative;
+  background: rgba(212,212,212,.8);
+  top: 0;
+  width: 20%;
+  height: 100%;
+  padding: 20px;
+}
+.brand{
+  font-family: serif;
+  font-size: 14px;
+  font-weight: bold;
 }

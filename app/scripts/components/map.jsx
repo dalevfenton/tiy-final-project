@@ -1,28 +1,35 @@
 var React = require('react');
+var _ = require('underscore');
 // var Mapbox = require('mapbox-gl');
-// var MapboxClient = require('mapbox');
-// var accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
 
 var Map = React.createClass({
-  getInitialState: function(){
-    return {}
-  },
-  componentWillMount: function(){
-    // var mapClient = new MapboxClient();
+  drawMap: function(){
+    if(this.props.location){
+      this.map.setView([this.props.location.coords.latitude,this.props.location.coords.longitude], 14);
+    }
+    if(this.props.waypoints){
+      // console.log('waypoints are being evaluated');
+      // console.log(this.props.waypoints);
+      // console.log(this.map);
+      _.each(this.props.waypoints, function(waypoint){
+        var data = waypoint.features[0];
+        L.marker([data.center[1], data.center[0]]).addTo(this.map);
+      }.bind(this));
+    }
   },
   componentDidMount: function(){
     L.mapbox.accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
-    var map = L.mapbox.map('map', 'fourcube.jd03l3mn');
+    var map = L.mapbox.map('map', 'mapbox.streets', { 'zoomControl': false})
+                      .addControl(L.mapbox.geocoderControl('mapbox.places',
+                      {autocomplete: true, keepOpen: true}));
+    this.map = map;
+  },
+  componentDidUpdate: function(){
+    this.drawMap();
   },
   render: function(){
-    console.log(this.mapClient);
     return (
-      <div className="map-container">
         <div id="map" className="map-full"></div>
-        <div className="map-overlay">
-          <h1>Title That Goes Over Map</h1>
-        </div>
-      </div>
     );
   }
 });

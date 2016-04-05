@@ -6,7 +6,7 @@ var Login = React.createClass({
       username: '',
       email: '',
       password: '',
-      toggleSignUp: false
+      toggleSignUp: false,
     }
   },
   toggleSignUp: function(e){
@@ -17,6 +17,7 @@ var Login = React.createClass({
     e.preventDefault();
   },
   render: function(){
+
     if(this.state.toggleSignUp){
       //show signup form for unregistered users
       return (

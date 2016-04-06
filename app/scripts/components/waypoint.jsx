@@ -112,7 +112,7 @@ var Waypoint = React.createClass({
     var id = "waypoint-input-" + this.props.index;
     return (
       <form className="waypoint" onSubmit={this.handleSubmit}>
-        <label>{this.props.index+1}</label>
+        <label className="waypoint-handle">{this.props.index+1}</label>
         <input type="text" id={id} />
         <button onClick={this.handleSubmit}>+</button>
       </form>

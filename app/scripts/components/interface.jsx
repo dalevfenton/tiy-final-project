@@ -1,10 +1,9 @@
 var React = require('react');
+var Sortable = require('sortablejs');
 
 var Login = require('./login.jsx');
-var Map = require('./map.jsx');
 var Waypoint = require('./waypoint.jsx');
 
-var waypointsDummy = ['greenville, sc', 'atlanta, ga', 'nashville, tn'];
 
 var Interface = React.createClass({
   getInitialState: function(){
@@ -20,6 +19,10 @@ var Interface = React.createClass({
     }.bind(this));
     this.props.router.on('route', this.callback);
     this.props.directions.on('load', this.callback );
+  },
+  componentDidMount: function(){
+    var el = document.getElementById('waypoint-list');
+    var sortable = Sortable.create(el, {'handle': ".waypoint-handle", 'draggable': 'form'});
   },
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
@@ -79,7 +82,9 @@ var Interface = React.createClass({
     }
     return (
       <div>
-        {waypoints}
+        <div id="waypoint-list">
+          {waypoints}
+        </div>
         <button onClick={this.addPoint}>+</button>
         {login}
       </div>

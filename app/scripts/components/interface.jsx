@@ -22,13 +22,83 @@ var Interface = React.createClass({
   },
   componentDidMount: function(){
     var el = document.getElementById('waypoint-list');
-    var sortable = Sortable.create(el, {'handle': ".waypoint-handle", 'draggable': 'form'});
+    var options = {
+      'handle': ".waypoint-handle",
+      'draggable': 'form',
+      'scroll': false,
+      'onSort': this.handleSort
+    };
+    var sortable = Sortable.create(el, options);
   },
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
   },
-  editPoint: function(waypoint, id){
-    console.log('inside editPoint');
+  handleSort: function(e){
+    var origin = this.props.directions.getOrigin();
+    var destination = this.props.directions.getDestination();
+    var waypoints = this.props.directions.getWaypoints();
+    if(e.oldIndex === 0){
+      if(e.newIndex === this.state.numPoints-1){
+        //origin moved to destination
+        console.log('origin to destination');
+        this.props.directions.setOrigin(destination);
+        this.props.directions.setDestination(origin);
+      }else if(0 < e.newIndex < this.state.numPoints-1){
+        //origin moved to waypoint
+        console.log('origin to waypoint');
+        var newOrigin = waypoints.splice(0,1);
+        waypoints.splice(e.newIndex-1, 0, origin);
+        this.props.directions.setOrigin(newOrigin[0]);
+        this.props.directions.setWaypoints(waypoints);
+      }else{
+        //this should never actually get called I think
+        console.log('origin stayed in same place');
+      }
+    }else if(e.oldIndex === this.state.numPoints-1){
+      if(e.newIndex === 0){
+        //destination to origin
+        console.log('destination moved to origin');
+        this.props.directions.setOrigin(destination);
+        this.props.directions.setDestination(origin);
+      }else if(0 < e.newIndex < this.state.numPoints-1){
+        //destination to waypoint
+        console.log('destination moved to waypoint');
+        var newDestination = waypoints.splice(-1,1);
+        waypoints.splice(e.newIndex-1, 0, destination);
+        this.props.directions.setWaypoints(waypoints);
+        this.props.directions.setDestination(newDestination[0]);
+      }else{
+        //this should never actually get called I think
+        console.log('destination stayed in same place');
+      }
+    }else if(0 < e.oldIndex < this.state.numPoints-1){
+      if(e.newIndex === 0){
+        //waypoint to origin
+        console.log('waypoint moved to origin');
+        var newOrigin = waypoints.splice(e.oldIndex-1,1);
+        waypoints.splice(0, 0, origin);
+        this.props.directions.setOrigin(newOrigin[0]);
+        this.props.directions.setWaypoints(waypoints);
+      }else if(e.newIndex === this.state.numPoints-1){
+        //waypoint to destination
+        console.log('waypoint moved to destination');
+        var newDestination = waypoints.splice(e.oldIndex-1,1);
+        waypoints.splice(-1, 0, destination);
+        this.props.directions.setDestination(newDestination[0]);
+        this.props.directions.setWaypoints(waypoints);
+      }else{
+        //waypoint to waypoint
+        console.log('waypoint moved to another waypoint');
+        var movingPoint = waypoints.splice(e.oldIndex-1,1);
+        waypoints.splice(e.newIndex-1, 0, movingPoint);
+        this.props.directions.setWaypoints(waypoints);
+      }
+    }
+    console.log('a sort happened');
+    console.log(e);
+    console.log(this.props.directions);
+    this.updateMap();
+    this.forceUpdate();
   },
   componentDidUpdate: function(){
     if(this.props.router.current == 'login' && this.state.loginToggle === false){
@@ -39,12 +109,7 @@ var Interface = React.createClass({
     console.log('inside update map');
     if(this.props.directions.queryable()){
       console.log('sending directions query');
-      this.props.directions.query({ proximity: this.props.map.getCenter() }, function(err, res){
-        if(err){
-          console.log('error during directions query:', err);
-        }
-        console.log(res);
-      });
+      this.props.directions.query({ proximity: this.props.map.getCenter() });
     }
     console.log('directions after updateMap in Interface');
     console.log(this.props.directions);
@@ -63,7 +128,6 @@ var Interface = React.createClass({
         waypoints.push(waypoint);
       }
     }
-    console.log('waypoints', waypoints);
     var button;
     if(this.state.numPoints.length > 1){
       button = (

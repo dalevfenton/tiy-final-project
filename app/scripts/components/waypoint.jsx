@@ -5,9 +5,9 @@ var $ = require('jquery');
 
 var Waypoint = React.createClass({
   componentWillMount: function(){
-    console.log('mounting waypoint');
-    console.log(this.props.index);
-    console.log(this.props.numPoints);
+    // console.log('mounting waypoint');
+    // console.log(this.props.index);
+    // console.log(this.props.numPoints);
     this.props.directions.on('load', this.setInput);
   },
   componentDidMount: function(){
@@ -23,7 +23,7 @@ var Waypoint = React.createClass({
     }
     if(this.props.index == 0){
       //if we are passed index 0 then we are on the origin component
-      console.log('inside origin setting');
+      // console.log('inside origin setting');
       //we only want to blank the origin if we are passed a null origin
       if(!this.props.directions.getOrigin()){
         //set the origin to a blank string
@@ -33,7 +33,7 @@ var Waypoint = React.createClass({
       }
     }else if(this.props.index == this.props.numPoints-1){
       //if we are passed the last index value then we want to set it as dest.
-      console.log('inside destination setting');
+      // console.log('inside destination setting');
       //we only want to blank the destination if we are passed a null dest.
       if(!this.props.directions.getDestination()){
         //set destination to a blank string
@@ -44,19 +44,21 @@ var Waypoint = React.createClass({
     }else{
       //any index that doesn't hit the first two tests will be a waypoint
       //on the directions prop
-      console.log('inside waypoint setting');
-      console.log(this.props.directions.getWaypoints()[this.props.index-1]);
+      // console.log('inside waypoint setting');
+      // console.log(this.props.directions.getWaypoints()[this.props.index-1]);
       if(!this.props.directions.getWaypoints()[this.props.index-1]){
-        console.log('inside setting waypoint on load');
-        console.log(this.props.directions.getWaypoints());
+        // console.log('inside setting waypoint on load');
+        // console.log(this.props.directions.getWaypoints());
       }else{
         this.setInput();
       }
     }
   },
   setInput: function(){
-    console.log('inside setInput');
+    // console.log('inside setInput');
     var name = {};
+    console.log('setting input on waypoint');
+    console.log(this.props);
     if(this.props.index == 0){
       //if we are passed index 0 then we are on the origin component
       console.log('inside origin setInput');
@@ -82,21 +84,21 @@ var Waypoint = React.createClass({
     }else{
       name = '';
     }
-    console.log('name from second sort', name);
-    console.log($('#waypoint-input-'+ this.props.index));
+    // console.log('name from second sort', name);
+    // console.log($('#waypoint-input-'+ this.props.index));
     $('#waypoint-input-'+ this.props.index).val(name);
   },
   handleSubmit:function(e){
     e.preventDefault();
     var thisWaypointVal= $('#waypoint-input-'+ this.props.index).val();
     if(this.props.index == 0){
-      console.log('setting origin');
+      // console.log('setting origin');
       this.props.directions.setOrigin(thisWaypointVal);
     }else if(this.props.index == (this.props.numPoints - 1)){
-      console.log('setting destination');
+      // console.log('setting destination');
       this.props.directions.setDestination(thisWaypointVal);
     }else{
-      console.log('setting waypoint');
+      // console.log('setting waypoint');
       if(!this.props.directions.getWaypoints()[this.props.index-1]){
         this.props.directions.addWaypoint(this.props.index-1, thisWaypointVal);
       }else{
@@ -107,14 +109,13 @@ var Waypoint = React.createClass({
     this.props.updateMap();
   },
   render: function(){
-    console.log('inside component with index:', this.props.index);
-    console.log(this.props.directions);
+    // console.log('inside component with index:', this.props.index);
+    // console.log(this.props.directions);
     var id = "waypoint-input-" + this.props.index;
     return (
       <form className="waypoint" onSubmit={this.handleSubmit}>
         <label className="waypoint-handle">{this.props.index+1}</label>
         <input type="text" id={id} />
-        <button onClick={this.handleSubmit}>+</button>
       </form>
     );
   }

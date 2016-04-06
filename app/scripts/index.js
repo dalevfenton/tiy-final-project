@@ -7,7 +7,7 @@ var Interface = require('./components/interface.jsx');
 var router = require('./router');
 
 L.mapbox.accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
-var map = L.mapbox.map('map', 'mapbox.streets', {
+var map = L.mapbox.map('map', 'mapbox.dark', {
     zoomControl: false
 }).setView([34.8514, -82.3985], 6);
 

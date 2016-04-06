@@ -65,3 +65,25 @@ img {
   }
 
 }
+.waypoint{
+  width: 100%;
+  label, input, button{
+    display: inline-block;
+    padding: 10px 5%;
+  }
+  label, button{
+    width: 20%;
+    background: rgb(50,50,50);
+    text-align: center;
+    color: white;
+    font-weight: bold;
+  }
+  input{
+    width: 60%;
+    height: 100%;
+    margin-left: -4px;
+  }
+  button{
+    border: none;
+  }
+}

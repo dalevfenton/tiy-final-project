@@ -10,55 +10,28 @@ var Interface = React.createClass({
   getInitialState: function(){
     return {
       location: null,
-      waypoints: waypointsDummy,
+      numPoints: 3,
       loginToggle: false
     }
   },
   componentWillMount: function(){
     this.callback = (function(){
+      console.log('forceUpdating');
       this.forceUpdate();
     }.bind(this));
     this.props.router.on('route', this.callback);
-    // if ("geolocation" in navigator) {
-    //   /* geolocation is available */
-    //   console.log('geolocation available');
-    //   navigator.geolocation.getCurrentPosition(function(position) {
-    //     this.setState({'location': position});
-    //     // do_something(position.coords.latitude, position.coords.longitude);
-    //   }.bind(this));
-    // } else {
-    //   /* geolocation IS NOT available */
-    //   console.log('no geolocation');
-    // }
-    //
+    this.props.directions.on('load', this.callback );
+  },
+  handleMap: function(e){
+    console.log('map load callback');
+    console.log(this.props.directions);
+
   },
   componentDidMount: function(){
-    this.setMap();
+
   },
   setMap: function(){
-    L.mapbox.accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
-    var map = L.mapbox.map('map', 'mapbox.streets', {
-        zoomControl: false
-    }).setView([40, -74.50], 9);
 
-    // move the attribution control out of the way
-    map.attributionControl.setPosition('bottomleft');
-
-    // create the initial directions object, from which the layer
-    // and inputs will pull data.
-    var directions = L.mapbox.directions();
-    this.setState({'map': map, 'directions': directions});
-    var directionsLayer = L.mapbox.directions.layer(directions)
-        .addTo(map);
-
-    var directionsInputControl = L.mapbox.directions.inputControl('inputs', directions)
-        .addTo(map);
-
-    var directionsErrorsControl = L.mapbox.directions.errorsControl('errors', directions)
-        .addTo(map);
-    //
-    var directionsRoutesControl = L.mapbox.directions.routesControl('routes', directions)
-        .addTo(map);
   },
   addPoint: function(waypoint){
     console.log('waypoint inside Interfaces addPoint');
@@ -76,36 +49,48 @@ var Interface = React.createClass({
     if(this.props.router.current == 'login' && this.state.loginToggle === false){
       this.setState({'loginToggle': true});
     }
-    this.updateMap();
+    // this.updateMap();
   },
   updateMap: function(){
     console.log('inside update map');
-    console.log(this.state.directions);
-    console.log(this.state.directions.queryable());
-    if(this.state.directions.queryable()){
+    console.log(this.props.directions);
+    console.log(this.props.directions.getWaypoints());
+    if(this.props.directions.queryable()){
       console.log('sending directions query');
-      this.state.directions.query({ proximity: this.state.map.getCenter() }, function(err, res){
+      this.props.directions.query({ proximity: this.props.map.getCenter() }, function(err, res){
         console.log('results from directions query');
         console.log(err);
         console.log(res);
       });
     }
+    console.log(this.props.directions.getWaypoints());
   },
   render: function(){
     console.log('interface render called');
     console.log(this.state);
-    if(this.state.directions){
-      var waypoints = this.state.waypoints.map(function(waypoint, index, waypointsArr){
-        console.log(index);
-        console.log(waypointsArr);
-        return ( <Waypoint editPoint={this.editPoint} waypoint={waypoint}
-                  key={index} index={index} length={waypointsArr.length} type="edit"
-                  directions={this.state.directions}
-                  updateMap={this.updateMap} /> );
-      }.bind(this));
+    if(this.props.directions){
+      var waypoints = [];
+      var self = this;
+      for(var i = 0; i < self.state.numPoints; i++){
+        var waypoint = (
+          <Waypoint directions={self.props.directions}
+            key={i} index={i} numPoints={self.state.numPoints}
+            updateMap={self.updateMap}
+          /> );
+        waypoints.push(waypoint);
+      }
+      // var waypoints = this.state.waypoints.map(function(waypoint, index, waypointsArr){
+      //   console.log(index);
+      //   console.log(waypointsArr);
+      //   return ( <Waypoint editPoint={this.editPoint} waypoint={waypoint}
+      //             key={index} index={index} length={waypointsArr.length} type="edit"
+      //             directions={this.props.directions}
+      //             updateMap={this.updateMap} /> );
+      // }.bind(this));
     }
+    console.log('waypoints', waypoints);
     var button;
-    if(this.state.waypoints.length > 1){
+    if(this.state.numPoints.length > 1){
       button = (
         <div className="login-button">
           <a href="#login">Save This Trip</a>
@@ -122,20 +107,9 @@ var Interface = React.createClass({
     }
     return (
       <div>
-        <div className="map-container">
-          <div id="map" className="map-full"></div>
-          <Map location={this.state.location} waypoints={this.state.waypoints} />
-          <div className="map-overlay">
-            <div id="inputs"></div>
-            <div id="errors"></div>
-            <div id="directions">
-              <div id="routes"></div>
-              <div id="instructions"></div>
-            </div>
-            {waypoints}
-          </div>
-          {login}
-        </div>
+        {waypoints}
+
+        {login}
       </div>
     );
   }

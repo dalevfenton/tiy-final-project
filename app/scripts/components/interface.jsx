@@ -15,10 +15,25 @@ var Interface = React.createClass({
   },
   componentWillMount: function(){
     this.callback = (function(){
-      this.forceUpdate();
+      var numPoints = 0;
+      if(this.props.directions.getOrigin()){
+        numPoints += 1;
+      }
+      if(this.props.directions.getDestination()){
+        numPoints += 1;
+      }
+      if(this.props.directions.getWaypoints().length > 0){
+        numPoints += this.props.directions.getWaypoints().length;
+      }
+      console.log('number of points from directions', numPoints);
+      if(numPoints < 2){
+        numPoints = 2;
+      }
+      this.setState({'numPoints': numPoints});
+      // this.forceUpdate();
     }.bind(this));
     this.props.router.on('route', this.callback);
-    this.props.directions.on('load', this.callback );
+    this.props.directions.on('origin, destination, profile, selectRoute, load', this.callback );
   },
   componentDidMount: function(){
     var el = document.getElementById('waypoint-list');
@@ -26,6 +41,7 @@ var Interface = React.createClass({
       'handle': ".waypoint-handle",
       'draggable': 'form',
       'scroll': false,
+      // 'sort': false,
       'onSort': this.handleSort
     };
     var sortable = Sortable.create(el, options);
@@ -34,6 +50,7 @@ var Interface = React.createClass({
     this.setState({'numPoints': this.state.numPoints+1});
   },
   handleSort: function(e){
+    e.preventDefault();
     var origin = this.props.directions.getOrigin();
     var destination = this.props.directions.getDestination();
     var waypoints = this.props.directions.getWaypoints();
@@ -89,8 +106,14 @@ var Interface = React.createClass({
       }else{
         //waypoint to waypoint
         console.log('waypoint moved to another waypoint');
-        var movingPoint = waypoints.splice(e.oldIndex-1,1);
+        console.log(waypoints);
+        console.log(e.oldIndex);
+        console.log(e.newIndex);
+        var movingPoint = waypoints.splice(e.oldIndex-1,1)[0];
+        console.log(movingPoint);
+        console.log(waypoints);
         waypoints.splice(e.newIndex-1, 0, movingPoint);
+        console.log(waypoints);
         this.props.directions.setWaypoints(waypoints);
       }
     }
@@ -113,6 +136,10 @@ var Interface = React.createClass({
     }
     console.log('directions after updateMap in Interface');
     console.log(this.props.directions);
+  },
+  doUpdate: function(e){
+    e.preventDefault();
+    this.forceUpdate();
   },
   render: function(){
     console.log('interface render called');
@@ -149,7 +176,8 @@ var Interface = React.createClass({
         <div id="waypoint-list">
           {waypoints}
         </div>
-        <button onClick={this.addPoint}>+</button>
+        <button className="trip-button" onClick={this.addPoint}>+ Add New Waypoint</button>
+
         {login}
       </div>
     );

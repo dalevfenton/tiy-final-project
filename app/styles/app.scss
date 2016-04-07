@@ -16,6 +16,10 @@ img {
   max-width: 100%;
 }
 
+html, body{
+  height: 100%;
+  min-height: 100%;
+}
 .map-container{
   position: absolute;
   top: 0;
@@ -65,8 +69,13 @@ img {
   }
 
 }
+#waypoint-list{
+  max-height: 50vh;
+  overflow-y: scroll;
+}
 .waypoint{
   width: 100%;
+  position: relative;
   label, input, button{
     display: inline-block;
     padding: 10px 5%;
@@ -77,13 +86,47 @@ img {
     text-align: center;
     color: white;
     font-weight: bold;
+    margin: 0;
+    &:not(:last-of-type){
+      border-bottom: 1px solid rgb(50,50,50);
+    }
+  }
+  label{
+    height: 100%;
   }
   input{
-    width: 60%;
+    width: 80%;
     height: 100%;
     margin-left: -4px;
+    border: none;
+    &:not(:last-of-type){
+      border-bottom: 1px solid rgb(150,150,150);
+    }
   }
   button{
     border: none;
   }
+}
+button.waypoint-remove{
+  position: absolute;
+  right: 15px;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  margin-top: -5px;
+  padding: 0;
+  color: rgb(50,50,50);
+  background: none;
+}
+.trip-button{
+  width: 100%;
+  background: rgb(50,50,50);
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  margin: 0;
+  border: none;
+  padding: 5px 0;
+  border-bottom: 1px solid rgb(175,175,175);
 }

@@ -62,28 +62,32 @@ var Waypoint = React.createClass({
     if(this.props.index == 0){
       //if we are passed index 0 then we are on the origin component
       console.log('inside origin setInput');
-      name = this.props.directions.getOrigin().properties;
+      name = this.props.directions.getOrigin();
     }else if(this.props.index == this.props.numPoints-1){
       //if we are passed the last index value then we want to set it as dest.
       console.log('inside destination setInput');
-      name = this.props.directions.getDestination().properties;
+      name = this.props.directions.getDestination();
     }else{
       //any index that doesn't hit the first two tests will be a waypoint
       //on the directions prop
       console.log('inside waypoint setInput');
-      var waypoint = this.props.directions.getWaypoints()[this.props.index-1];
-      if(waypoint){
-        name = waypoint.properties;
-      }
+      var name = this.props.directions.getWaypoints()[this.props.index-1];
     }
-    console.log('name from sort:', name);
-    if(name.hasOwnProperty('name')){
-      name = name.name;
-    }else if(name.hasOwnProperty('query')){
-      name = name.query;
+    console.log(typeof name);
+    if(name !== undefined && name.hasOwnProperty('properties')){
+      if(name.properties.hasOwnProperty('name')){
+        if(!name.properties.name == ''){
+          name = name.properties.name;
+        }else{
+          name = name.coordinates;
+        }
+      }else if(name.properties.hasOwnProperty('query')){
+        name = name.properties.query;
+      }
     }else{
       name = '';
     }
+    console.log('name from sort:', name);
     // console.log('name from second sort', name);
     // console.log($('#waypoint-input-'+ this.props.index));
     $('#waypoint-input-'+ this.props.index).val(name);
@@ -108,6 +112,42 @@ var Waypoint = React.createClass({
     //now that our data is set, see if we can do the directions query
     this.props.updateMap();
   },
+  remove: function(e){
+    e.preventDefault();
+    if(this.props.index == 0){
+      // console.log('removing origin');
+      if(this.props.directions.getWaypoints()){
+        var waypoints = this.props.directions.getWaypoints();
+        var newOrigin = waypoints.splice(0,1);
+        this.props.directions.setOrigin(newOrigin[0]);
+        this.props.directions.setWaypoints(waypoints);
+      }else{
+        this.props.directions.setOrigin('');
+      }
+    }else if(this.props.index == (this.props.numPoints - 1)){
+      // console.log('removing destination');
+      // this.props.directions.setDestination(thisWaypointVal);
+      if(this.props.directions.getWaypoints()){
+        var waypoints = this.props.directions.getWaypoints();
+        var newDestination = waypoints.splice(-1,1);
+        this.props.directions.setDestination(newDestination[0]);
+        this.props.directions.setWaypoints(waypoints);
+      }else{
+        this.props.directions.setDestination('');
+      }
+    }else{
+      // console.log('removing waypoint');
+      if(this.props.directions.getWaypoints()[this.props.index-1]){
+        var waypoints = this.props.directions.getWaypoints();
+        waypoints.splice(this.props.index-1, 1);
+        this.props.directions.setWaypoints(waypoints);
+      }else{
+        console.log('error! remove waypoint called but waypoint doesnt exist');
+      }
+    }
+    //now that our data is set, see if we can do the directions query
+    this.props.updateMap();
+  },
   render: function(){
     // console.log('inside component with index:', this.props.index);
     // console.log(this.props.directions);
@@ -116,6 +156,7 @@ var Waypoint = React.createClass({
       <form className="waypoint" onSubmit={this.handleSubmit}>
         <label className="waypoint-handle">{this.props.index+1}</label>
         <input type="text" id={id} />
+        <button onClick={this.remove} className="waypoint-remove">x</button>
       </form>
     );
   }

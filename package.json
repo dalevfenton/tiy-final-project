@@ -33,6 +33,7 @@
     , "sortablejs": "^1.4.2"
     , "mapbox": "1.0.0-beta"
     , "mapbox-gl": "^0.16.0"
+    , "mapbox-directions.js": "^0.4.0"
   },
   "scripts": {
     "html": "cp app/*.html dist/",

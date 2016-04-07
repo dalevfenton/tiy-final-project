@@ -3,6 +3,21 @@ var $ = require('jquery');
 // var MapboxClient = require('mapbox');
 // var accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
 
+
+function format(waypoint) {
+  if (!waypoint) {
+      return '';
+  } else if (waypoint.properties.name) {
+      return waypoint.properties.name;
+  } else if (waypoint.geometry.coordinates) {
+      var precision = Math.max(0, Math.ceil(Math.log(map.getZoom()) / Math.LN2));
+      return waypoint.geometry.coordinates[0].toFixed(precision) + ', ' +
+             waypoint.geometry.coordinates[1].toFixed(precision);
+  } else {
+      return waypoint.properties.query || '';
+  }
+}
+
 var Waypoint = React.createClass({
   componentWillMount: function(){
     // console.log('mounting waypoint');
@@ -73,7 +88,6 @@ var Waypoint = React.createClass({
       console.log('inside waypoint setInput');
       var name = this.props.directions.getWaypoints()[this.props.index-1];
     }
-    console.log(typeof name);
     if(name !== undefined && name.hasOwnProperty('properties')){
       if(name.properties.hasOwnProperty('name')){
         if(!name.properties.name == ''){
@@ -95,8 +109,10 @@ var Waypoint = React.createClass({
   handleSubmit:function(e){
     e.preventDefault();
     var thisWaypointVal= $('#waypoint-input-'+ this.props.index).val();
+    console.log('waypoint value in handleSubmit');
+    console.log(thisWaypointVal);
     if(this.props.index == 0){
-      // console.log('setting origin');
+      console.log('setting origin');
       this.props.directions.setOrigin(thisWaypointVal);
     }else if(this.props.index == (this.props.numPoints - 1)){
       // console.log('setting destination');
@@ -114,6 +130,7 @@ var Waypoint = React.createClass({
   },
   remove: function(e){
     e.preventDefault();
+    console.log('waypoint remove called');
     if(this.props.index == 0){
       // console.log('removing origin');
       if(this.props.directions.getWaypoints()){
@@ -153,11 +170,13 @@ var Waypoint = React.createClass({
     // console.log(this.props.directions);
     var id = "waypoint-input-" + this.props.index;
     return (
-      <form className="waypoint" onSubmit={this.handleSubmit}>
-        <label className="waypoint-handle">{this.props.index+1}</label>
-        <input type="text" id={id} />
+      <div className="waypoint-container">
+        <form className="waypoint" onSubmit={this.handleSubmit}>
+          <label className="waypoint-handle">{this.props.index+1}</label>
+          <input type="text" id={id} />
+        </form>
         <button onClick={this.remove} className="waypoint-remove">x</button>
-      </form>
+      </div>
     );
   }
 });

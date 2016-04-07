@@ -14,7 +14,9 @@ var Interface = React.createClass({
     }
   },
   componentWillMount: function(){
-    this.callback = (function(){
+    this.callback = (function(e){
+      console.log('this.callback called');
+      console.log(e);
       var numPoints = 0;
       if(this.props.directions.getOrigin()){
         numPoints += 1;
@@ -30,19 +32,29 @@ var Interface = React.createClass({
         numPoints = 2;
       }
       this.setState({'numPoints': numPoints});
-      // this.forceUpdate();
+      this.forceUpdate();
     }.bind(this));
     this.props.router.on('route', this.callback);
-    this.props.directions.on('origin, destination, profile, selectRoute, load', this.callback );
+    this.props.directions.on('profile, selectRoute, load', this.callback );
+    this.props.directions.on('origin', this.originSet);
+    this.props.directions.on('destination', this.destinationSet);
+  },
+  originSet: function(){
+    console.log('origin set');
+    this.forceUpdate();
+  },
+  destinationSet: function(){
+    console.log('destination set');
+    this.forceUpdate();
   },
   componentDidMount: function(){
     var el = document.getElementById('waypoint-list');
     var options = {
       'handle': ".waypoint-handle",
-      'draggable': 'form',
+      'draggable': 'div.waypoint-container',
       'scroll': false,
-      // 'sort': false,
-      'onSort': this.handleSort
+      'sort': false,
+      'onEnd': this.handleSort
     };
     var sortable = Sortable.create(el, options);
   },

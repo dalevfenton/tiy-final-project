@@ -38,11 +38,10 @@ html, body{
 }
 .map-overlay{
   position: relative;
-  // background: rgba(212,212,212,.8);
+  background: rgb(212,212,212);
   top: 0;
   width: 20%;
   height: 100%;
-  // padding: 20px;
 }
 .brand{
   font-family: serif;
@@ -71,7 +70,10 @@ html, body{
 }
 #waypoint-list{
   max-height: 50vh;
-  overflow-y: scroll;
+  overflow: scroll;
+}
+.waypoint-container{
+  position: relative;
 }
 .waypoint{
   width: 100%;
@@ -111,13 +113,13 @@ button.waypoint-remove{
   position: absolute;
   right: 15px;
   display: inline-block;
-  width: 10px;
-  height: 10px;
-  top: 50%;
-  margin-top: -5px;
+  width: 20px;
+  height: 20px;
+  top: 30%;
   padding: 0;
   color: rgb(50,50,50);
-  background: none;
+  background: white;
+  border: none;
 }
 .trip-button{
   width: 100%;

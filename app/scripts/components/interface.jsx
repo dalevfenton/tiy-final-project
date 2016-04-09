@@ -10,13 +10,22 @@ var Interface = React.createClass({
     return {
       location: null,
       numPoints: 2,
-      loginToggle: false
+      loginToggle: false,
+      toggleLeft: false,
+      toggleRight: false
     }
+  },
+  toggleLeft: function(e){
+    console.log('toggleLeft triggered');
+    this.setState({toggleLeft: !this.state.toggleLeft});
+  },
+  toggleRight: function(e){
+    this.setState({toggleRight: !this.state.toggleRight});
   },
   componentWillMount: function(){
     this.callback = (function(e){
-      console.log('this.callback called');
-      console.log(e);
+      // console.log('this.callback called');
+      // console.log(e);
       var numPoints = 0;
       if(this.props.directions.getOrigin()){
         numPoints += 1;
@@ -38,14 +47,22 @@ var Interface = React.createClass({
     this.props.directions.on('profile, selectRoute, load', this.callback );
     this.props.directions.on('origin', this.originSet);
     this.props.directions.on('destination', this.destinationSet);
+    this.props.directions.on('waypoint', this.waypointSet);
   },
-  originSet: function(){
-    console.log('origin set');
+  originSet: function(e){
+    // console.log('origin set');
+    // console.log(this.props.directions.getOrigin());
     this.forceUpdate();
   },
-  destinationSet: function(){
-    console.log('destination set');
+  destinationSet: function(e){
+    // console.log('destination set');
+    // console.log(this.props.directions.getDestination());
     this.forceUpdate();
+  },
+  waypointSet: function(e){
+    // console.log('waypoint set');
+    // console.log(e);
+    this.updateMap();
   },
   componentDidMount: function(){
     var el = document.getElementById('waypoint-list');
@@ -57,6 +74,7 @@ var Interface = React.createClass({
       'onEnd': this.handleSort
     };
     var sortable = Sortable.create(el, options);
+
   },
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
@@ -66,10 +84,15 @@ var Interface = React.createClass({
     var origin = this.props.directions.getOrigin();
     var destination = this.props.directions.getDestination();
     var waypoints = this.props.directions.getWaypoints();
+    console.log(e.oldIndex);
+    console.log(e.newIndex);
+    console.log(this.state.numPoints);
     if(e.oldIndex === 0){
       if(e.newIndex === this.state.numPoints-1){
         //origin moved to destination
         console.log('origin to destination');
+        console.log(origin);
+        console.log(destination);
         this.props.directions.setOrigin(destination);
         this.props.directions.setDestination(origin);
       }else if(0 < e.newIndex < this.state.numPoints-1){
@@ -129,9 +152,9 @@ var Interface = React.createClass({
         this.props.directions.setWaypoints(waypoints);
       }
     }
-    console.log('a sort happened');
-    console.log(e);
-    console.log(this.props.directions);
+    // console.log('a sort happened');
+    // console.log(e);
+    // console.log(this.props.directions);
     this.updateMap();
     this.forceUpdate();
   },
@@ -141,9 +164,10 @@ var Interface = React.createClass({
     }
   },
   updateMap: function(){
-    console.log('inside update map');
+    // console.log('inside update map');
     if(this.props.directions.queryable()){
       console.log('sending directions query');
+      console.log(this.props.map);
       this.props.directions.query({ proximity: this.props.map.getCenter() });
     }
     console.log('directions after updateMap in Interface');
@@ -154,7 +178,7 @@ var Interface = React.createClass({
     this.forceUpdate();
   },
   render: function(){
-    console.log('interface render called');
+    // console.log('interface render called');
     if(this.props.directions){
       var waypoints = [];
       var self = this;
@@ -183,14 +207,46 @@ var Interface = React.createClass({
         </div>
       );
     }
+    var leftToggle, rightToggle, leftIcon, rightIcon;
+    if(this.state.toggleLeft){
+      leftToggle = "map-overlay sidebar-left collapse-overlay-left";
+      leftIcon = ">";
+    }else{
+      leftToggle = "map-overlay sidebar-left";
+      leftIcon = "<";
+    }
+    if(this.state.toggleRight){
+      rightToggle = "map-overlay sidebar-right collapse-overlay-right";
+      rightIcon = "<";
+    }else{
+      rightToggle = "map-overlay sidebar-right";
+      rightIcon = ">";
+    }
     return (
       <div>
-        <div id="waypoint-list">
-          {waypoints}
-        </div>
-        <button className="trip-button" onClick={this.addPoint}>+ Add New Waypoint</button>
+        <div className={leftToggle}>
+          <div className="overlay-control-left">
+            <span className="close-overlay" onClick={this.toggleLeft}>
+              {leftIcon}
+            </span>
+          </div>
+          <div>
+            <div id="waypoint-list">
+              {waypoints}
+            </div>
+            <button className="trip-button" onClick={this.addPoint}>+ Add New Waypoint</button>
 
-        {login}
+            {login}
+          </div>
+        </div>
+        <div className={rightToggle}>
+          <div className="overlay-control-right">
+            <span className="close-overlay" onClick={this.toggleRight}>
+              {rightIcon}
+            </span>
+          </div>
+          <h3>Right Sidebar</h3>
+        </div>
       </div>
     );
   }

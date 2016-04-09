@@ -1,22 +1,5 @@
 var React = require('react');
 var $ = require('jquery');
-// var MapboxClient = require('mapbox');
-// var accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
-
-
-function format(waypoint) {
-  if (!waypoint) {
-      return '';
-  } else if (waypoint.properties.name) {
-      return waypoint.properties.name;
-  } else if (waypoint.geometry.coordinates) {
-      var precision = Math.max(0, Math.ceil(Math.log(map.getZoom()) / Math.LN2));
-      return waypoint.geometry.coordinates[0].toFixed(precision) + ', ' +
-             waypoint.geometry.coordinates[1].toFixed(precision);
-  } else {
-      return waypoint.properties.query || '';
-  }
-}
 
 var Waypoint = React.createClass({
   componentWillMount: function(){
@@ -72,25 +55,25 @@ var Waypoint = React.createClass({
   setInput: function(){
     // console.log('inside setInput');
     var name = {};
-    console.log('setting input on waypoint');
-    console.log(this.props);
+    // console.log('setting input on waypoint');
+    // console.log(this.props);
     if(this.props.index == 0){
       //if we are passed index 0 then we are on the origin component
-      console.log('inside origin setInput');
+      // console.log('inside origin setInput');
       name = this.props.directions.getOrigin();
     }else if(this.props.index == this.props.numPoints-1){
       //if we are passed the last index value then we want to set it as dest.
-      console.log('inside destination setInput');
+      // console.log('inside destination setInput');
       name = this.props.directions.getDestination();
     }else{
       //any index that doesn't hit the first two tests will be a waypoint
       //on the directions prop
-      console.log('inside waypoint setInput');
+      // console.log('inside waypoint setInput');
       var name = this.props.directions.getWaypoints()[this.props.index-1];
     }
     if(name !== undefined && name.hasOwnProperty('properties')){
-      if(name.properties.hasOwnProperty('name')){
-        if(!name.properties.name == ''){
+      if(name.properties.hasOwnProperty('name') && name.properties.name !== undefined ){
+        if(name.properties.name){
           name = name.properties.name;
         }else{
           name = name.coordinates;
@@ -101,7 +84,7 @@ var Waypoint = React.createClass({
     }else{
       name = '';
     }
-    console.log('name from sort:', name);
+    // console.log('name from sort:', name);
     // console.log('name from second sort', name);
     // console.log($('#waypoint-input-'+ this.props.index));
     $('#waypoint-input-'+ this.props.index).val(name);
@@ -109,14 +92,16 @@ var Waypoint = React.createClass({
   handleSubmit:function(e){
     e.preventDefault();
     var thisWaypointVal= $('#waypoint-input-'+ this.props.index).val();
-    console.log('waypoint value in handleSubmit');
-    console.log(thisWaypointVal);
+    // console.log('waypoint value in handleSubmit');
+    // console.log(thisWaypointVal);
     if(this.props.index == 0){
-      console.log('setting origin');
+      // console.log('setting origin');
       this.props.directions.setOrigin(thisWaypointVal);
+
     }else if(this.props.index == (this.props.numPoints - 1)){
       // console.log('setting destination');
       this.props.directions.setDestination(thisWaypointVal);
+
     }else{
       // console.log('setting waypoint');
       if(!this.props.directions.getWaypoints()[this.props.index-1]){
@@ -130,7 +115,7 @@ var Waypoint = React.createClass({
   },
   remove: function(e){
     e.preventDefault();
-    console.log('waypoint remove called');
+    // console.log('waypoint remove called');
     if(this.props.index == 0){
       // console.log('removing origin');
       if(this.props.directions.getWaypoints()){

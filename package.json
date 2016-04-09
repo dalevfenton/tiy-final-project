@@ -31,8 +31,7 @@
     , "backbone-react-component": "^0.10.0"
     , "parse": "^1.8.1"
     , "sortablejs": "^1.4.2"
-    , "mapbox": "1.0.0-beta"
-    , "mapbox-gl": "^0.16.0"
+    , "mapbox.js": "^2.0"
     , "mapbox-directions.js": "^0.4.0"
   },
   "scripts": {

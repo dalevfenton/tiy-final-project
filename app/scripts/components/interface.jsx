@@ -3,20 +3,30 @@ var Sortable = require('sortablejs');
 
 var Login = require('./login.jsx');
 var Waypoint = require('./waypoint.jsx');
-
+var RightSidebar = require('./rightsidebar.jsx');
 
 var Interface = React.createClass({
   getInitialState: function(){
     return {
       location: null,
       numPoints: 2,
-      loginToggle: false
+      loginToggle: false,
+      toggleLeft: false,
+      toggleRight: false,
+      activePoint: 0
     }
+  },
+  toggleLeft: function(e){
+    console.log('toggleLeft triggered');
+    this.setState({toggleLeft: !this.state.toggleLeft});
+  },
+  toggleRight: function(e){
+    this.setState({toggleRight: !this.state.toggleRight});
   },
   componentWillMount: function(){
     this.callback = (function(e){
-      console.log('this.callback called');
-      console.log(e);
+      // console.log('this.callback called');
+      // console.log(e);
       var numPoints = 0;
       if(this.props.directions.getOrigin()){
         numPoints += 1;
@@ -38,14 +48,22 @@ var Interface = React.createClass({
     this.props.directions.on('profile, selectRoute, load', this.callback );
     this.props.directions.on('origin', this.originSet);
     this.props.directions.on('destination', this.destinationSet);
+    this.props.directions.on('waypoint', this.waypointSet);
   },
-  originSet: function(){
-    console.log('origin set');
+  originSet: function(e){
+    // console.log('origin set');
+    // console.log(this.props.directions.getOrigin());
     this.forceUpdate();
   },
-  destinationSet: function(){
-    console.log('destination set');
+  destinationSet: function(e){
+    // console.log('destination set');
+    // console.log(this.props.directions.getDestination());
     this.forceUpdate();
+  },
+  waypointSet: function(e){
+    // console.log('waypoint set');
+    // console.log(e);
+    this.updateMap();
   },
   componentDidMount: function(){
     var el = document.getElementById('waypoint-list');
@@ -53,23 +71,30 @@ var Interface = React.createClass({
       'handle': ".waypoint-handle",
       'draggable': 'div.waypoint-container',
       'scroll': false,
-      'sort': false,
+      'sort': true,
       'onEnd': this.handleSort
     };
     var sortable = Sortable.create(el, options);
+
   },
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
   },
   handleSort: function(e){
+    console.log(e);
     e.preventDefault();
     var origin = this.props.directions.getOrigin();
     var destination = this.props.directions.getDestination();
     var waypoints = this.props.directions.getWaypoints();
+    console.log(e.oldIndex);
+    console.log(e.newIndex);
+    console.log(this.state.numPoints);
     if(e.oldIndex === 0){
       if(e.newIndex === this.state.numPoints-1){
         //origin moved to destination
         console.log('origin to destination');
+        console.log(origin);
+        console.log(destination);
         this.props.directions.setOrigin(destination);
         this.props.directions.setDestination(origin);
       }else if(0 < e.newIndex < this.state.numPoints-1){
@@ -129,9 +154,9 @@ var Interface = React.createClass({
         this.props.directions.setWaypoints(waypoints);
       }
     }
-    console.log('a sort happened');
-    console.log(e);
-    console.log(this.props.directions);
+    // console.log('a sort happened');
+    // console.log(e);
+    // console.log(this.props.directions);
     this.updateMap();
     this.forceUpdate();
   },
@@ -141,9 +166,10 @@ var Interface = React.createClass({
     }
   },
   updateMap: function(){
-    console.log('inside update map');
+    // console.log('inside update map');
     if(this.props.directions.queryable()){
       console.log('sending directions query');
+      console.log(this.props.map);
       this.props.directions.query({ proximity: this.props.map.getCenter() });
     }
     console.log('directions after updateMap in Interface');
@@ -153,16 +179,23 @@ var Interface = React.createClass({
     e.preventDefault();
     this.forceUpdate();
   },
+  setActive: function(index){
+    this.setState({activePoint: index});
+  },
   render: function(){
-    console.log('interface render called');
+    // console.log('interface render called');
     if(this.props.directions){
       var waypoints = [];
       var self = this;
       for(var i = 0; i < self.state.numPoints; i++){
+        var active = false;
+        if(this.state.activePoint == i){
+          active = true;
+        }
         var waypoint = (
           <Waypoint directions={self.props.directions}
             key={i} index={i} numPoints={self.state.numPoints}
-            updateMap={self.updateMap}
+            updateMap={self.updateMap} active={active} setActive={this.setActive}
           /> );
         waypoints.push(waypoint);
       }
@@ -183,14 +216,35 @@ var Interface = React.createClass({
         </div>
       );
     }
+    var leftToggle, rightToggle;
+    if(this.state.toggleLeft){
+      leftToggle = "map-overlay sidebar-left collapse-overlay-left collapse-overlay";
+    }else{
+      leftToggle = "map-overlay sidebar-left";
+    }
+    if(this.state.toggleRight){
+      rightToggle = "map-overlay sidebar-right collapse-overlay-right collapse-overlay";
+    }else{
+      rightToggle = "map-overlay sidebar-right";
+    }
     return (
       <div>
-        <div id="waypoint-list">
-          {waypoints}
-        </div>
-        <button className="trip-button" onClick={this.addPoint}>+ Add New Waypoint</button>
+        <div className={leftToggle}>
+          <div className="overlay-control overlay-control-left">
+            <span className="close-overlay" onClick={this.toggleLeft}>
+              <span className="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
+            </span>
+          </div>
+          <div>
+            <div id="waypoint-list">
+              {waypoints}
+            </div>
+            <button className="trip-button" onClick={this.addPoint}>+ Add New Waypoint</button>
 
-        {login}
+            {login}
+          </div>
+        </div>
+        <RightSidebar toggle={rightToggle} toggleRight={this.toggleRight}/>
       </div>
     );
   }

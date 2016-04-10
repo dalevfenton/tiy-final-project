@@ -16,6 +16,10 @@ img {
   max-width: 100%;
 }
 
+//------------------------------------------------------------------------------
+//                            PAGE LAYOUT STYLES
+//------------------------------------------------------------------------------
+
 html, body{
   height: 100%;
   min-height: 100%;
@@ -28,6 +32,7 @@ html, body{
   right: 0;
   background: white;
   color: rgb(50,50,50);
+  overflow: hidden;
 }
 #map{
   position: absolute;
@@ -36,13 +41,81 @@ html, body{
   height: 100%;
   width: 100%;
 }
+#mapbox-ui{
+  position: absolute;
+  width: 60%;
+  bottom: 0;
+  left: 20%;
+  background: black;
+}
 .map-overlay{
-  position: relative;
+  position: absolute;
   background: rgb(212,212,212);
   top: 0;
   width: 20%;
   height: 100%;
+  transition: .5s ease-in-out;
+  & > *:not(.overlay-control) {
+    //delay doesn't seem to be working correctly here
+    //investigate later
+    transition-delay: 1s;
+    transition: .25s;
+  }
+  & > .overlay-control{
+    transition: .5s;
+  }
 }
+.collapse-overlay{
+  & > *:not(.overlay-control){
+    transition-delay: 0s;
+  }
+  & > .overlay-control{
+    transform: rotate(180deg);
+  }
+}
+.overlay-control-left{
+  width: 10%;
+  margin-left: 90%;
+  text-align: center;
+  font-weight: bold;
+}
+.collapse-overlay-left{
+  transform: translateX(-90%);
+  & > *:not(.overlay-control-left) {
+    opacity: 0;
+  }
+}
+.overlay-control-right{
+  width: 10%;
+  margin-right: 90%;
+  text-align: center;
+  font-weight: bold;
+}
+.collapse-overlay-right{
+  transform: translateX(90%);
+  & > *:not(.overlay-control-right) {
+    opacity: 0;
+  }
+}
+.close-overlay{
+  padding: 5px;
+  color: rbg(50,50,50);
+  transition: .25s;
+  &:hover, &:active{
+    color: rbg(150,150,150);
+  }
+}
+.sidebar-left{
+  left: 0;
+}
+.sidebar-right{
+  right: 0;
+}
+
+//------------------------------------------------------------------------------
+//                            LOGIN MODAL STYLES
+//------------------------------------------------------------------------------
+
 .brand{
   font-family: serif;
   font-size: 14px;
@@ -68,6 +141,12 @@ html, body{
   }
 
 }
+
+
+//------------------------------------------------------------------------------
+//                            LEFT SIDEBAR STYLES
+//------------------------------------------------------------------------------
+
 #waypoint-list{
   max-height: 50vh;
   overflow: scroll;
@@ -75,6 +154,7 @@ html, body{
 .waypoint-container{
   position: relative;
 }
+
 .waypoint{
   width: 100%;
   position: relative;
@@ -121,6 +201,11 @@ button.waypoint-remove{
   background: white;
   border: none;
 }
+.waypoint-active{
+  label{
+    background: rgb(59, 178, 208);
+  }
+}
 .trip-button{
   width: 100%;
   background: rgb(50,50,50);
@@ -131,4 +216,56 @@ button.waypoint-remove{
   border: none;
   padding: 5px 0;
   border-bottom: 1px solid rgb(175,175,175);
+}
+
+
+//------------------------------------------------------------------------------
+//                            RIGHT SIDEBAR STYLES
+//------------------------------------------------------------------------------
+
+.location-selectors{
+  list-style: none;
+  ul{
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+  }
+  li{
+    display: inline-block;
+    width: 25%;
+    text-align: center;
+    &:not(:first-of-type){
+      margin-left: -4px;
+    }
+  }
+}
+
+.selector > span{
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  padding: 10px 0;
+  transition: .25s ease-in-out;
+  &:hover{
+    color: rgb(59, 178, 208);
+  }
+}
+
+.selector-active{
+  background: rgb(240, 240, 240);
+  color: darken(rgb(59, 178, 208), 10%);
+}
+
+//Loading Component Styles
+.icon-refresh-animate {
+  animation-name: rotateThis;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  font-size: 75px;
+}
+
+@keyframes rotateThis {
+  from { transform: scale( 1 ) rotate( 0deg );   }
+  to   { transform: scale( 1 ) rotate( 360deg ); }
 }

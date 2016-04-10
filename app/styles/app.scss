@@ -255,3 +255,17 @@ button.waypoint-remove{
   background: rgb(240, 240, 240);
   color: darken(rgb(59, 178, 208), 10%);
 }
+
+//Loading Component Styles
+.icon-refresh-animate {
+  animation-name: rotateThis;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  font-size: 75px;
+}
+
+@keyframes rotateThis {
+  from { transform: scale( 1 ) rotate( 0deg );   }
+  to   { transform: scale( 1 ) rotate( 360deg ); }
+}

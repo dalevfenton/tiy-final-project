@@ -35,21 +35,23 @@ var RightSidebar = React.createClass({
     var food = "selector selector-food";
     var gas = "selector selector-gas";
     var tab = (<div></div>);
+    location = {'latitude': 34.8514, 'longitude': -82.3985};
+    
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
-      tab = (<LocationTab />);
+      tab = (<LocationTab currentLocation={location} />);
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
-      tab = (<HotelTab />);
+      tab = (<HotelTab currentLocation={location} />);
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
-      tab = (<FoodTab />);
+      tab = (<FoodTab currentLocation={location} />);
     }
     if(this.state.currentTab == 'gas'){
       gas = "selector selector-gas selector-active";
-      tab = (<GasTab />);
+      tab = (<GasTab currentLocation={location} />);
     }
     return (
       <div className={this.props.toggle}>

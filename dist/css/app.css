@@ -6005,4 +6005,17 @@ button.waypoint-remove {
   background: #f0f0f0;
   color: #2a94ae; }
 
+.icon-refresh-animate {
+  animation-name: rotateThis;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  font-size: 75px; }
+
+@keyframes rotateThis {
+  from {
+    transform: scale(1) rotate(0deg); }
+  to {
+    transform: scale(1) rotate(360deg); } }
+
 /*# sourceMappingURL=app.css.map */

@@ -3,7 +3,7 @@ var Sortable = require('sortablejs');
 
 var Login = require('./login.jsx');
 var Waypoint = require('./waypoint.jsx');
-
+var RightSidebar = require('./rightsidebar.jsx');
 
 var Interface = React.createClass({
   getInitialState: function(){
@@ -12,7 +12,8 @@ var Interface = React.createClass({
       numPoints: 2,
       loginToggle: false,
       toggleLeft: false,
-      toggleRight: false
+      toggleRight: false,
+      activePoint: 0
     }
   },
   toggleLeft: function(e){
@@ -70,7 +71,7 @@ var Interface = React.createClass({
       'handle': ".waypoint-handle",
       'draggable': 'div.waypoint-container',
       'scroll': false,
-      'sort': false,
+      'sort': true,
       'onEnd': this.handleSort
     };
     var sortable = Sortable.create(el, options);
@@ -80,6 +81,7 @@ var Interface = React.createClass({
     this.setState({'numPoints': this.state.numPoints+1});
   },
   handleSort: function(e){
+    console.log(e);
     e.preventDefault();
     var origin = this.props.directions.getOrigin();
     var destination = this.props.directions.getDestination();
@@ -177,16 +179,23 @@ var Interface = React.createClass({
     e.preventDefault();
     this.forceUpdate();
   },
+  setActive: function(index){
+    this.setState({activePoint: index});
+  },
   render: function(){
     // console.log('interface render called');
     if(this.props.directions){
       var waypoints = [];
       var self = this;
       for(var i = 0; i < self.state.numPoints; i++){
+        var active = false;
+        if(this.state.activePoint == i){
+          active = true;
+        }
         var waypoint = (
           <Waypoint directions={self.props.directions}
             key={i} index={i} numPoints={self.state.numPoints}
-            updateMap={self.updateMap}
+            updateMap={self.updateMap} active={active} setActive={this.setActive}
           /> );
         waypoints.push(waypoint);
       }
@@ -207,27 +216,23 @@ var Interface = React.createClass({
         </div>
       );
     }
-    var leftToggle, rightToggle, leftIcon, rightIcon;
+    var leftToggle, rightToggle;
     if(this.state.toggleLeft){
-      leftToggle = "map-overlay sidebar-left collapse-overlay-left";
-      leftIcon = ">";
+      leftToggle = "map-overlay sidebar-left collapse-overlay-left collapse-overlay";
     }else{
       leftToggle = "map-overlay sidebar-left";
-      leftIcon = "<";
     }
     if(this.state.toggleRight){
-      rightToggle = "map-overlay sidebar-right collapse-overlay-right";
-      rightIcon = "<";
+      rightToggle = "map-overlay sidebar-right collapse-overlay-right collapse-overlay";
     }else{
       rightToggle = "map-overlay sidebar-right";
-      rightIcon = ">";
     }
     return (
       <div>
         <div className={leftToggle}>
-          <div className="overlay-control-left">
+          <div className="overlay-control overlay-control-left">
             <span className="close-overlay" onClick={this.toggleLeft}>
-              {leftIcon}
+              <span className="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
             </span>
           </div>
           <div>
@@ -239,14 +244,7 @@ var Interface = React.createClass({
             {login}
           </div>
         </div>
-        <div className={rightToggle}>
-          <div className="overlay-control-right">
-            <span className="close-overlay" onClick={this.toggleRight}>
-              {rightIcon}
-            </span>
-          </div>
-          <h3>Right Sidebar</h3>
-        </div>
+        <RightSidebar toggle={rightToggle} toggleRight={this.toggleRight}/>
       </div>
     );
   }

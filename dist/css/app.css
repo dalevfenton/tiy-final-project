@@ -5851,9 +5851,17 @@ html, body {
   top: 0;
   width: 20%;
   height: 100%;
-  transition: .2s ease-in-out; }
+  transition: .5s ease-in-out; }
   .map-overlay > *:not(.overlay-control) {
-    transition: .1s; }
+    transition-delay: 1s;
+    transition: .25s; }
+  .map-overlay > .overlay-control {
+    transition: .5s; }
+
+.collapse-overlay > *:not(.overlay-control) {
+  transition-delay: 0s; }
+.collapse-overlay > .overlay-control {
+  transform: rotate(180deg); }
 
 .overlay-control-left {
   width: 10%;
@@ -5876,6 +5884,13 @@ html, body {
   transform: translateX(90%); }
   .collapse-overlay-right > *:not(.overlay-control-right) {
     opacity: 0; }
+
+.close-overlay {
+  padding: 5px;
+  color: rbg(50, 50, 50);
+  transition: .25s; }
+  .close-overlay:hover, .close-overlay:active {
+    color: rbg(150, 150, 150); }
 
 .sidebar-left {
   left: 0; }
@@ -5950,6 +5965,9 @@ button.waypoint-remove {
   background: white;
   border: none; }
 
+.waypoint-active label {
+  background: #3bb2d0; }
+
 .trip-button {
   width: 100%;
   background: #323232;
@@ -5960,5 +5978,31 @@ button.waypoint-remove {
   border: none;
   padding: 5px 0;
   border-bottom: 1px solid #afafaf; }
+
+.location-selectors {
+  list-style: none; }
+  .location-selectors ul {
+    margin: 0;
+    padding: 0;
+    font-size: 20px; }
+  .location-selectors li {
+    display: inline-block;
+    width: 25%;
+    text-align: center; }
+    .location-selectors li:not(:first-of-type) {
+      margin-left: -4px; }
+
+.selector > span {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  padding: 10px 0;
+  transition: .25s ease-in-out; }
+  .selector > span:hover {
+    color: #3bb2d0; }
+
+.selector-active {
+  background: #f0f0f0;
+  color: #2a94ae; }
 
 /*# sourceMappingURL=app.css.map */

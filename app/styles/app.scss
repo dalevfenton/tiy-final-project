@@ -16,6 +16,10 @@ img {
   max-width: 100%;
 }
 
+//------------------------------------------------------------------------------
+//                            PAGE LAYOUT STYLES
+//------------------------------------------------------------------------------
+
 html, body{
   height: 100%;
   min-height: 100%;
@@ -50,9 +54,23 @@ html, body{
   top: 0;
   width: 20%;
   height: 100%;
-  transition: .2s ease-in-out;
+  transition: .5s ease-in-out;
   & > *:not(.overlay-control) {
-    transition: .1s;
+    //delay doesn't seem to be working correctly here
+    //investigate later
+    transition-delay: 1s;
+    transition: .25s;
+  }
+  & > .overlay-control{
+    transition: .5s;
+  }
+}
+.collapse-overlay{
+  & > *:not(.overlay-control){
+    transition-delay: 0s;
+  }
+  & > .overlay-control{
+    transform: rotate(180deg);
   }
 }
 .overlay-control-left{
@@ -79,12 +97,25 @@ html, body{
     opacity: 0;
   }
 }
+.close-overlay{
+  padding: 5px;
+  color: rbg(50,50,50);
+  transition: .25s;
+  &:hover, &:active{
+    color: rbg(150,150,150);
+  }
+}
 .sidebar-left{
   left: 0;
 }
 .sidebar-right{
   right: 0;
 }
+
+//------------------------------------------------------------------------------
+//                            LOGIN MODAL STYLES
+//------------------------------------------------------------------------------
+
 .brand{
   font-family: serif;
   font-size: 14px;
@@ -110,6 +141,12 @@ html, body{
   }
 
 }
+
+
+//------------------------------------------------------------------------------
+//                            LEFT SIDEBAR STYLES
+//------------------------------------------------------------------------------
+
 #waypoint-list{
   max-height: 50vh;
   overflow: scroll;
@@ -117,6 +154,7 @@ html, body{
 .waypoint-container{
   position: relative;
 }
+
 .waypoint{
   width: 100%;
   position: relative;
@@ -163,6 +201,11 @@ button.waypoint-remove{
   background: white;
   border: none;
 }
+.waypoint-active{
+  label{
+    background: rgb(59, 178, 208);
+  }
+}
 .trip-button{
   width: 100%;
   background: rgb(50,50,50);
@@ -173,4 +216,42 @@ button.waypoint-remove{
   border: none;
   padding: 5px 0;
   border-bottom: 1px solid rgb(175,175,175);
+}
+
+
+//------------------------------------------------------------------------------
+//                            RIGHT SIDEBAR STYLES
+//------------------------------------------------------------------------------
+
+.location-selectors{
+  list-style: none;
+  ul{
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+  }
+  li{
+    display: inline-block;
+    width: 25%;
+    text-align: center;
+    &:not(:first-of-type){
+      margin-left: -4px;
+    }
+  }
+}
+
+.selector > span{
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  padding: 10px 0;
+  transition: .25s ease-in-out;
+  &:hover{
+    color: rgb(59, 178, 208);
+  }
+}
+
+.selector-active{
+  background: rgb(240, 240, 240);
+  color: darken(rgb(59, 178, 208), 10%);
 }

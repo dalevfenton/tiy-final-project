@@ -150,15 +150,24 @@ var Waypoint = React.createClass({
     //now that our data is set, see if we can do the directions query
     this.props.updateMap();
   },
+  setActive: function(e){
+    this.props.setActive(this.props.index);
+  },
   render: function(){
     // console.log('inside component with index:', this.props.index);
     // console.log(this.props.directions);
     var id = "waypoint-input-" + this.props.index;
+    var classes;
+    if(this.props.active){
+      classes = "waypoint-container waypoint-active";
+    }else{
+      classes = "waypoint-container"
+    }
     return (
-      <div className="waypoint-container">
+      <div className={classes} onClick={this.setActive}>
         <form className="waypoint" onSubmit={this.handleSubmit}>
           <label className="waypoint-handle">{this.props.index+1}</label>
-          <input type="text" id={id} />
+          <input type="text" id={id} autoComplete="off" />
         </form>
         <button onClick={this.remove} className="waypoint-remove">x</button>
       </div>

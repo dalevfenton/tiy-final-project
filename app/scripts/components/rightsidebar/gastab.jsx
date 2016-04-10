@@ -17,11 +17,11 @@ var GasTab = React.createClass({
     this.getStations();
   },
   getStations: function(){
+    // location check to use in real app
     // if(!this.props.currentLocation){
     //   return 'Error: No Location Set!';
     // }
-    // http://127.0.0.1:3000/api/gasfeed?endpoint=stations/brands/
-    var url = 'http://127.0.0.1:3000/api/gasfeed';
+    var url = this.props.proxy + 'gasfeed';
     var lat = this.props.currentLocation.latitude || '-82.3985';
     var long = this.props.currentLocation.longitude || '34.8514';
     var distance = this.state.distance || '10';
@@ -38,9 +38,9 @@ var GasTab = React.createClass({
     console.log( url );
     $.ajax( url ).then(function(data){
       var data = JSON.parse(data);
-      console.log('data from gasfeed api');
-      console.log(data.geoLocation);
-      console.log(data.stations);
+      // console.log('data from gasfeed api');
+      // console.log(data.geoLocation);
+      // console.log(data.stations);
       this.setState({'stations': data});
     }.bind(this), function(error){
       console.log('error getting gas info');
@@ -54,7 +54,6 @@ var GasTab = React.createClass({
     }
     return (
       <div className="sidebar-tab">
-        <h2>Gas Tab</h2>
         {stations}
       </div>
     );

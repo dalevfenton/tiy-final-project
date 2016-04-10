@@ -6,6 +6,8 @@ var GasTab = require('./rightsidebar/gastab.jsx');
 var HotelTab = require('./rightsidebar/hoteltab.jsx');
 var LocationTab = require('./rightsidebar/locationtab.jsx');
 
+var PROXYURL = 'http://127.0.0.1:3000/api/';
+
 var RightSidebar = React.createClass({
   getInitialState: function(){
     return {
@@ -36,7 +38,7 @@ var RightSidebar = React.createClass({
     var gas = "selector selector-gas";
     var tab = (<div></div>);
     location = {'latitude': 34.8514, 'longitude': -82.3985};
-    
+
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
       tab = (<LocationTab currentLocation={location} />);
@@ -47,11 +49,11 @@ var RightSidebar = React.createClass({
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
-      tab = (<FoodTab currentLocation={location} />);
+      tab = (<FoodTab currentLocation={location} proxy={PROXYURL} />);
     }
     if(this.state.currentTab == 'gas'){
       gas = "selector selector-gas selector-active";
-      tab = (<GasTab currentLocation={location} />);
+      tab = (<GasTab currentLocation={location} proxy={PROXYURL} />);
     }
     return (
       <div className={this.props.toggle}>

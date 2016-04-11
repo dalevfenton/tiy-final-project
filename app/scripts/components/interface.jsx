@@ -8,7 +8,7 @@ var RightSidebar = require('./rightsidebar.jsx');
 var Interface = React.createClass({
   getInitialState: function(){
     return {
-      location: null,
+      location: this.props.location,
       numPoints: 2,
       loginToggle: false,
       toggleLeft: false,
@@ -17,16 +17,23 @@ var Interface = React.createClass({
     }
   },
   toggleLeft: function(e){
-    console.log('toggleLeft triggered');
     this.setState({toggleLeft: !this.state.toggleLeft});
   },
   toggleRight: function(e){
     this.setState({toggleRight: !this.state.toggleRight});
   },
   componentWillMount: function(){
+    if ("geolocation" in navigator) {
+      /* geolocation is available */
+      navigator.geolocation.getCurrentPosition(function(position) {
+        this.setState({'location': position});
+      }.bind(this));
+    } else {
+      /* geolocation IS NOT available */
+      // console.log('no geolocation');
+    }
+
     this.callback = (function(e){
-      // console.log('this.callback called');
-      // console.log(e);
       var numPoints = 0;
       if(this.props.directions.getOrigin()){
         numPoints += 1;
@@ -37,7 +44,6 @@ var Interface = React.createClass({
       if(this.props.directions.getWaypoints().length > 0){
         numPoints += this.props.directions.getWaypoints().length;
       }
-      console.log('number of points from directions', numPoints);
       if(numPoints < 2){
         numPoints = 2;
       }
@@ -81,14 +87,14 @@ var Interface = React.createClass({
     this.setState({'numPoints': this.state.numPoints+1});
   },
   handleSort: function(e){
-    console.log(e);
+    // console.log(e);
     e.preventDefault();
     var origin = this.props.directions.getOrigin();
     var destination = this.props.directions.getDestination();
     var waypoints = this.props.directions.getWaypoints();
-    console.log(e.oldIndex);
-    console.log(e.newIndex);
-    console.log(this.state.numPoints);
+    // console.log(e.oldIndex);
+    // console.log(e.newIndex);
+    // console.log(this.state.numPoints);
     if(e.oldIndex === 0){
       if(e.newIndex === this.state.numPoints-1){
         //origin moved to destination
@@ -168,12 +174,12 @@ var Interface = React.createClass({
   updateMap: function(){
     // console.log('inside update map');
     if(this.props.directions.queryable()){
-      console.log('sending directions query');
-      console.log(this.props.map);
+      // console.log('sending directions query');
+      // console.log(this.props.map);
       this.props.directions.query({ proximity: this.props.map.getCenter() });
     }
-    console.log('directions after updateMap in Interface');
-    console.log(this.props.directions);
+    // console.log('directions after updateMap in Interface');
+    // console.log(this.props.directions);
   },
   doUpdate: function(e){
     e.preventDefault();
@@ -244,7 +250,8 @@ var Interface = React.createClass({
             {login}
           </div>
         </div>
-        <RightSidebar toggle={rightToggle} toggleRight={this.toggleRight}/>
+        <RightSidebar toggle={rightToggle} toggleRight={this.toggleRight}
+          location={this.state.location}/>
       </div>
     );
   }

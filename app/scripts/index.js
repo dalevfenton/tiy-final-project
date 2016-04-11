@@ -10,9 +10,9 @@ require('mapbox.js');
 require('mapbox-directions.js');
 
 L.mapbox.accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
-var map = L.mapbox.map('map', 'mapbox.dark', {
+var map = L.mapbox.map('map', 'mapbox.streets', {
     zoomControl: false
-}).setView([34.8514, -82.3985], 6);
+}).setView([39.833333, -98.583333], 5);
 
 // move the attribution control out of the way
 // map.attributionControl.setPosition('bottomleft');
@@ -42,7 +42,8 @@ ReactDOM.render(
   {
     'router': router,
     'map': map,
-    'directions': directions
+    'directions': directions,
+    'location': {'latitude': 39.833333, 'longitude': -98.583333}
   } ),
   document.getElementById('app')
 );

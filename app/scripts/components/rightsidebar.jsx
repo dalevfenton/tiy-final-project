@@ -11,12 +11,21 @@ var PROXYURL = 'http://127.0.0.1:3000/api/';
 var RightSidebar = React.createClass({
   getInitialState: function(){
     return {
-      currentTab: "location"
+      currentTab: "location",
+      distance: 10,
+      fuelType: 'reg',
+      sort: 'distance',
+      hotels: null,
+      restaurants: null,
+      stations: null
     }
   },
+  componentWillMount: function(){
+    this.getStations();
+    this.getRestaurants();
+    this.getHotels();
+  },
   setCurrent: function(e){
-    console.log(e);
-    console.log($(e.target).hasClass('glyphicon-map-marker'));
     if($(e.target).hasClass('glyphicon-map-marker')){
       this.setState({currentTab: 'location'})
     }
@@ -30,30 +39,94 @@ var RightSidebar = React.createClass({
       this.setState({currentTab: 'gas'})
     }
   },
+  getStations: function(){
+    // location check to use in real app
+    // if(!this.props.currentLocation){
+    //   return 'Error: No Location Set!';
+    // }
+    var url = PROXYURL + 'gasfeed';
+    var lat = this.props.location.latitude || '-82.3985';
+    var long = this.props.location.longitude || '34.8514';
+    var distance = this.state.distance || '10';
+    var fuelType = this.state.fuelType || 'reg';
+    var sort = this.state.sort || 'distance';
+    var endpointStr = '?endpoint=/stations/radius/' + lat +
+                      '/' + long +
+                      '/' + distance +
+                      '/' + fuelType +
+                      '/' + sort + '/';
+
+    var url = url+endpointStr;
+    console.log( url );
+    $.ajax( url ).then(function(data){
+      var data = JSON.parse(data);
+      console.log('data from gasfeed api');
+      console.log(data.geoLocation);
+      console.log(data.stations);
+      this.setState({'stations': data});
+    }.bind(this), function(error){
+      console.log('error getting gas info');
+      console.log(error);
+    });
+  },
+  getRestaurants: function(){
+    this.getYelp("restaurants");
+  },
+  getHotels: function(){
+    this.getYelp("hotels");
+  },
+  getYelp: function(category, opts){
+    var url = PROXYURL + 'yelp';
+    var lat = this.props.location.latitude || '-82.3985';
+    var long = this.props.location.longitude || '34.8514';
+    var distance = this.state.distance || '10';
+    var catTerm = category + "Term";
+    var term = this.state[catTerm] || '';
+    var endpointStr = '?term=' + term +
+                      '&limit=' + 10 +
+                      '&ll=' + lat + "," + long +
+                      '&category_filter=' + category +
+                      '&radius_filter=' + distance;
+
+    var url = url+endpointStr;
+    console.log( url );
+    $.ajax( url ).then(function(data){
+      console.log(data);
+      console.log('data from yelp api');
+      console.log(data.businesses);
+      var obj = {};
+      obj[category] = data;
+      console.log(obj);
+      this.setState(obj);
+    }.bind(this), function(error){
+      console.log('error getting yelp info');
+      console.log(error);
+    });
+  },
   render: function(){
-    console.log(this.props);
+    // console.log(this.props);
     var location = "selector selector-location";
     var hotel = "selector selector-hotel";
     var food = "selector selector-food";
     var gas = "selector selector-gas";
     var tab = (<div></div>);
-    location = {'latitude': 34.8514, 'longitude': -82.3985};
+    // location = {'latitude': 34.8514, 'longitude': -82.3985};
 
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
-      tab = (<LocationTab currentLocation={location} />);
+      tab = (<LocationTab location={this.props.location} />);
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
-      tab = (<HotelTab currentLocation={location} />);
+      tab = (<HotelTab location={this.props.location} hotels={this.state.hotels} />);
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
-      tab = (<FoodTab currentLocation={location} proxy={PROXYURL} />);
+      tab = (<FoodTab location={this.props.location} restaurants={this.state.restaurants} />);
     }
     if(this.state.currentTab == 'gas'){
       gas = "selector selector-gas selector-active";
-      tab = (<GasTab currentLocation={location} proxy={PROXYURL} />);
+      tab = (<GasTab location={this.props.location} stations={this.state.stations} />);
     }
     return (
       <div className={this.props.toggle}>

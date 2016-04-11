@@ -4,7 +4,8 @@ var LocationTab = React.createClass({
   render: function(){
     return (
       <div className="sidebar-tab">
-        <h2>Location Tab</h2>
+        <input type="text" placeholder="Set Your Location" />
+        <button>Set Your Current Location</button>
       </div>
     );
   }

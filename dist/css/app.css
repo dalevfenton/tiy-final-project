@@ -6004,6 +6004,11 @@ button.waypoint-remove {
   background: #f0f0f0;
   color: #2a94ae; }
 
+.selector-disabled {
+  color: #b3b3b3; }
+  .selector-disabled > span:hover {
+    color: #b3b3b3; }
+
 .icon-refresh-animate {
   animation-name: rotateThis;
   animation-duration: 2s;

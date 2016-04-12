@@ -561,13 +561,13 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     if($(e.target).hasClass('glyphicon-map-marker')){
       this.setState({currentTab: 'location'})
     }
-    if($(e.target).hasClass('glyphicon-tent')){
+    if($(e.target).hasClass('glyphicon-tent') && this.state.hotels){
       this.setState({currentTab: 'hotel'})
     }
-    if($(e.target).hasClass('glyphicon-apple')){
+    if($(e.target).hasClass('glyphicon-apple') && this.state.restaurants){
       this.setState({currentTab: 'food'})
     }
-    if($(e.target).hasClass('glyphicon-flash')){
+    if($(e.target).hasClass('glyphicon-flash') && this.state.stations){
       this.setState({currentTab: 'gas'})
     }
   },
@@ -590,6 +590,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
       var data = JSON.parse(data);
       console.log('data from gasfeed api');
       console.log(data);
+      this.setMarkers(data.stations.splice(0, 20), 'gas');
       this.setState({'stations': data});
     }.bind(this), function(error){
       console.log('error getting gas info');
@@ -630,8 +631,15 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     });
   },
   setMarkers: function(businesses, type){
+
     businesses.forEach(function(business){
-      var coords = business.location.coordinate;
+      var coords;
+      if(type == 'gas'){
+        coords = {latitude: business.lat, longitude: business.lng};
+      }else{
+        coords = business.location.coordinate;
+      }
+
       var className = "mapbox-marker-special mapbox-marker-" + type + "-icon";
       var marker = L.marker([coords.latitude, coords.longitude],
         {
@@ -658,9 +666,6 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     this.getHotels();
   },
   render: function(){
-    // console.log('render of rightsidebar');
-    // console.log(this.props);
-    // console.log(this.state);
     var location = "selector selector-location";
     var hotel = "selector selector-hotel";
     var food = "selector selector-food";
@@ -675,6 +680,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
       rightToggle = "map-overlay sidebar-right";
     }
 
+
     var currentLocation = this.getCurrentPoint();
     //display the active tab
     if(this.state.currentTab == 'location'){
@@ -685,15 +691,22 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
       tab = (React.createElement(HotelTab, {location: this.props.location, hotels: this.state.hotels}));
+    }else if(!this.state.hotels){
+      hotel = "selector selector-hotel selector-disabled";
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
       tab = (React.createElement(FoodTab, {location: this.props.location, restaurants: this.state.restaurants}));
+    }else if(!this.state.restaurants){
+      food = "selector selector-food selector-disabled";
     }
     if(this.state.currentTab == 'gas'){
       gas = "selector selector-gas selector-active";
       tab = (React.createElement(GasTab, {location: this.props.location, stations: this.state.stations}));
+    }else if(!this.state.stations){
+      gas = "selector selector-gas selector-disabled";
     }
+
     return (
       React.createElement("div", {className: rightToggle}, 
         React.createElement("div", {className: "overlay-control overlay-control-right"}, 

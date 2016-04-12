@@ -256,6 +256,12 @@ button.waypoint-remove{
   color: darken(rgb(59, 178, 208), 10%);
 }
 
+.selector-disabled{
+  color: lighten(black, 70%);
+  & > span:hover{
+    color: lighten(black, 70%);
+  }
+}
 //Loading Component Styles
 .icon-refresh-animate {
   animation-name: rotateThis;

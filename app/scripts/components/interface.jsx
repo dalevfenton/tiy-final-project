@@ -229,7 +229,8 @@ var Interface = React.createClass({
 
         <RightSidebar toggle={this.state.toggleRight} toggleRight={this.toggleRight}
           directions={this.props.directions} activePoint={this.state.activePoint}
-          numPoints={this.state.numPoints} doGeocode={this.doGeocode}/>
+          numPoints={this.state.numPoints} doGeocode={this.doGeocode}
+          directionsLayer={this.props.directionsLayer} map={this.props.map} />
         {login}
       </div>
     );

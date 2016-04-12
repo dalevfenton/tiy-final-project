@@ -231,7 +231,8 @@ var Interface = React.createClass({displayName: "Interface",
 
         React.createElement(RightSidebar, {toggle: this.state.toggleRight, toggleRight: this.toggleRight, 
           directions: this.props.directions, activePoint: this.state.activePoint, 
-          numPoints: this.state.numPoints, doGeocode: this.doGeocode}), 
+          numPoints: this.state.numPoints, doGeocode: this.doGeocode, 
+          directionsLayer: this.props.directionsLayer, map: this.props.map}), 
         login
       )
     );
@@ -528,7 +529,8 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
   },
   componentWillMount: function(){
     var point = this.getCurrentPoint();
-    this.setState({location: point});
+    var markerLayer = L.featureGroup().addTo(this.props.map);
+    this.setState({location: point, markerLayer: markerLayer});
   },
   getCurrentPoint: function(){
     //Set the current location based on the activePoint
@@ -620,14 +622,33 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
       console.log(data);
       var obj = {};
       obj[category] = data;
+      this.setMarkers(data.businesses, category);
       this.setState(obj);
     }.bind(this), function(error){
       console.log('error getting yelp info');
       console.log(error);
     });
   },
+  setMarkers: function(businesses, type){
+    businesses.forEach(function(business){
+      var coords = business.location.coordinate;
+      var className = "mapbox-marker-special mapbox-marker-" + type + "-icon";
+      var marker = L.marker([coords.latitude, coords.longitude],
+        {
+          draggable: false,
+          icon: L.divIcon({
+              iconSize: L.point(32, 32),
+              'className': className,
+          })
+      });
+      this.state.markerLayer.addLayer(marker);
+      // marker.addTo(this.props.markerLayer);
+      // this.props.directionsLayer.addLayer(marker);
+    }.bind(this));
+  },
   setLocation: function(waypoint){
     this.props.doGeocode(waypoint, this.handleGeocode);
+    this.state.markerLayer.clearLayers();
   },
   handleGeocode: function(waypoint){
     console.log(waypoint);
@@ -1124,6 +1145,7 @@ function setupApp(startPt, startZoom){
   var directionsLayer = L.mapbox.directions.layer(directions)
       .addTo(map);
 
+  
   // var directionsInputControl = L.mapbox.directions.inputControl('inputs', directions)
   //     .addTo(map);
   //

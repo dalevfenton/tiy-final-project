@@ -6016,5 +6016,22 @@ button.waypoint-remove {
     transform: scale(1) rotate(0deg); }
   to {
     transform: scale(1) rotate(360deg); } }
+.mapbox-marker-special {
+  border-radius: 16px;
+  font-family: 'Glyphicons Halflings';
+  background: black;
+  color: white;
+  font-size: 16px;
+  padding: 10px;
+  text-align: center; }
+
+.mapbox-marker-hotels-icon::before {
+  content: "\26fa"; }
+
+.mapbox-marker-restaurants-icon::before {
+  content: "\f8ff"; }
+
+.mapbox-marker-gas-icon::before {
+  content: "\e162"; }
 
 /*# sourceMappingURL=app.css.map */

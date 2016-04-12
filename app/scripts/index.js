@@ -36,6 +36,7 @@ function setupApp(startPt, startZoom){
   var directionsLayer = L.mapbox.directions.layer(directions)
       .addTo(map);
 
+  
   // var directionsInputControl = L.mapbox.directions.inputControl('inputs', directions)
   //     .addTo(map);
   //

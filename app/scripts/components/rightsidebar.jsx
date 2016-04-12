@@ -23,7 +23,8 @@ var RightSidebar = React.createClass({
   },
   componentWillMount: function(){
     var point = this.getCurrentPoint();
-    this.setState({location: point});
+    var markerLayer = L.featureGroup().addTo(this.props.map);
+    this.setState({location: point, markerLayer: markerLayer});
   },
   getCurrentPoint: function(){
     //Set the current location based on the activePoint
@@ -115,14 +116,33 @@ var RightSidebar = React.createClass({
       console.log(data);
       var obj = {};
       obj[category] = data;
+      this.setMarkers(data.businesses, category);
       this.setState(obj);
     }.bind(this), function(error){
       console.log('error getting yelp info');
       console.log(error);
     });
   },
+  setMarkers: function(businesses, type){
+    businesses.forEach(function(business){
+      var coords = business.location.coordinate;
+      var className = "mapbox-marker-special mapbox-marker-" + type + "-icon";
+      var marker = L.marker([coords.latitude, coords.longitude],
+        {
+          draggable: false,
+          icon: L.divIcon({
+              iconSize: L.point(32, 32),
+              'className': className,
+          })
+      });
+      this.state.markerLayer.addLayer(marker);
+      // marker.addTo(this.props.markerLayer);
+      // this.props.directionsLayer.addLayer(marker);
+    }.bind(this));
+  },
   setLocation: function(waypoint){
     this.props.doGeocode(waypoint, this.handleGeocode);
+    this.state.markerLayer.clearLayers();
   },
   handleGeocode: function(waypoint){
     console.log(waypoint);

@@ -84,9 +84,6 @@ var Waypoint = React.createClass({
     }else{
       name = '';
     }
-    // console.log('name from sort:', name);
-    // console.log('name from second sort', name);
-    // console.log($('#waypoint-input-'+ this.props.index));
     $('#waypoint-input-'+ this.props.index).val(name);
   },
   handleSubmit:function(e){
@@ -148,14 +145,12 @@ var Waypoint = React.createClass({
       }
     }
     //now that our data is set, see if we can do the directions query
-    this.props.updateMap();
+    this.props.removePoint(this.props.index);
   },
   setActive: function(e){
     this.props.setActive(this.props.index);
   },
   render: function(){
-    // console.log('inside component with index:', this.props.index);
-    // console.log(this.props.directions);
     var id = "waypoint-input-" + this.props.index;
     var classes;
     if(this.props.active){

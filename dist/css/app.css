@@ -5946,7 +5946,6 @@ html, body {
   .waypoint input {
     width: 80%;
     height: 100%;
-    margin-left: -4px;
     border: none; }
     .waypoint input:not(:last-of-type) {
       border-bottom: 1px solid #969696; }

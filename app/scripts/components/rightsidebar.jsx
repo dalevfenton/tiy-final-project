@@ -12,7 +12,8 @@ var RightSidebar = React.createClass({
   getInitialState: function(){
     return {
       currentTab: "location",
-      distance: 10,
+      currentLocation: null,
+      distance: 40000,
       fuelType: 'reg',
       sort: 'distance',
       hotels: null,
@@ -21,9 +22,33 @@ var RightSidebar = React.createClass({
     }
   },
   componentWillMount: function(){
-    this.getStations();
-    this.getRestaurants();
-    this.getHotels();
+    var point = this.getCurrentPoint();
+    this.setState({location: point});
+  },
+  getCurrentPoint: function(){
+    //Set the current location based on the activePoint
+    var currentLocation = this.props.directions._normalizeWaypoint('');
+    // if(this.props.activePoint == 0){
+    //   currentLocation = this.props.directions.getOrigin();
+    // }else if(this.props.activePoint == this.props.numPoints-1){
+    //   currentLocation = this.props.directions.getDestination();
+    // }else if(this.props.directions.getWaypoints()[activePoint+1] ){
+    //   currentLocation = this.props.directions.getWaypoints()[activePoint+1];
+    // }
+    return currentLocation;
+  },
+  componentDidUpdate: function(){
+    if(this.props.activePoint < 0 || this.props.activePoint > this.props.numPoints-1 ){
+      console.log('current location not set');
+      return 'no current location set, aborting RightSidebar queries';
+    }
+    // var currentLocation = this.getCurrentPoint();
+    // if(!this.state.hotels && !this.state.restaurants
+    //   && !this.state.stations && currentLocation.geometry.coordinates ){
+    //   this.getStations();
+    //   this.getRestaurants();
+    //   this.getHotels();
+    // }
   },
   setCurrent: function(e){
     if($(e.target).hasClass('glyphicon-map-marker')){
@@ -40,14 +65,10 @@ var RightSidebar = React.createClass({
     }
   },
   getStations: function(){
-    // location check to use in real app
-    // if(!this.props.currentLocation){
-    //   return 'Error: No Location Set!';
-    // }
     var url = PROXYURL + 'gasfeed';
-    var lat = this.props.location.latitude || '-82.3985';
-    var long = this.props.location.longitude || '34.8514';
-    var distance = this.state.distance || '10';
+    var lat = this.state.currentLocation.geometry.coordinates[1] || '-82.3985';
+    var long = this.state.currentLocation.geometry.coordinates[0] || '34.8514';
+    var distance = '25';
     var fuelType = this.state.fuelType || 'reg';
     var sort = this.state.sort || 'distance';
     var endpointStr = '?endpoint=/stations/radius/' + lat +
@@ -61,8 +82,7 @@ var RightSidebar = React.createClass({
     $.ajax( url ).then(function(data){
       var data = JSON.parse(data);
       console.log('data from gasfeed api');
-      console.log(data.geoLocation);
-      console.log(data.stations);
+      console.log(data);
       this.setState({'stations': data});
     }.bind(this), function(error){
       console.log('error getting gas info');
@@ -77,13 +97,13 @@ var RightSidebar = React.createClass({
   },
   getYelp: function(category, opts){
     var url = PROXYURL + 'yelp';
-    var lat = this.props.location.latitude || '-82.3985';
-    var long = this.props.location.longitude || '34.8514';
-    var distance = this.state.distance || '10';
+    var lat = this.state.currentLocation.geometry.coordinates[1] || '-82.3985';
+    var long = this.state.currentLocation.geometry.coordinates[0] || '34.8514';
+    var distance = this.state.distance || '20000'; //distance is in meters, max of 40000
     var catTerm = category + "Term";
     var term = this.state[catTerm] || '';
     var endpointStr = '?term=' + term +
-                      '&limit=' + 10 +
+                      // '&limit=' + 10 +
                       '&ll=' + lat + "," + long +
                       '&category_filter=' + category +
                       '&radius_filter=' + distance;
@@ -91,30 +111,50 @@ var RightSidebar = React.createClass({
     var url = url+endpointStr;
     console.log( url );
     $.ajax( url ).then(function(data){
-      console.log(data);
       console.log('data from yelp api');
-      console.log(data.businesses);
+      console.log(data);
       var obj = {};
       obj[category] = data;
-      console.log(obj);
       this.setState(obj);
     }.bind(this), function(error){
       console.log('error getting yelp info');
       console.log(error);
     });
   },
+  setLocation: function(waypoint){
+    this.props.doGeocode(waypoint, this.handleGeocode);
+  },
+  handleGeocode: function(waypoint){
+    console.log(waypoint);
+    this.setState({currentLocation: waypoint});
+    this.getStations();
+    this.getRestaurants();
+    this.getHotels();
+  },
   render: function(){
+    // console.log('render of rightsidebar');
     // console.log(this.props);
+    // console.log(this.state);
     var location = "selector selector-location";
     var hotel = "selector selector-hotel";
     var food = "selector selector-food";
     var gas = "selector selector-gas";
     var tab = (<div></div>);
-    // location = {'latitude': 34.8514, 'longitude': -82.3985};
 
+    //Set the correct classes to toggle the sidebar open and closed
+    var rightToggle;
+    if(this.props.toggle){
+      rightToggle = "map-overlay sidebar-right collapse-overlay-right collapse-overlay";
+    }else{
+      rightToggle = "map-overlay sidebar-right";
+    }
+
+    var currentLocation = this.getCurrentPoint();
+    //display the active tab
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
-      tab = (<LocationTab location={this.props.location} />);
+      tab = (<LocationTab location={this.props.location}
+        currentLocation={currentLocation} setLocation={this.setLocation} />);
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
@@ -129,7 +169,7 @@ var RightSidebar = React.createClass({
       tab = (<GasTab location={this.props.location} stations={this.state.stations} />);
     }
     return (
-      <div className={this.props.toggle}>
+      <div className={rightToggle}>
         <div className="overlay-control overlay-control-right">
           <span className="close-overlay" onClick={this.props.toggleRight}>
             <span className="glyphicon glyphicon-menu-right" aria-hidden="true"></span>

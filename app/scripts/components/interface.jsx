@@ -20,6 +20,7 @@ var Interface = React.createClass({
       toggleLeft: false,
       toggleRight: false,
       activePoint: 0,
+      userLocationEnabled: this.props.userLocation,
       currentLocation: {}
     }
   },
@@ -30,13 +31,11 @@ var Interface = React.createClass({
     this.userLayer = L.featureGroup().addTo(this.props.map);
     if ("geolocation" in navigator) {
       /* geolocation is available */
-      navigator.geolocation.watchPosition( this.setUserLocation, function(error){
-        console.log('error while watching users position:', error);
-      });
-      this.setState({'userLocationEnabled': true});
+      navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
     } else {
       /* geolocation IS NOT available */
-      this.setState({'userLocationEnabled': false});
+      var error = {code: 4, message:'geolocation not available'};
+      this.userLocationError(error);
     }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
@@ -77,7 +76,8 @@ var Interface = React.createClass({
         //if we already have a name then this has been geocoded already;
         // this.setMapView(location);
         console.log('location is already geocoded');
-        // return location;
+        this.resolveGeocode(obj, cb);
+        return this;
       }else if(obj.properties.query){
         //if we only have a query string set it as the geocoding search
         console.log('location has a query');
@@ -120,25 +120,17 @@ var Interface = React.createClass({
       obj.geometry.coordinates = newpoint.center;
       obj.properties.name = newpoint.place_name;
       obj.properties.text = newpoint.text;
-
-      if(typeof cb === 'function'){
-        cb(obj);
-      }else{
-        this.setMapView(obj);
-      }
-      //
-      //
-      // console.log(obj);
-      // console.log(this.props.directions);
-      // console.log('geocoded point:', newpoint);
-      // console.log('type set to: ', type);
-      // this.setMapView(newpoint);
-      // this.setPoint(newpoint, type);
-      // this.setState({currentLocation: newpoint});
-      // console.log(data);
+      this.resolveGeocode(obj, cb);
     }.bind(this), function(error){
       console.log(error);
     });
+  },
+  resolveGeocode: function(obj, cb){
+    if(typeof cb === 'function'){
+      cb(obj);
+    }else{
+      this.setMapView(obj);
+    }
   },
   setMapView: function(newpoint){
     //check if we have a route on the screen
@@ -261,7 +253,7 @@ var Interface = React.createClass({
           directions={this.props.directions} activePoint={this.state.activePoint}
           numPoints={this.state.numPoints} doGeocode={this.doGeocode}
           directionsLayer={this.props.directionsLayer} map={this.props.map}
-          userLocation={this.state.userLocation} />
+          userLocation={this.state.userLocation} state={this.state} props={this.props} />
         {login}
       </div>
     );
@@ -295,13 +287,29 @@ var Interface = React.createClass({
       L.latLng(position.coords.latitude, position.coords.longitude)
     );
     console.log('location from geolocation watch', userLocation);
-    this.setState({'userLocation': userLocation});
+    this.setState({'userLocation': userLocation, 'userLocationEnabled': true});
   },
   toggleLeft: function(e){
     this.setState({toggleLeft: !this.state.toggleLeft});
   },
   toggleRight: function(e){
     this.setState({toggleRight: !this.state.toggleRight});
+  },
+  userLocationError: function(error){
+    if(error.code == 1){
+      //permission denied
+      console.log('gelocation permission denied');
+    }else if(error.code == 2){
+      //position unavailable
+      console.log('geolocation position is unavailable');
+    }else if(error.code == 3){
+      //position lookup has timed out
+      console.log('geolocation position lookup timed out');
+    }else if(error.code == 4){
+      //geolocation not available in this browser
+      console.log('geolocation not available');
+    }
+    this.setState({'userLocationEnabled': false, 'userLocationError': error.message});
   },
   callback: function(e){
     var numPoints = 0;

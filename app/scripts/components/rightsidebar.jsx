@@ -22,34 +22,14 @@ var RightSidebar = React.createClass({
     }
   },
   componentWillMount: function(){
-    var point = this.getCurrentPoint();
     var markerLayer = L.featureGroup().addTo(this.props.map);
-    this.setState({location: point, markerLayer: markerLayer});
-  },
-  getCurrentPoint: function(){
-    //Set the current location based on the activePoint
-    var currentLocation = this.props.directions._normalizeWaypoint('');
-    // if(this.props.activePoint == 0){
-    //   currentLocation = this.props.directions.getOrigin();
-    // }else if(this.props.activePoint == this.props.numPoints-1){
-    //   currentLocation = this.props.directions.getDestination();
-    // }else if(this.props.directions.getWaypoints()[activePoint+1] ){
-    //   currentLocation = this.props.directions.getWaypoints()[activePoint+1];
-    // }
-    return currentLocation;
+    this.setState({markerLayer: markerLayer});
   },
   componentDidUpdate: function(){
     if(this.props.activePoint < 0 || this.props.activePoint > this.props.numPoints-1 ){
       console.log('current location not set');
       return 'no current location set, aborting RightSidebar queries';
     }
-    // var currentLocation = this.getCurrentPoint();
-    // if(!this.state.hotels && !this.state.restaurants
-    //   && !this.state.stations && currentLocation.geometry.coordinates ){
-    //   this.getStations();
-    //   this.getRestaurants();
-    //   this.getHotels();
-    // }
   },
   setCurrent: function(e){
     if($(e.target).hasClass('glyphicon-map-marker')){
@@ -65,10 +45,10 @@ var RightSidebar = React.createClass({
       this.setState({currentTab: 'gas'})
     }
   },
-  getStations: function(){
+  getStations: function(waypoint){
     var url = PROXYURL + 'gasfeed';
-    var lat = this.state.currentLocation.geometry.coordinates[1] || '-82.3985';
-    var long = this.state.currentLocation.geometry.coordinates[0] || '34.8514';
+    var lat = waypoint.geometry.coordinates[1] || '-82.3985';
+    var long = waypoint.geometry.coordinates[0] || '34.8514';
     var distance = '25';
     var fuelType = this.state.fuelType || 'reg';
     var sort = this.state.sort || 'distance';
@@ -91,17 +71,17 @@ var RightSidebar = React.createClass({
       console.log(error);
     });
   },
-  getRestaurants: function(){
-    this.getYelp("restaurants");
+  getRestaurants: function(waypoint){
+    this.getYelp("restaurants", waypoint);
   },
-  getHotels: function(){
-    this.getYelp("hotels");
+  getHotels: function(waypoint){
+    this.getYelp("hotels", waypoint);
   },
-  getYelp: function(category, opts){
+  getYelp: function(category, waypoint){
     var url = PROXYURL + 'yelp';
-    var lat = this.state.currentLocation.geometry.coordinates[1] || '-82.3985';
-    var long = this.state.currentLocation.geometry.coordinates[0] || '34.8514';
-    var distance = this.state.distance || '20000'; //distance is in meters, max of 40000
+    var lat = waypoint.geometry.coordinates[1] || '-82.3985';
+    var long = waypoint.geometry.coordinates[0] || '34.8514';
+    var distance = this.state.distance || '5000'; //distance is in meters, max of 40000
     var catTerm = category + "Term";
     var term = this.state[catTerm] || '';
     var endpointStr = '?term=' + term +
@@ -125,7 +105,6 @@ var RightSidebar = React.createClass({
     });
   },
   setMarkers: function(businesses, type){
-
     businesses.forEach(function(business){
       var coords;
       if(type == 'gas'){
@@ -133,7 +112,6 @@ var RightSidebar = React.createClass({
       }else{
         coords = business.location.coordinate;
       }
-
       var className = "mapbox-marker-special mapbox-marker-" + type + "-icon";
       var marker = L.marker([coords.latitude, coords.longitude],
         {
@@ -155,10 +133,12 @@ var RightSidebar = React.createClass({
   },
   handleGeocode: function(waypoint){
     console.log(waypoint);
-    this.setState({currentLocation: waypoint});
-    this.getStations();
-    this.getRestaurants();
-    this.getHotels();
+
+    this.setState({'currentLocation': waypoint});
+    console.log(this.state);
+    this.getStations(waypoint);
+    this.getRestaurants(waypoint);
+    this.getHotels(waypoint);
   },
   render: function(){
     var location = "selector selector-location";
@@ -175,14 +155,13 @@ var RightSidebar = React.createClass({
       rightToggle = "map-overlay sidebar-right";
     }
 
-
-    var currentLocation = this.getCurrentPoint();
     //display the active tab
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
       tab = (<LocationTab location={this.props.location}
-        currentLocation={currentLocation} setLocation={this.setLocation}
-        userLocation={this.props.userLocation} />);
+        setLocation={this.setLocation}
+        userLocation={this.props.userLocation}
+        state={this.props.state} props={this.props.props} />);
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";

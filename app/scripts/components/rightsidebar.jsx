@@ -149,6 +149,7 @@ var RightSidebar = React.createClass({
     }.bind(this));
   },
   setLocation: function(waypoint){
+    console.log('waypoint in setLocation', waypoint);
     this.props.doGeocode(waypoint, this.handleGeocode);
     this.state.markerLayer.clearLayers();
   },
@@ -180,7 +181,8 @@ var RightSidebar = React.createClass({
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
       tab = (<LocationTab location={this.props.location}
-        currentLocation={currentLocation} setLocation={this.setLocation} />);
+        currentLocation={currentLocation} setLocation={this.setLocation}
+        userLocation={this.props.userLocation} />);
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";

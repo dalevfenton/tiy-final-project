@@ -14,7 +14,7 @@ var Interface = React.createClass({
   //React Lifecycle Methods
   getInitialState: function(){
     return {
-      location: this.props.location,
+      userLocation: this.props.userLocation,
       numPoints: 2,
       loginToggle: false,
       toggleLeft: false,
@@ -27,6 +27,17 @@ var Interface = React.createClass({
     this.props.router.on('route', this.callback);
     this.props.directions.on('profile, selectRoute, load', this.callback );
     this.props.directions.on('origin', this.setPoint);
+    this.userLayer = L.featureGroup().addTo(this.props.map);
+    if ("geolocation" in navigator) {
+      /* geolocation is available */
+      navigator.geolocation.watchPosition( this.setUserLocation, function(error){
+        console.log('error while watching users position:', error);
+      });
+      this.setState({'userLocationEnabled': true});
+    } else {
+      /* geolocation IS NOT available */
+      this.setState({'userLocationEnabled': false});
+    }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
     // this.props.directions.on('origin, destination, waypoint', this.setPoint);
@@ -55,7 +66,11 @@ var Interface = React.createClass({
     console.log(eObj);
     var obj;
     if(typeof eObj == 'object'){
-      obj = eObj.object;
+      if(eObj.type == "Feature"){
+        obj = eObj;
+      }else{
+        obj = eObj.object;
+      }
       console.log('location is an object');
       console.log(obj);
       if( obj.properties.name ){
@@ -161,8 +176,8 @@ var Interface = React.createClass({
     this.forceUpdate();
   },
   setPoint: function(e){
-    console.log('setpoint called');
-    console.log(e);
+    // console.log('setpoint called');
+    // console.log(e);
 
     if(typeof e[e.type] == 'object' &&
         !e[e.type].properties.hasOwnProperty('name') &&
@@ -196,6 +211,24 @@ var Interface = React.createClass({
       return (<div><h1>Error Loading Application - No Directions Available</h1></div>);
     }
 
+    //check if the user's location is known and if so update their marker on the map
+    var userLocation = null;
+    if(this.state.userLocationEnabled){
+      userLocation = this.state.userLocation.geometry.coordinates;
+      console.log(userLocation);
+      var marker = L.marker(userLocation,
+        {
+          draggable: false,
+          icon: L.divIcon({
+              iconSize: L.point(16, 16),
+              iconAnchor: L.point(8, 8),
+              'className': "mapbox-marker-special mapbox-marker-user-icon",
+          })
+      });
+      this.userLayer.clearLayers();
+      this.userLayer.addLayer(marker);
+    }
+
     //Display a button to save the trip once we have a valid directions object
     var button;
     if(this.props.directions.queryable()){
@@ -215,10 +248,7 @@ var Interface = React.createClass({
         </div>
       );
     }
-    // console.log('render state');
-    // console.log(this.state);
-    // console.log('render props');
-    // console.log(this.props);
+
     return (
       <div>
         <LeftSidebar toggleLeft={this.toggleLeft}
@@ -230,7 +260,8 @@ var Interface = React.createClass({
         <RightSidebar toggle={this.state.toggleRight} toggleRight={this.toggleRight}
           directions={this.props.directions} activePoint={this.state.activePoint}
           numPoints={this.state.numPoints} doGeocode={this.doGeocode}
-          directionsLayer={this.props.directionsLayer} map={this.props.map} />
+          directionsLayer={this.props.directionsLayer} map={this.props.map}
+          userLocation={this.state.userLocation} />
         {login}
       </div>
     );
@@ -258,6 +289,13 @@ var Interface = React.createClass({
   },
   setLogin: function(e){
     this.setState({login: !this.state.login});
+  },
+  setUserLocation: function(position){
+    var userLocation = this.props.directions._normalizeWaypoint(
+      L.latLng(position.coords.latitude, position.coords.longitude)
+    );
+    console.log('location from geolocation watch', userLocation);
+    this.setState({'userLocation': userLocation});
   },
   toggleLeft: function(e){
     this.setState({toggleLeft: !this.state.toggleLeft});

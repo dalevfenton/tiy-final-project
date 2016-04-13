@@ -16,7 +16,7 @@ var Interface = React.createClass({displayName: "Interface",
   //React Lifecycle Methods
   getInitialState: function(){
     return {
-      location: this.props.location,
+      userLocation: this.props.userLocation,
       numPoints: 2,
       loginToggle: false,
       toggleLeft: false,
@@ -29,6 +29,17 @@ var Interface = React.createClass({displayName: "Interface",
     this.props.router.on('route', this.callback);
     this.props.directions.on('profile, selectRoute, load', this.callback );
     this.props.directions.on('origin', this.setPoint);
+    this.userLayer = L.featureGroup().addTo(this.props.map);
+    if ("geolocation" in navigator) {
+      /* geolocation is available */
+      navigator.geolocation.watchPosition( this.setUserLocation, function(error){
+        console.log('error while watching users position:', error);
+      });
+      this.setState({'userLocationEnabled': true});
+    } else {
+      /* geolocation IS NOT available */
+      this.setState({'userLocationEnabled': false});
+    }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
     // this.props.directions.on('origin, destination, waypoint', this.setPoint);
@@ -57,7 +68,11 @@ var Interface = React.createClass({displayName: "Interface",
     console.log(eObj);
     var obj;
     if(typeof eObj == 'object'){
-      obj = eObj.object;
+      if(eObj.type == "Feature"){
+        obj = eObj;
+      }else{
+        obj = eObj.object;
+      }
       console.log('location is an object');
       console.log(obj);
       if( obj.properties.name ){
@@ -163,8 +178,8 @@ var Interface = React.createClass({displayName: "Interface",
     this.forceUpdate();
   },
   setPoint: function(e){
-    console.log('setpoint called');
-    console.log(e);
+    // console.log('setpoint called');
+    // console.log(e);
 
     if(typeof e[e.type] == 'object' &&
         !e[e.type].properties.hasOwnProperty('name') &&
@@ -198,6 +213,24 @@ var Interface = React.createClass({displayName: "Interface",
       return (React.createElement("div", null, React.createElement("h1", null, "Error Loading Application - No Directions Available")));
     }
 
+    //check if the user's location is known and if so update their marker on the map
+    var userLocation = null;
+    if(this.state.userLocationEnabled){
+      userLocation = this.state.userLocation.geometry.coordinates;
+      console.log(userLocation);
+      var marker = L.marker(userLocation,
+        {
+          draggable: false,
+          icon: L.divIcon({
+              iconSize: L.point(16, 16),
+              iconAnchor: L.point(8, 8),
+              'className': "mapbox-marker-special mapbox-marker-user-icon",
+          })
+      });
+      this.userLayer.clearLayers();
+      this.userLayer.addLayer(marker);
+    }
+
     //Display a button to save the trip once we have a valid directions object
     var button;
     if(this.props.directions.queryable()){
@@ -217,10 +250,7 @@ var Interface = React.createClass({displayName: "Interface",
         )
       );
     }
-    // console.log('render state');
-    // console.log(this.state);
-    // console.log('render props');
-    // console.log(this.props);
+
     return (
       React.createElement("div", null, 
         React.createElement(LeftSidebar, {toggleLeft: this.toggleLeft, 
@@ -232,7 +262,8 @@ var Interface = React.createClass({displayName: "Interface",
         React.createElement(RightSidebar, {toggle: this.state.toggleRight, toggleRight: this.toggleRight, 
           directions: this.props.directions, activePoint: this.state.activePoint, 
           numPoints: this.state.numPoints, doGeocode: this.doGeocode, 
-          directionsLayer: this.props.directionsLayer, map: this.props.map}), 
+          directionsLayer: this.props.directionsLayer, map: this.props.map, 
+          userLocation: this.state.userLocation}), 
         login
       )
     );
@@ -260,6 +291,13 @@ var Interface = React.createClass({displayName: "Interface",
   },
   setLogin: function(e){
     this.setState({login: !this.state.login});
+  },
+  setUserLocation: function(position){
+    var userLocation = this.props.directions._normalizeWaypoint(
+      L.latLng(position.coords.latitude, position.coords.longitude)
+    );
+    console.log('location from geolocation watch', userLocation);
+    this.setState({'userLocation': userLocation});
   },
   toggleLeft: function(e){
     this.setState({toggleLeft: !this.state.toggleLeft});
@@ -655,6 +693,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }.bind(this));
   },
   setLocation: function(waypoint){
+    console.log('waypoint in setLocation', waypoint);
     this.props.doGeocode(waypoint, this.handleGeocode);
     this.state.markerLayer.clearLayers();
   },
@@ -686,7 +725,8 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
       tab = (React.createElement(LocationTab, {location: this.props.location, 
-        currentLocation: currentLocation, setLocation: this.setLocation}));
+        currentLocation: currentLocation, setLocation: this.setLocation, 
+        userLocation: this.props.userLocation}));
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
@@ -854,22 +894,73 @@ var LocationTab = React.createClass({displayName: "LocationTab",
     e.preventDefault();
     this.props.setLocation(this.state.display);
   },
+  handleUserLocation: function(e){
+    e.preventDefault();
+    console.log(e.target.value);
+    this.props.setLocation(this.props.userLocation);
+  },
   render: function(){
     // console.log('location tab currentLocation');
     // console.log(this.props.currentLocation);
     var id = "waypoint-input-" + this.props.index;
-
+    var userLocationJSX;
+    if(this.props.userLocation){
+      var userLocation = this.props.userLocation.geometry.coordinates;
+      userLocationJSX = (
+        React.createElement("div", null, 
+          React.createElement("div", null, userLocation), 
+          React.createElement("button", {onClick: this.handleUserLocation}, "Lookup Stops")
+        )
+      );
+    }else{
+      userLocationJSX = (
+        React.createElement("div", null, 
+          React.createElement("button", {onClick: this.doUserLocation}, "Activate Location Finding")
+        )
+      );
+    }
     return (
       React.createElement("div", {className: "sidebar-tab"}, 
         React.createElement("div", {className: "waypoint-container waypoint-active"}, 
-          React.createElement("form", {className: "waypoint", onSubmit: this.handleSubmit}, 
-            React.createElement("input", {type: "text", autoComplete: "off", 
-              value: this.state.display, onChange: this.setInput, 
-              placeholder: "Find A Location To Stop"}), 
-            React.createElement("label", {className: "waypoint-handle"}, 
-              React.createElement("span", {className: "glyphicon glyphicon-map-marker", 
-                "aria-hidden": "true"
-              })
+          React.createElement("div", {className: "sidebar-accordion", toggle: this.toggle, 
+            onClick: this.setToggle}, 
+            React.createElement("div", {className: "sidebar-accordion-title"}, 
+              "Find A Stop Near You"
+            ), 
+            React.createElement("div", {className: "sidebar-accordion-body"}, 
+              userLocationJSX
+            )
+          ), 
+          React.createElement("div", {className: "sidebar-accordion", toggle: this.toggle, 
+            onClick: this.setToggle}, 
+            React.createElement("div", {className: "sidebar-accordion-title"}, 
+              "Find A Stop Near A Waypoint"
+            ), 
+            React.createElement("form", {className: "waypoint", onSubmit: this.handleSubmit}, 
+              React.createElement("input", {type: "text", autoComplete: "off", 
+                value: this.state.display, onChange: this.setInput, 
+                placeholder: "Find A Stop Near A Waypoint"}), 
+              React.createElement("label", {className: "waypoint-handle"}, 
+                React.createElement("span", {className: "glyphicon glyphicon-map-marker", 
+                  "aria-hidden": "true"
+                })
+              )
+            )
+          ), 
+          React.createElement("div", {className: "sidebar-accordion", toggle: this.toggle, 
+            onClick: this.setToggle}, 
+            React.createElement("div", {className: "sidebar-accordion-title"}, 
+              "Find A Stop Near An Address"
+            ), 
+            React.createElement("form", {className: "waypoint", onSubmit: this.handleSubmit}, 
+              React.createElement("input", {type: "text", autoComplete: "off", 
+                value: this.state.display, onChange: this.setInput, 
+                placeholder: "Find A Stop Near An Address"}), 
+              React.createElement("label", {className: "waypoint-handle"}, 
+                React.createElement("span", {className: "glyphicon glyphicon-map-marker", 
+                  "aria-hidden": "true"
+                })
+              )
             )
           )
         )
@@ -1129,36 +1220,56 @@ var Backbone = require('backbone');
 require('mapbox.js');
 require('mapbox-directions.js');
 
-var startPt, startZoom;
+var startPt, startZoom, userLocationEnabled;
 if ("geolocation" in navigator) {
   /* geolocation is available */
   navigator.geolocation.getCurrentPosition(function(position) {
     startPt = [position.coords.latitude, position.coords.longitude];
     startZoom = 13;
-    setupApp(startPt, startZoom);
-    // this.doGeocode(position);
+    userLocationEnabled = true;
+    setupApp(startPt, startZoom, userLocationEnabled);
+  }, function(error){
+    doNoPositionSetup(error);
   });
 } else {
   /* geolocation IS NOT available */
-  startPt = [39.833333, -98.583333];
-  startZoom = 5;
-  setupApp(startPt, startZoom);
+  var error = {code: 4, message:'geolocation not available'};
+  doNoPositionSetup(error);
 }
 
-function setupApp(startPt, startZoom){
+function doNoPositionSetup(error){
+  if(error.code == 1){
+    //permission denied
+    console.log('gelocation permission denied');
+  }else if(error.code == 2){
+    //position unavailable
+    console.log('geolocation position is unavailable');
+  }else if(error.code == 3){
+    //position lookup has timed out
+    console.log('geolocation position lookup timed out');
+  }else if(error.code == 4){
+    //geolocation not available in this browser
+    console.log('geolocation not available');
+  }
+  startPt = [39.833333, -98.583333];
+  startZoom = 5;
+  userLocationEnabled = false;
+  setupApp(startPt, startZoom, userLocationEnabled);
+}
+
+function setupApp(startPt, startZoom, userLocationEnabled){
   //set accessToken and instatiate our map object
   L.mapbox.accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
   var map = L.mapbox.map('map', 'mapbox.streets', {
       zoomControl: false
   }).setView(startPt, startZoom);
-
   // create the initial directions object, from which the layer
   // and inputs will pull data.
   var directions = L.mapbox.directions();
   var directionsLayer = L.mapbox.directions.layer(directions)
       .addTo(map);
 
-  
+  startPt = directions._normalizeWaypoint( L.latLng(startPt[0], startPt[1]) );
   // var directionsInputControl = L.mapbox.directions.inputControl('inputs', directions)
   //     .addTo(map);
   //
@@ -1189,7 +1300,8 @@ function setupApp(startPt, startZoom){
       'map': map,
       'directions': directions,
       'directionsLayer': directionsLayer,
-      'location': {'latitude': 39.833333, 'longitude': -98.583333}
+      'userLocation': startPt,
+      'userLocationEnabled': userLocationEnabled
     } ),
     document.getElementById('app')
   );

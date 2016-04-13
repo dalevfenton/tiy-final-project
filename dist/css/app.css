@@ -6039,4 +6039,23 @@ button.waypoint-remove {
 .mapbox-marker-gas-icon::before {
   content: "\e162"; }
 
+.mapbox-marker-user-icon {
+  background: #207185;
+  animation-name: color-pulse;
+  animation-duration: 1s;
+  animation-direction: alternate;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear; }
+
+.mapbox-marker-user-icon::before {
+  content: ''; }
+
+@keyframes color-pulse {
+  from {
+    transform: scale(1);
+    background: #8dd2e4; }
+  to {
+    transform: scale(0.8);
+    background: #3bb2d0; } }
+
 /*# sourceMappingURL=app.css.map */

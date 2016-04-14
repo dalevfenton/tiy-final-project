@@ -5856,9 +5856,66 @@ html, body {
 .splash-container {
   width: 50%;
   margin: 10% auto 0 auto;
-  padding: 20px;
   background: white;
-  border: 1px solid #c8c8c8; }
+  border: 1px solid #d4d4d4;
+  padding: 10px 0; }
+
+.splash-half {
+  display: inline-block;
+  width: 50%;
+  margin: 0;
+  padding: 10px 20px; }
+  .splash-half:nth-of-type(0+2n) {
+    margin-left: -4px; }
+
+.set-geolocation {
+  border-right: 1px solid #c8c8c8; }
+
+.geolocation-row {
+  width: 100%;
+  margin: 15px 0; }
+
+.geolocation-logo {
+  display: inline-block;
+  width: 35%;
+  font-size: 50px;
+  text-align: center;
+  transition: .5s ease-in-out;
+  vertical-align: top;
+  color: #2a94ae; }
+  .geolocation-logo:hover {
+    color: blue;
+    border-color: blue; }
+
+.geolocation-disclaimer {
+  color: #7d7d7d;
+  text-align: center;
+  font-size: 10px;
+  margin: 20px 0; }
+
+.geo-auth-button {
+  text-align: center;
+  font-family: 'Quicksand', sans-serif;
+  cursor: pointer; }
+
+.geolocation-authorize {
+  background: #2a94ae;
+  color: #f0f0f0; }
+
+.geolocation-deny {
+  background-color: #323232;
+  color: white; }
+
+.geolocation-info {
+  display: inline-block;
+  margin-left: -4px;
+  width: 65%; }
+
+.dtr-title {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: bold;
+  text-align: center;
+  font-size: 16px; }
 
 .map-overlay {
   position: absolute;

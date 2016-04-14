@@ -145,7 +145,7 @@ var Interface = React.createClass({
     //check if we have a route set and set bounds to our map if so
     if(origin && destination && bounds.hasOwnProperty('_southWest')){
       this.props.map.fitBounds(bounds);
-    }else if(origin || destination){
+    }else if(origin || destination || newpoint){
       //if we have a point set then check if our point is set or not
       if(!newpoint){
         return newpoint;
@@ -203,7 +203,7 @@ var Interface = React.createClass({
     }
     //if we are doing our initial load then show the splash screen:
     if(this.state.splash){
-      return (<Splash load={this.loadApp}/>)
+      return (<Splash setupGeo={this.setupGeo}/>)
     }
     //check if the user's location is known and if so update their marker on the map
     var userLocation = null;
@@ -267,16 +267,23 @@ var Interface = React.createClass({
     this.setState({'numPoints': this.state.numPoints+1});
   },
   loadApp: function(allowed){
-    if(allowed){
-      if ("geolocation" in navigator) {
-        /* geolocation is available */
-        navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
-      } else {
-        /* geolocation IS NOT available */
-        var error = {code: 4, message:'geolocation not available'};
-        this.userLocationError(error);
+
+  },
+  setupGeo: function(bool){
+    if ( bool && "geolocation" in navigator) {
+      /* geolocation is available */
+      navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
+    } else {
+      /* geolocation IS NOT available */
+      var error;
+      if(bool){
+        error = {code: 4, message:'geolocation not available'};
+      }else{
+        error = {code: 1, message:'permission denied'};
       }
+      this.userLocationError(error);
     }
+
   },
   removePoint: function(index){
     // TODO: figure out why this is not correctly setting the state
@@ -296,12 +303,17 @@ var Interface = React.createClass({
   setLogin: function(e){
     this.setState({login: !this.state.login});
   },
-  setUserLocation: function(position){
+  setUserLocation: function(position, load){
     var userLocation = this.props.directions._normalizeWaypoint(
       L.latLng(position.coords.latitude, position.coords.longitude)
     );
     console.log('location from geolocation watch', userLocation);
+
     this.setState({'userLocation': userLocation, 'userLocationEnabled': true});
+    if(this.state.splash){
+      this.setMapView(userLocation);
+      this.setState({splash:false});
+    }
   },
   toggleLeft: function(e){
     this.setState({toggleLeft: !this.state.toggleLeft});
@@ -323,7 +335,11 @@ var Interface = React.createClass({
       //geolocation not available in this browser
       console.log('geolocation not available');
     }
-    this.setState({'userLocationEnabled': false, 'userLocationError': error.message});
+    this.setState({
+      'userLocationEnabled': false,
+      'userLocationError': error.message,
+      'splash': false
+    });
   },
   callback: function(e){
     var numPoints = 0;

@@ -147,7 +147,7 @@ var Interface = React.createClass({displayName: "Interface",
     //check if we have a route set and set bounds to our map if so
     if(origin && destination && bounds.hasOwnProperty('_southWest')){
       this.props.map.fitBounds(bounds);
-    }else if(origin || destination){
+    }else if(origin || destination || newpoint){
       //if we have a point set then check if our point is set or not
       if(!newpoint){
         return newpoint;
@@ -205,7 +205,7 @@ var Interface = React.createClass({displayName: "Interface",
     }
     //if we are doing our initial load then show the splash screen:
     if(this.state.splash){
-      return (React.createElement(Splash, {load: this.loadApp}))
+      return (React.createElement(Splash, {setupGeo: this.setupGeo}))
     }
     //check if the user's location is known and if so update their marker on the map
     var userLocation = null;
@@ -269,16 +269,23 @@ var Interface = React.createClass({displayName: "Interface",
     this.setState({'numPoints': this.state.numPoints+1});
   },
   loadApp: function(allowed){
-    if(allowed){
-      if ("geolocation" in navigator) {
-        /* geolocation is available */
-        navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
-      } else {
-        /* geolocation IS NOT available */
-        var error = {code: 4, message:'geolocation not available'};
-        this.userLocationError(error);
+
+  },
+  setupGeo: function(bool){
+    if ( bool && "geolocation" in navigator) {
+      /* geolocation is available */
+      navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
+    } else {
+      /* geolocation IS NOT available */
+      var error;
+      if(bool){
+        error = {code: 4, message:'geolocation not available'};
+      }else{
+        error = {code: 1, message:'permission denied'};
       }
+      this.userLocationError(error);
     }
+
   },
   removePoint: function(index){
     // TODO: figure out why this is not correctly setting the state
@@ -298,12 +305,17 @@ var Interface = React.createClass({displayName: "Interface",
   setLogin: function(e){
     this.setState({login: !this.state.login});
   },
-  setUserLocation: function(position){
+  setUserLocation: function(position, load){
     var userLocation = this.props.directions._normalizeWaypoint(
       L.latLng(position.coords.latitude, position.coords.longitude)
     );
     console.log('location from geolocation watch', userLocation);
+
     this.setState({'userLocation': userLocation, 'userLocationEnabled': true});
+    if(this.state.splash){
+      this.setMapView(userLocation);
+      this.setState({splash:false});
+    }
   },
   toggleLeft: function(e){
     this.setState({toggleLeft: !this.state.toggleLeft});
@@ -325,7 +337,11 @@ var Interface = React.createClass({displayName: "Interface",
       //geolocation not available in this browser
       console.log('geolocation not available');
     }
-    this.setState({'userLocationEnabled': false, 'userLocationError': error.message});
+    this.setState({
+      'userLocationEnabled': false,
+      'userLocationError': error.message,
+      'splash': false
+    });
   },
   callback: function(e){
     var numPoints = 0;
@@ -1093,16 +1109,57 @@ module.exports = YelpList;
 var React = require('react');
 
 var Splash = React.createClass({displayName: "Splash",
+  callLocationSetup: function(bool, e){
+    console.log(e);
+    console.log(bool);
+    e.preventDefault();
+    this.props.setupGeo(bool);
+  },
   render: function(){
+    var geolcationStatus = (
+      React.createElement("div", {className: "geolocation-title dtr-title"}, 
+        "Your Device Does Not Support Geolocation, Some Features Will" + ' ' +
+        "Be Disabled On This Device"
+      )
+    )
+    if ("geolocation" in navigator) {
+      geolcationStatus = (
+        React.createElement("div", null, 
+          React.createElement("div", {className: "geolocation-title dtr-title"}, 
+            "This App Works Best When We Can Detect Your Location"
+          ), 
+          React.createElement("div", {className: "geolocation-row"}, 
+            React.createElement("div", {className: "geolocation-logo"}, 
+              React.createElement("span", {className: "glyphicon glyphicon-map-marker", 
+                "aria-hidden": "true"
+              })
+            ), 
+            React.createElement("div", {className: "geolocation-info"}, 
+              React.createElement("div", null, 
+                "Allowing Us To Locate You Lets Us Help Track You Along Your Route" + ' ' +
+                "and Find Hotels, Food, Gas and Other Stops!"
+              )
+            )
+          ), 
+          React.createElement("div", {className: "geolocation-disclaimer"}, 
+            "You Can Always Let Us Set Your Location Later At Any Time"
+          ), 
+          React.createElement("div", {className: "geolocation-inputs"}, 
+            React.createElement("div", {className: "splash-half geo-auth-button geolocation-authorize", 
+              onClick: this.callLocationSetup.bind(this, true)}, "Authorize"), 
+            React.createElement("div", {className: "splash-half geo-auth-button geolocation-deny", 
+              onClick: this.callLocationSetup.bind(this, false)}, "Deny")
+          )
+        )
+      )
+    }
     return (
       React.createElement("div", {className: "splash-screen"}, 
         React.createElement("div", {className: "splash-container"}, 
           React.createElement("div", {className: "splash-half set-geolocation"}, 
-            React.createElement("span", null, 
-              "This App Works Best When We Can Detect Your Location" + ' ' +
-              "Would You Like To Approve This Site To Know Your Location?"
-            )
+            geolcationStatus
           ), 
+
           React.createElement("div", {className: "splash-half splash-login"}, 
             React.createElement("button", null, "Login Form")
           )

@@ -59,14 +59,68 @@ html, body{
 .splash-container{
   width: 50%;
   margin: 10% auto 0 auto;
-  // padding: 20px;
   background: white;
-  border: 1px solid rgb(200,200,200);
+  border: 1px solid rgb(212, 212, 212);
+  padding: 10px 0;
 }
 .splash-half{
+  display: inline-block;
   width: 50%;
   margin: 0;
-  padding: 20px;
+  padding: 10px 20px;
+  &:nth-of-type(0+2n){
+    margin-left: -4px;
+  }
+}
+.set-geolocation{
+  border-right: 1px solid rgb(200, 200, 200);
+}
+.geolocation-row{
+  width: 100%;
+  margin: 15px 0;
+}
+.geolocation-logo{
+  display: inline-block;
+  width: 35%;
+  font-size: 50px;
+  text-align: center;
+  transition: .5s ease-in-out;
+  vertical-align: top;
+  color: darken(rgb(59, 178, 208), 10%);
+  &:hover{
+    color: blue;
+    border-color: blue;
+  }
+}
+.geolocation-disclaimer{
+  color: rgb(125, 125, 125);
+  text-align: center;
+  font-size: 10px;
+  margin: 20px 0;
+}
+.geo-auth-button{
+  text-align: center;
+  font-family: 'Quicksand', sans-serif;
+  cursor: pointer;
+}
+.geolocation-authorize{
+  background: darken(rgb(59, 178, 208), 10%);
+  color: rgb(240, 240, 240);
+}
+.geolocation-deny{
+  background-color: rgb(50,50,50);
+  color: white;
+}
+.geolocation-info {
+  display: inline-block;
+  margin-left: -4px;
+  width: 65%;
+}
+.dtr-title{
+  font-family: 'Quicksand', sans-serif;
+  font-weight: bold;
+  text-align: center;
+  font-size: 16px;
 }
 .map-overlay{
   position: absolute;

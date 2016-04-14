@@ -8,21 +8,22 @@ require('mapbox.js');
 require('mapbox-directions.js');
 
 var startPt, startZoom, userLocationEnabled;
-if ("geolocation" in navigator) {
-  /* geolocation is available */
-  navigator.geolocation.getCurrentPosition(function(position) {
-    startPt = [position.coords.latitude, position.coords.longitude];
-    startZoom = 13;
-    userLocationEnabled = true;
-    setupApp(startPt, startZoom, userLocationEnabled);
-  }, function(error){
-    doNoPositionSetup(error);
-  });
-} else {
-  /* geolocation IS NOT available */
-  var error = {code: 4, message:'geolocation not available'};
-  doNoPositionSetup(error);
-}
+// if ("geolocation" in navigator) {
+//   /* geolocation is available */
+//   navigator.geolocation.getCurrentPosition(function(position) {
+//     startPt = [position.coords.latitude, position.coords.longitude];
+//     startZoom = 13;
+//     userLocationEnabled = true;
+//     setupApp(startPt, startZoom, userLocationEnabled);
+//   }, function(error){
+//     doNoPositionSetup(error);
+//   });
+// } else {
+//   /* geolocation IS NOT available */
+//   var error = {code: 4, message:'geolocation not available'};
+//   doNoPositionSetup(error);
+// }
+doNoPositionSetup({code: '5', message: 'app starting user not prompted'});
 
 function doNoPositionSetup(error){
   if(error.code == 1){

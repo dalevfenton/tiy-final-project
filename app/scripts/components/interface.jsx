@@ -6,21 +6,27 @@ var Sortable = require('sortablejs');
 var RightSidebar = require('./rightsidebar.jsx');
 var LeftSidebar = require('./leftsidebar.jsx');
 
+var Splash = require('./splash.jsx');
 var Login = require('./login.jsx');
 
 // var GEOCODER_BASE = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
+// use the old v4 api in order to match up with the format retrieved by the
+// mapbox directions library
+
 var GEOCODER_BASE = 'https://api.tiles.mapbox.com/v4/geocode/mapbox.places/';
+
 var Interface = React.createClass({
   //React Lifecycle Methods
   getInitialState: function(){
     return {
       userLocation: this.props.userLocation,
+      userLocationEnabled: this.props.userLocation,
+      splash: true,
       numPoints: 2,
       loginToggle: false,
       toggleLeft: false,
       toggleRight: false,
       activePoint: 0,
-      userLocationEnabled: this.props.userLocation,
       currentLocation: {}
     }
   },
@@ -29,28 +35,21 @@ var Interface = React.createClass({
     this.props.directions.on('profile, selectRoute, load', this.callback );
     this.props.directions.on('origin', this.setPoint);
     this.userLayer = L.featureGroup().addTo(this.props.map);
-    if ("geolocation" in navigator) {
-      /* geolocation is available */
-      navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
-    } else {
-      /* geolocation IS NOT available */
-      var error = {code: 4, message:'geolocation not available'};
-      this.userLocationError(error);
-    }
+
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
     // this.props.directions.on('origin, destination, waypoint', this.setPoint);
   },
   componentDidMount: function(){
-    var el = document.getElementById('waypoint-list');
-    var options = {
-      'handle': ".waypoint-handle",
-      'draggable': 'div.waypoint-container',
-      'scroll': false,
-      'sort': true,
-      'onEnd': this.handleSort
-    };
-    var sortable = Sortable.create(el, options);
+    // var el = document.getElementById('waypoint-list');
+    // var options = {
+    //   'handle': ".waypoint-handle",
+    //   'draggable': 'div.waypoint-container',
+    //   'scroll': false,
+    //   'sort': true,
+    //   'onEnd': this.handleSort
+    // };
+    // var sortable = Sortable.create(el, options);
   },
   componentDidUpdate: function(){
     if(this.props.router.current == 'login' && this.state.loginToggle === false){
@@ -202,7 +201,10 @@ var Interface = React.createClass({
     if(!this.props.directions){
       return (<div><h1>Error Loading Application - No Directions Available</h1></div>);
     }
-
+    //if we are doing our initial load then show the splash screen:
+    if(this.state.splash){
+      return (<Splash load={this.loadApp}/>)
+    }
     //check if the user's location is known and if so update their marker on the map
     var userLocation = null;
     if(this.state.userLocationEnabled){
@@ -263,6 +265,18 @@ var Interface = React.createClass({
   //----------------------------------------------------------------------------
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
+  },
+  loadApp: function(allowed){
+    if(allowed){
+      if ("geolocation" in navigator) {
+        /* geolocation is available */
+        navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
+      } else {
+        /* geolocation IS NOT available */
+        var error = {code: 4, message:'geolocation not available'};
+        this.userLocationError(error);
+      }
+    }
   },
   removePoint: function(index){
     // TODO: figure out why this is not correctly setting the state

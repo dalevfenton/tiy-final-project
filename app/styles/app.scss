@@ -48,6 +48,26 @@ html, body{
   left: 20%;
   background: black;
 }
+.splash-screen{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgb(212, 212, 212);
+}
+.splash-container{
+  width: 50%;
+  margin: 10% auto 0 auto;
+  // padding: 20px;
+  background: white;
+  border: 1px solid rgb(200,200,200);
+}
+.splash-half{
+  width: 50%;
+  margin: 0;
+  padding: 20px;
+}
 .map-overlay{
   position: absolute;
   background: rgb(212,212,212);

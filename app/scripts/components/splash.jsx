@@ -1,5 +1,7 @@
 var React = require('react');
 
+var Login = require('./login.jsx');
+
 var Splash = React.createClass({
   callLocationSetup: function(bool, e){
     console.log(e);
@@ -34,7 +36,7 @@ var Splash = React.createClass({
             </div>
           </div>
           <div className="geolocation-disclaimer">
-            You Can Always Let Us Set Your Location Later At Any Time
+            You Can Always Let Us Set Your Location Later
           </div>
           <div className="geolocation-inputs">
             <div className="splash-half geo-auth-button geolocation-authorize"
@@ -53,7 +55,7 @@ var Splash = React.createClass({
           </div>
 
           <div className="splash-half splash-login">
-            <button>Login Form</button>
+            <Login />
           </div>
         </div>
       </div>

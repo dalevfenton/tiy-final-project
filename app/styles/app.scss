@@ -15,7 +15,16 @@ $icon-font-path: '../fonts/';
 img {
   max-width: 100%;
 }
+button{
+  border: none;
+  padding: 10px;
+}
 
+$accent-color: rgb(59, 178, 208);
+$accent-color-darken: darken($accent-color, 20%);
+$accent-color-lighten: lighten($accent-color, 20%);
+$error-color: rgb(190, 21, 21);
+$bg-color-lighten: rgb(240, 240, 240);
 //------------------------------------------------------------------------------
 //                            PAGE LAYOUT STYLES
 //------------------------------------------------------------------------------
@@ -23,6 +32,7 @@ img {
 html, body{
   height: 100%;
   min-height: 100%;
+  font-family: 'Open Sans', sans-serif;
 }
 .map-container{
   position: absolute;
@@ -54,7 +64,7 @@ html, body{
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgb(212, 212, 212);
+  background: rgba(212, 212, 212, .8);
 }
 .splash-container{
   width: 50%;
@@ -68,6 +78,7 @@ html, body{
   width: 50%;
   margin: 0;
   padding: 10px 20px;
+  vertical-align: top;
   &:nth-of-type(0+2n){
     margin-left: -4px;
   }
@@ -86,10 +97,9 @@ html, body{
   text-align: center;
   transition: .5s ease-in-out;
   vertical-align: top;
-  color: darken(rgb(59, 178, 208), 10%);
+  color: $accent-color-darken;
   &:hover{
-    color: blue;
-    border-color: blue;
+    color: $accent-color;
   }
 }
 .geolocation-disclaimer{
@@ -102,14 +112,21 @@ html, body{
   text-align: center;
   font-family: 'Quicksand', sans-serif;
   cursor: pointer;
+  transition: .5s ease-in-out;
 }
 .geolocation-authorize{
-  background: darken(rgb(59, 178, 208), 10%);
-  color: rgb(240, 240, 240);
+  background: $accent-color-darken;
+  color: $bg-color-lighten;
+  &:hover{
+    background: $accent-color;
+  }
 }
 .geolocation-deny{
   background-color: rgb(50,50,50);
   color: white;
+  &:hover{
+    background: lighten(rgb(50,50,50), 20%);
+  }
 }
 .geolocation-info {
   display: inline-block;
@@ -124,7 +141,7 @@ html, body{
 }
 .map-overlay{
   position: absolute;
-  background: rgb(212,212,212);
+  background: rgba(212,212,212, .8);
   top: 0;
   width: 20%;
   height: 100%;
@@ -204,19 +221,60 @@ html, body{
   background: rgba(212,212,212,.8);
 }
 .login-container{
+  input{
+    padding: 5px;
+    margin-top: 12px;
+  }
   input, button{
     width: 100%;
-    margin-bottom: 16px;
   }
   a{
     display: inline-block;
     width: 100%;
     text-align: center;
   }
+}
+.login-error{
+  padding: 5px;
+  text-align: center;
+  color: $error-color;
+}
+.login-profile{
+  text-align: center;
 
 }
+.login-profile-avatar-wrapper{
+  width: 50%;
+  margin: 0 auto;
+  position: relative;
 
-
+}
+.login-profile-avatar{
+  position: relative;
+  width: 50%;
+  margin: 0 auto;
+  padding-bottom: 50%;
+  position: relative;
+  border-radius: 50%;
+  background: $accent-color-darken;
+  color: white;
+  font-size: 50px;
+  transition: .5s ease-in-out;
+  &:hover{
+    background: $accent-color;
+  }
+  & > span{
+    display: inline-block;
+    width: 50%;
+    left: 25%;
+    right: 25%;
+    top: 10%;
+    position: absolute;
+  }
+}
+.login-welcome{
+  text-transform: capitalize;
+}
 //------------------------------------------------------------------------------
 //                            LEFT SIDEBAR STYLES
 //------------------------------------------------------------------------------
@@ -277,7 +335,7 @@ button.waypoint-remove{
 }
 .waypoint-active{
   label{
-    background: rgb(59, 178, 208);
+    background: $accent-color;
   }
 }
 .trip-button{
@@ -321,13 +379,13 @@ button.waypoint-remove{
   padding: 10px 0;
   transition: .25s ease-in-out;
   &:hover{
-    color: rgb(59, 178, 208);
+    color: $accent-color;
   }
 }
 
 .selector-active{
-  background: rgb(240, 240, 240);
-  color: darken(rgb(59, 178, 208), 10%);
+  background: $bg-color-lighten;
+  color: $accent-color-darken;
 }
 
 .selector-disabled{
@@ -335,6 +393,30 @@ button.waypoint-remove{
   & > span:hover{
     color: lighten(black, 70%);
   }
+}
+
+.sidebar-accordion-title{
+  padding: 10px;
+  background-color: $bg-color-lighten;
+  color: $accent-color-darken;
+  transition: .5s ease-in-out;
+  cursor: pointer;
+  &:hover{
+    color: $accent-color;
+  }
+}
+.sidebar-accordion-body{
+  padding: 10px;
+}
+.sidebar-info{
+  padding: 5px;
+}
+.sidebar-label{
+  display: inline-block;
+  padding: 0 5px 5px 5px;
+  font-weight: bold;
+  margin-left: 5%;
+  width: 30%;
 }
 //Loading Component Styles
 .icon-refresh-animate {
@@ -371,7 +453,7 @@ button.waypoint-remove{
   content: "\e162";
 }
 .mapbox-marker-user-icon{
-  background: darken(rgb(59, 178, 208), 20%);
+  background: $accent-color-darken;
   animation-name: color-pulse;
   animation-duration: 1s;
   animation-direction: alternate;
@@ -382,6 +464,6 @@ button.waypoint-remove{
   content: '';
 }
 @keyframes color-pulse {
-  from { transform: scale( 1 ); background: lighten(rgb(59, 178, 208), 20%); }
-  to   { transform: scale( .8 ); background: rgb(59, 178, 208); }
+  from { transform: scale( 1 ); background: $accent-color-lighten; }
+  to   { transform: scale( .8 ); background: $accent-color; }
 }

@@ -5817,9 +5817,14 @@ button.close {
 img {
   max-width: 100%; }
 
+button {
+  border: none;
+  padding: 10px; }
+
 html, body {
   height: 100%;
-  min-height: 100%; }
+  min-height: 100%;
+  font-family: 'Open Sans', sans-serif; }
 
 .map-container {
   position: absolute;
@@ -5851,7 +5856,7 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #d4d4d4; }
+  background: rgba(212, 212, 212, 0.8); }
 
 .splash-container {
   width: 50%;
@@ -5864,7 +5869,8 @@ html, body {
   display: inline-block;
   width: 50%;
   margin: 0;
-  padding: 10px 20px; }
+  padding: 10px 20px;
+  vertical-align: top; }
   .splash-half:nth-of-type(0+2n) {
     margin-left: -4px; }
 
@@ -5882,10 +5888,9 @@ html, body {
   text-align: center;
   transition: .5s ease-in-out;
   vertical-align: top;
-  color: #2a94ae; }
+  color: #207185; }
   .geolocation-logo:hover {
-    color: blue;
-    border-color: blue; }
+    color: #3bb2d0; }
 
 .geolocation-disclaimer {
   color: #7d7d7d;
@@ -5896,15 +5901,20 @@ html, body {
 .geo-auth-button {
   text-align: center;
   font-family: 'Quicksand', sans-serif;
-  cursor: pointer; }
+  cursor: pointer;
+  transition: .5s ease-in-out; }
 
 .geolocation-authorize {
-  background: #2a94ae;
+  background: #207185;
   color: #f0f0f0; }
+  .geolocation-authorize:hover {
+    background: #3bb2d0; }
 
 .geolocation-deny {
   background-color: #323232;
   color: white; }
+  .geolocation-deny:hover {
+    background: #656565; }
 
 .geolocation-info {
   display: inline-block;
@@ -5919,7 +5929,7 @@ html, body {
 
 .map-overlay {
   position: absolute;
-  background: #d4d4d4;
+  background: rgba(212, 212, 212, 0.8);
   top: 0;
   width: 20%;
   height: 100%;
@@ -5983,13 +5993,52 @@ html, body {
   top: 10%;
   background: rgba(212, 212, 212, 0.8); }
 
+.login-container input {
+  padding: 5px;
+  margin-top: 12px; }
 .login-container input, .login-container button {
-  width: 100%;
-  margin-bottom: 16px; }
+  width: 100%; }
 .login-container a {
   display: inline-block;
   width: 100%;
   text-align: center; }
+
+.login-error {
+  padding: 5px;
+  text-align: center;
+  color: #be1515; }
+
+.login-profile {
+  text-align: center; }
+
+.login-profile-avatar-wrapper {
+  width: 50%;
+  margin: 0 auto;
+  position: relative; }
+
+.login-profile-avatar {
+  position: relative;
+  width: 50%;
+  margin: 0 auto;
+  padding-bottom: 50%;
+  position: relative;
+  border-radius: 50%;
+  background: #207185;
+  color: white;
+  font-size: 50px;
+  transition: .5s ease-in-out; }
+  .login-profile-avatar:hover {
+    background: #3bb2d0; }
+  .login-profile-avatar > span {
+    display: inline-block;
+    width: 50%;
+    left: 25%;
+    right: 25%;
+    top: 10%;
+    position: absolute; }
+
+.login-welcome {
+  text-transform: capitalize; }
 
 #waypoint-list {
   max-height: 50vh;
@@ -6074,12 +6123,34 @@ button.waypoint-remove {
 
 .selector-active {
   background: #f0f0f0;
-  color: #2a94ae; }
+  color: #207185; }
 
 .selector-disabled {
   color: #b3b3b3; }
   .selector-disabled > span:hover {
     color: #b3b3b3; }
+
+.sidebar-accordion-title {
+  padding: 10px;
+  background-color: #f0f0f0;
+  color: #207185;
+  transition: .5s ease-in-out;
+  cursor: pointer; }
+  .sidebar-accordion-title:hover {
+    color: #3bb2d0; }
+
+.sidebar-accordion-body {
+  padding: 10px; }
+
+.sidebar-info {
+  padding: 5px; }
+
+.sidebar-label {
+  display: inline-block;
+  padding: 0 5px 5px 5px;
+  font-weight: bold;
+  margin-left: 5%;
+  width: 30%; }
 
 .icon-refresh-animate {
   animation-name: rotateThis;

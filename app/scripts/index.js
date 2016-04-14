@@ -2,28 +2,34 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
 var Backbone = require('backbone');
+var Parse = require('parse');
 
 //bring in mapbox and mapbox directions
 require('mapbox.js');
 require('mapbox-directions.js');
 
+//setup parse SDK to connect to server
+Parse.initialize("dvf_final_project");
+Parse.serverURL = 'http://tiy-dvf-final-project.herokuapp.com';
+
 var startPt, startZoom, userLocationEnabled;
-// if ("geolocation" in navigator) {
-//   /* geolocation is available */
-//   navigator.geolocation.getCurrentPosition(function(position) {
-//     startPt = [position.coords.latitude, position.coords.longitude];
-//     startZoom = 13;
-//     userLocationEnabled = true;
-//     setupApp(startPt, startZoom, userLocationEnabled);
-//   }, function(error){
-//     doNoPositionSetup(error);
-//   });
-// } else {
-//   /* geolocation IS NOT available */
-//   var error = {code: 4, message:'geolocation not available'};
-//   doNoPositionSetup(error);
-// }
-doNoPositionSetup({code: '5', message: 'app starting user not prompted'});
+
+if ("geolocation" in navigator && localStorage.getItem("geolocation") === "true") {
+  /* geolocation is available */
+  navigator.geolocation.getCurrentPosition(function(position) {
+    startPt = [position.coords.latitude, position.coords.longitude];
+    startZoom = 13;
+    userLocationEnabled = true;
+    setupApp(startPt, startZoom, userLocationEnabled);
+  }, function(error){
+    doNoPositionSetup(error);
+  });
+} else {
+  /* geolocation IS NOT available */
+  var error = {code: 4, message:'geolocation not available'};
+  doNoPositionSetup(error);
+}
+// doNoPositionSetup({code: '5', message: 'app starting user not prompted'});
 
 function doNoPositionSetup(error){
   if(error.code == 1){
@@ -48,7 +54,7 @@ function doNoPositionSetup(error){
 function setupApp(startPt, startZoom, userLocationEnabled){
   //set accessToken and instatiate our map object
   L.mapbox.accessToken = 'pk.eyJ1IjoiZGFsZWZlbnRvbiIsImEiOiJjaW1tNGY4Y3QwM3NvbzBtMG0xNG94amNyIn0.dSBZiHka-IqfB6eqBL_o1Q';
-  var map = L.mapbox.map('map', 'mapbox.streets', {
+  var map = L.mapbox.map('map', 'mapbox.light', {
       zoomControl: false
   }).setView(startPt, startZoom);
   // create the initial directions object, from which the layer
@@ -63,11 +69,10 @@ function setupApp(startPt, startZoom, userLocationEnabled){
   //
   // var directionsErrorsControl = L.mapbox.directions.errorsControl('errors', directions)
   //     .addTo(map);
-  // //
+
   var directionsRoutesControl = L.mapbox.directions.routesControl('routes', directions)
       .addTo(map);
-  // console.log(map);
-  // console.log(directions);
+
 
   // move the attribution control out of the way
   map.attributionControl.setPosition('bottomleft');

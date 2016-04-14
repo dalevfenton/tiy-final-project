@@ -159,7 +159,7 @@ var RightSidebar = React.createClass({
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
       tab = (<LocationTab location={this.props.location}
-        setLocation={this.setLocation}
+        setLocation={this.setLocation} setupGeo={this.props.setupGeo}
         userLocation={this.props.userLocation}
         state={this.props.state} props={this.props.props} />);
     }

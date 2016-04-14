@@ -2,6 +2,8 @@ var $ = require('jquery');
 var _ = require('underscore');
 var React = require('react');
 var Sortable = require('sortablejs');
+var Parse = require('parse');
+
 
 var RightSidebar = require('./rightsidebar.jsx');
 var LeftSidebar = require('./leftsidebar.jsx');
@@ -20,7 +22,7 @@ var Interface = React.createClass({
   getInitialState: function(){
     return {
       userLocation: this.props.userLocation,
-      userLocationEnabled: this.props.userLocation,
+      userLocationEnabled: this.props.userLocationEnabled,
       splash: true,
       numPoints: 2,
       loginToggle: false,
@@ -201,15 +203,16 @@ var Interface = React.createClass({
     if(!this.props.directions){
       return (<div><h1>Error Loading Application - No Directions Available</h1></div>);
     }
+
     //if we are doing our initial load then show the splash screen:
-    if(this.state.splash){
+    if(this.state.splash && localStorage.getItem("geolocation") === null ){
       return (<Splash setupGeo={this.setupGeo}/>)
     }
     //check if the user's location is known and if so update their marker on the map
     var userLocation = null;
     if(this.state.userLocationEnabled){
       userLocation = this.state.userLocation.geometry.coordinates;
-      console.log(userLocation);
+
       var marker = L.marker(userLocation,
         {
           draggable: false,
@@ -254,6 +257,7 @@ var Interface = React.createClass({
         <RightSidebar toggle={this.state.toggleRight} toggleRight={this.toggleRight}
           directions={this.props.directions} activePoint={this.state.activePoint}
           numPoints={this.state.numPoints} doGeocode={this.doGeocode}
+          setupGeo={this.setupGeo}
           directionsLayer={this.props.directionsLayer} map={this.props.map}
           userLocation={this.state.userLocation} state={this.state} props={this.props} />
         {login}
@@ -271,10 +275,12 @@ var Interface = React.createClass({
   },
   setupGeo: function(bool){
     if ( bool && "geolocation" in navigator) {
+      localStorage.setItem("geolocation", "true");
       /* geolocation is available */
       navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
     } else {
       /* geolocation IS NOT available */
+      localStorage.setItem("geolocation", "false");
       var error;
       if(bool){
         error = {code: 4, message:'geolocation not available'};
@@ -308,7 +314,6 @@ var Interface = React.createClass({
       L.latLng(position.coords.latitude, position.coords.longitude)
     );
     console.log('location from geolocation watch', userLocation);
-
     this.setState({'userLocation': userLocation, 'userLocationEnabled': true});
     if(this.state.splash){
       this.setMapView(userLocation);

@@ -4,11 +4,18 @@ var WaypointLocation = require('./waypointlocation.jsx');
 
 var LocationTab = React.createClass({
   getInitialState: function(){
-    var location = '';
     return {
-      location: location,
-      display: ''
+      display: '',
+      currentLocation: false,
+      waypointLocation: false,
+      addressLocation: false
     }
+  },
+  callLocationSetup: function(bool, e){
+    console.log(e);
+    console.log(bool);
+    e.preventDefault();
+    this.props.setupGeo(bool);
   },
   setInput: function(e){
     e.preventDefault();
@@ -17,15 +24,22 @@ var LocationTab = React.createClass({
   handleSubmit: function(e){
     e.preventDefault();
     this.props.setLocation(this.state.display);
+    this.setState({'loading': 'inputLocation'});
   },
   handleUserLocation: function(e){
     e.preventDefault();
     console.log(e.target.value);
     this.props.setLocation(this.props.userLocation);
+    this.setState({'loading': 'userLocation'});
   },
   handleWaypointLocation: function(waypointProps){
     console.log(waypointProps);
     this.props.setLocation(waypointProps.waypoint);
+    this.setState({'loading': 'waypointLocation'});
+  },
+  toggleAccordion: function(e){
+    e.preventDefault();
+    console.log(this.refs);
   },
   render: function(){
     var id = "waypoint-input-" + this.props.index;
@@ -36,7 +50,15 @@ var LocationTab = React.createClass({
       var userLocation = this.props.userLocation.geometry.coordinates;
       userLocationJSX = (
         <div>
-          <div>{userLocation}</div>
+          <div className="dtr-title">Your Current Location</div>
+          <div className="sidebar-info">
+            <span className="sidebar-label">latitude:</span>
+            <span className="sidebar-label-info">{userLocation[1]}</span>
+          </div>
+          <div className="sidebar-info">
+            <span className="sidebar-label">longitude:</span>
+            <span className="sidebar-label-info">{userLocation[0]}</span>
+          </div>
           <button onClick={this.handleUserLocation}>Lookup Stops</button>
         </div>
       );
@@ -45,6 +67,8 @@ var LocationTab = React.createClass({
         <div>
           To Activate Location Tracking You Will Need To Reset Your Location
           Preferences and Reload the Page
+          <div className="geo-auth-button geolocation-authorize"
+            onClick={this.callLocationSetup.bind(this, true)}>Find Your Location</div>
         </div>
       );
     }
@@ -80,27 +104,27 @@ var LocationTab = React.createClass({
     return (
       <div className="sidebar-tab">
         <div className="waypoint-container waypoint-active">
-          <div className="sidebar-accordion" toggle={this.toggle}
-            onClick={this.setToggle}>
-            <div className="sidebar-accordion-title">
+          <div className="sidebar-accordion">
+            <div className="sidebar-accordion-title dtr-title"
+               onClick={this.toggleAccordion} ref="currentLocation">
               Find A Stop Near You
             </div>
             <div className="sidebar-accordion-body">
               {userLocationJSX}
             </div>
           </div>
-          <div className="sidebar-accordion" toggle={this.toggle}
-            onClick={this.setToggle}>
-            <div className="sidebar-accordion-title">
+          <div className="sidebar-accordion">
+            <div className="sidebar-accordion-title dtr-title"
+               onClick={this.toggleAccordion} ref="waypointLocation">
               Find A Stop Near A Waypoint
             </div>
             <div className="sidebar-accordion-body">
               {waypointsJSX}
             </div>
           </div>
-          <div className="sidebar-accordion" toggle={this.toggle}
-            onClick={this.setToggle}>
-            <div className="sidebar-accordion-title">
+          <div className="sidebar-accordion">
+            <div className="sidebar-accordion-title dtr-title"
+               onClick={this.toggleAccordion} ref="addressLocation">
               Find A Stop Near An Address
             </div>
             <form className="waypoint" onSubmit={this.handleSubmit}>

@@ -9,6 +9,7 @@ var GasTab = React.createClass({
   },
   render: function(){
     var stations = (<Loading />);
+    console.log(this.props.stations);
     if(this.props.stations){
       stations = <StationsList collection={this.props.stations}  />
     }

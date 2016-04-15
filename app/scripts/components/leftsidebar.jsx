@@ -44,7 +44,8 @@ var LeftSidebar = React.createClass({
           <div id="waypoint-list">
             {waypoints}
           </div>
-          <button className="trip-button" onClick={this.props.addPoint}>+ Add New Waypoint</button>
+          <button className="trip-button geo-auth-button geolocation-authorize"
+            onClick={this.props.addPoint}>+ Add New Waypoint</button>
         </div>
       </div>
     );

@@ -509,7 +509,8 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
           React.createElement("div", {id: "waypoint-list"}, 
             waypoints
           ), 
-          React.createElement("button", {className: "trip-button", onClick: this.props.addPoint}, "+ Add New Waypoint")
+          React.createElement("button", {className: "trip-button geo-auth-button geolocation-authorize", 
+            onClick: this.props.addPoint}, "+ Add New Waypoint")
         )
       )
     );
@@ -695,7 +696,7 @@ var GasTab = require('./rightsidebar/gastab.jsx');
 var HotelTab = require('./rightsidebar/hoteltab.jsx');
 var LocationTab = require('./rightsidebar/locationtab.jsx');
 
-var PROXYURL = 'http://127.0.0.1:3000/api/';
+var PROXYURL = 'http://node-proxy-dvf.herokuapp.com/api/';
 
 var RightSidebar = React.createClass({displayName: "RightSidebar",
   getInitialState: function(){
@@ -750,8 +751,9 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     var url = url+endpointStr;
     console.log( url );
     $.ajax( url ).then(function(data){
-      var data = JSON.parse(data);
-      console.log('data from gasfeed api');
+      console.log(data);
+      data = JSON.parse(data);
+      console.log('data from gas feed api');
       console.log(data);
       this.setMarkers(data.stations.splice(0, 20), 'gas');
       this.setState({'stations': data});
@@ -797,6 +799,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     businesses.forEach(function(business){
       var coords;
       if(type == 'gas'){
+        console.log('gas marker: ', business);
         coords = {latitude: business.lat, longitude: business.lng};
       }else{
         coords = business.location.coordinate;
@@ -994,6 +997,7 @@ var GasTab = React.createClass({displayName: "GasTab",
   },
   render: function(){
     var stations = (React.createElement(Loading, null));
+    console.log(this.props.stations);
     if(this.props.stations){
       stations = React.createElement(StationsList, {collection: this.props.stations})
     }
@@ -1091,7 +1095,9 @@ var LocationTab = React.createClass({displayName: "LocationTab",
             React.createElement("span", {className: "sidebar-label"}, "longitude:"), 
             React.createElement("span", {className: "sidebar-label-info"}, userLocation[0])
           ), 
-          React.createElement("button", {onClick: this.handleUserLocation}, "Lookup Stops")
+          React.createElement("div", {className: "sidebar-waypoint-picker"}, 
+            React.createElement("button", {onClick: this.handleUserLocation}, "Lookup Stops")
+          )
         )
       );
     }else{
@@ -1120,7 +1126,7 @@ var LocationTab = React.createClass({displayName: "LocationTab",
           React.createElement(WaypointLocation, {setWaypoint: this.handleWaypointLocation, waypoint: waypoint, 
             type: "waypoint", index: index, key: index+1})
         )
-      });
+      }.bind(this));
     }
     if(destination){
       waypointsJSX.push(
@@ -1130,7 +1136,7 @@ var LocationTab = React.createClass({displayName: "LocationTab",
     }
     if(waypointsJSX.length < 1){
       waypointsJSX = (
-        React.createElement("div", {className: "sidebar-waypoint-picker"}, "no waypoints set")
+        React.createElement("div", {className: "sidebar-waypoint-picker text-center"}, "no waypoints set")
       );
     }
     var addressJSX = (
@@ -1169,21 +1175,32 @@ var React = require('react');
 
 var StationsList = React.createClass({displayName: "StationsList",
   render: function(){
-    var stations = this.props.collection.stations.map(function(station, index){
-      if(index < 10){
-        var region = station.region;
-        if(this.props.collection.geoLocation.region_short){
-          region = this.props.collection.geoLocation.region_short;
+    var stations = (
+      React.createElement("div", {className: "sidebar-waypoint-picker text-center"}, 
+        "No Gas Stations Found"
+      )
+    );
+    if(this.props.collection.stations.length > 0){
+      stations = this.props.collection.stations.map(function(station, index){
+        if(index < 10){
+          var region = station.region;
+          if(this.props.collection.geoLocation.region_short){
+            region = this.props.collection.geoLocation.region_short;
+          }
+          return (
+            React.createElement("div", {className: "station-detail detail-item", key: index}, 
+              React.createElement("div", {className: "dtr-title"}, 
+                React.createElement("span", {className: "station-detail-title"}, station.station, " - "), 
+                React.createElement("span", {className: "station-detail-distance"}, station.distance)
+              ), 
+              React.createElement("div", {className: "address"}, station.address), 
+              React.createElement("div", {className: "address"}, station.city, ", ", region)
+            )
+          );
         }
-        return (
-          React.createElement("div", {className: "station-detail detail-item", key: index}, 
-            React.createElement("h6", {className: "dtr-title"}, station.station), 
-            React.createElement("span", {className: "distance"}, station.distance), 
-            React.createElement("span", {className: "address"}, station.address, ", ", station.city, ", ", region)
-          )
-        );
-      }
-    }.bind(this));
+      }.bind(this));
+    }
+
     return (
       React.createElement("div", null, 
         stations
@@ -1232,7 +1249,9 @@ var YelpList = React.createClass({displayName: "YelpList",
       if(index < 10){
         return (
           React.createElement("div", {className: "business-detail detail-item", key: index}, 
-            React.createElement("h6", {className: "business-detail-title dtr-title"}, business.name), 
+            React.createElement("a", {href: business.url}, 
+              React.createElement("h6", {className: "business-detail-title dtr-title"}, business.name)
+            ), 
             React.createElement("div", {className: "business-detail-info"}, 
               React.createElement("span", {className: "rating"}, React.createElement("img", {src: business.rating_img_url})), 
               React.createElement("span", {className: "reviews"}, React.createElement("a", {href: business.url}, "(", business.review_count, ") Reviews"))

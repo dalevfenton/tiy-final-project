@@ -5821,6 +5821,9 @@ button {
   border: none;
   padding: 10px; }
 
+.text-center {
+  text-align: center; }
+
 html, body {
   height: 100%;
   min-height: 100%;
@@ -6086,18 +6089,13 @@ button.waypoint-remove {
   border: none; }
 
 .waypoint-active label {
-  background: #3bb2d0; }
+  background: #207185;
+  transition: .5s ease-in-out; }
+  .waypoint-active label:hover {
+    background-color: #3bb2d0; }
 
 .trip-button {
-  width: 100%;
-  background: #323232;
-  text-align: center;
-  color: white;
-  font-weight: bold;
-  margin: 0;
-  border: none;
-  padding: 5px 0;
-  border-bottom: 1px solid #afafaf; }
+  width: 100%; }
 
 .location-selectors {
   list-style: none; }
@@ -6141,7 +6139,7 @@ button.waypoint-remove {
 
 .sidebar-accordion-body {
   position: relative;
-  padding: 10px;
+  padding: 10px 0;
   transition: .5s ease-in-out; }
 
 .sidebar-info {
@@ -6151,12 +6149,26 @@ button.waypoint-remove {
   display: inline-block;
   padding: 0 5px 5px 5px;
   font-weight: bold;
-  margin-left: 5%;
+  margin-left: 10%;
   width: 30%; }
+
+.sidebar-waypoint-picker button {
+  width: 100%;
+  background-color: #207185;
+  color: white; }
+  .sidebar-waypoint-picker button:hover {
+    background-color: #3bb2d0; }
+  .sidebar-waypoint-picker button:not(:last-of-type) {
+    border-bottom: 1px solid white; }
 
 .detail-item {
   background: #f0f0f0;
   padding: 10px; }
+  .detail-item:not(:last-of-type) {
+    border-bottom: 1px solid #207185; }
+
+.business-detail-title {
+  margin: 0; }
 
 .icon-refresh-animate {
   animation-name: rotateThis;

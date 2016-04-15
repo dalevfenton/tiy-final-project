@@ -57,7 +57,9 @@ var LocationTab = React.createClass({
             <span className="sidebar-label">longitude:</span>
             <span className="sidebar-label-info">{userLocation[0]}</span>
           </div>
-          <button onClick={this.handleUserLocation}>Lookup Stops</button>
+          <div className="sidebar-waypoint-picker">
+            <button  onClick={this.handleUserLocation}>Lookup Stops</button>
+          </div>
         </div>
       );
     }else{
@@ -86,7 +88,7 @@ var LocationTab = React.createClass({
           <WaypointLocation setWaypoint={this.handleWaypointLocation} waypoint={waypoint}
             type="waypoint" index={index} key={index+1} />
         )
-      });
+      }.bind(this));
     }
     if(destination){
       waypointsJSX.push(
@@ -96,7 +98,7 @@ var LocationTab = React.createClass({
     }
     if(waypointsJSX.length < 1){
       waypointsJSX = (
-        <div className="sidebar-waypoint-picker">no waypoints set</div>
+        <div className="sidebar-waypoint-picker text-center">no waypoints set</div>
       );
     }
     var addressJSX = (

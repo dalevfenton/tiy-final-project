@@ -61,8 +61,9 @@ var RightSidebar = React.createClass({
     var url = url+endpointStr;
     console.log( url );
     $.ajax( url ).then(function(data){
-      var data = JSON.parse(data);
-      console.log('data from gasfeed api');
+      console.log(data);
+      data = JSON.parse(data);
+      console.log('data from gas feed api');
       console.log(data);
       this.setMarkers(data.stations.splice(0, 20), 'gas');
       this.setState({'stations': data});
@@ -108,6 +109,7 @@ var RightSidebar = React.createClass({
     businesses.forEach(function(business){
       var coords;
       if(type == 'gas'){
+        console.log('gas marker: ', business);
         coords = {latitude: business.lat, longitude: business.lng};
       }else{
         coords = business.location.coordinate;

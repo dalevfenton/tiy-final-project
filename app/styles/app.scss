@@ -19,6 +19,9 @@ button{
   border: none;
   padding: 10px;
 }
+.text-center{
+  text-align: center;
+}
 
 $accent-color: rgb(59, 178, 208);
 $accent-color-darken: darken($accent-color, 20%);
@@ -335,19 +338,24 @@ button.waypoint-remove{
 }
 .waypoint-active{
   label{
-    background: $accent-color;
+    background: $accent-color-darken;
+    transition: .5s ease-in-out;
+    &:hover{
+      background-color: $accent-color;
+    }
   }
+
 }
 .trip-button{
   width: 100%;
-  background: rgb(50,50,50);
-  text-align: center;
-  color: white;
-  font-weight: bold;
-  margin: 0;
-  border: none;
-  padding: 5px 0;
-  border-bottom: 1px solid rgb(175,175,175);
+  // background: rgb(50,50,50);
+  // text-align: center;
+  // color: white;
+  // font-weight: bold;
+  // margin: 0;
+  // border: none;
+  // padding: 5px 0;
+  // border-bottom: 1px solid rgb(175,175,175);
 }
 
 
@@ -411,7 +419,7 @@ button.waypoint-remove{
   // overflow-y: scroll;
   // overflow-x: hidden;
   //
-  padding: 10px;
+  padding: 10px 0;
   transition: .5s ease-in-out;
 }
 // .accordion-hide{
@@ -431,12 +439,34 @@ button.waypoint-remove{
   display: inline-block;
   padding: 0 5px 5px 5px;
   font-weight: bold;
-  margin-left: 5%;
+  margin-left: 10%;
   width: 30%;
+}
+.sidebar-waypoint-picker{
+  button{
+    width: 100%;
+    background-color: $accent-color-darken;
+    color: white;
+    &:hover{
+      background-color: $accent-color;
+    }
+    &:not(:last-of-type){
+      border-bottom: 1px solid white;
+    }
+  }
 }
 .detail-item{
   background: $bg-color-lighten;
   padding: 10px;
+  &:not(:last-of-type){
+    border-bottom: 1px solid $accent-color-darken;
+  }
+}
+.business-detail-title{
+  margin: 0;
+}
+.station-detail-distance{
+
 }
 //Loading Component Styles
 .icon-refresh-animate {

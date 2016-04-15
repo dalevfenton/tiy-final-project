@@ -6,7 +6,7 @@ var GasTab = require('./rightsidebar/gastab.jsx');
 var HotelTab = require('./rightsidebar/hoteltab.jsx');
 var LocationTab = require('./rightsidebar/locationtab.jsx');
 
-var PROXYURL = 'http://127.0.0.1:3000/api/';
+var PROXYURL = 'http://node-proxy-dvf.herokuapp.com/api/';
 
 var RightSidebar = React.createClass({
   getInitialState: function(){

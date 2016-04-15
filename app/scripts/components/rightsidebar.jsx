@@ -13,7 +13,7 @@ var RightSidebar = React.createClass({
     return {
       currentTab: "location",
       currentLocation: null,
-      distance: 40000,
+      distance: 1610,
       fuelType: 'reg',
       sort: 'distance',
       hotels: null,
@@ -49,7 +49,7 @@ var RightSidebar = React.createClass({
     var url = PROXYURL + 'gasfeed';
     var lat = waypoint.geometry.coordinates[1] || '-82.3985';
     var long = waypoint.geometry.coordinates[0] || '34.8514';
-    var distance = '25';
+    var distance = '1';
     var fuelType = this.state.fuelType || 'reg';
     var sort = this.state.sort || 'distance';
     var endpointStr = '?endpoint=/stations/radius/' + lat +
@@ -81,7 +81,7 @@ var RightSidebar = React.createClass({
     var url = PROXYURL + 'yelp';
     var lat = waypoint.geometry.coordinates[1] || '-82.3985';
     var long = waypoint.geometry.coordinates[0] || '34.8514';
-    var distance = this.state.distance || '5000'; //distance is in meters, max of 40000
+    var distance = this.state.distance || '1610'; //distance is in meters, max of 40000
     var catTerm = category + "Term";
     var term = this.state[catTerm] || '';
     var endpointStr = '?term=' + term +
@@ -125,6 +125,8 @@ var RightSidebar = React.createClass({
       // marker.addTo(this.props.markerLayer);
       // this.props.directionsLayer.addLayer(marker);
     }.bind(this));
+    console.log(this.props);
+    console.log(this.state);
   },
   setLocation: function(waypoint){
     console.log('waypoint in setLocation', waypoint);
@@ -132,10 +134,8 @@ var RightSidebar = React.createClass({
     this.state.markerLayer.clearLayers();
   },
   handleGeocode: function(waypoint){
-    console.log(waypoint);
-
     this.setState({'currentLocation': waypoint});
-    console.log(this.state);
+    // console.log(this.state);
     this.getStations(waypoint);
     this.getRestaurants(waypoint);
     this.getHotels(waypoint);

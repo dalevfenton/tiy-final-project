@@ -6,10 +6,12 @@ var YelpList = React.createClass({
       if(index < 10){
         return (
           <div className="business-detail detail-item" key={index}>
-            <h6>{business.name}</h6>
-            <span className="rating"><img src={business.rating_img_url} /></span>
-            <span className="reviews"><a href={business.url}>({business.review_count}) Reviews</a></span>
-            <span className="address">{business.location.address}, {business.location.city}, {business.location.state_code}</span>
+            <h6 className="business-detail-title dtr-title">{business.name}</h6>
+            <div className="business-detail-info">
+              <span className="rating"><img src={business.rating_img_url} /></span>
+              <span className="reviews"><a href={business.url}>({business.review_count}) Reviews</a></span>
+            </div>
+            <span className="business-detail-address">{business.location.address}, {business.location.city}, {business.location.state_code}</span>
           </div>
         );
       }

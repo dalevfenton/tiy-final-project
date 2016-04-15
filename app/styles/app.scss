@@ -406,8 +406,24 @@ button.waypoint-remove{
   }
 }
 .sidebar-accordion-body{
+  position: relative;
+  // max-height: 80%;
+  // overflow-y: scroll;
+  // overflow-x: hidden;
+  //
   padding: 10px;
+  transition: .5s ease-in-out;
 }
+// .accordion-hide{
+//
+//   animation-name: shrink;
+//   animation-duration: .5s ease-in-out;
+// }
+// @keyframes shrink {
+//   from { transform: scaleY( 1 ); height: auto; opacity: 1; }
+//   to   { transform: scaleY( .1 ); height: 0; opacity: .3; }
+// }
+
 .sidebar-info{
   padding: 5px;
 }
@@ -417,6 +433,10 @@ button.waypoint-remove{
   font-weight: bold;
   margin-left: 5%;
   width: 30%;
+}
+.detail-item{
+  background: $bg-color-lighten;
+  padding: 10px;
 }
 //Loading Component Styles
 .icon-refresh-animate {

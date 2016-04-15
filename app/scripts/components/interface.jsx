@@ -208,12 +208,15 @@ var Interface = React.createClass({
     if(this.state.splash && localStorage.getItem("geolocation") === null ){
       return (<Splash setupGeo={this.setupGeo}/>)
     }
+
     //check if the user's location is known and if so update their marker on the map
     var userLocation = null;
     if(this.state.userLocationEnabled){
       userLocation = this.state.userLocation.geometry.coordinates;
-
-      var marker = L.marker(userLocation,
+      console.log(userLocation);
+      console.log(userLocation[0]);
+      console.log(userLocation[1]);
+      var marker = L.marker([userLocation[1], userLocation[0]],
         {
           draggable: false,
           icon: L.divIcon({
@@ -222,8 +225,12 @@ var Interface = React.createClass({
               'className': "mapbox-marker-special mapbox-marker-user-icon",
           })
       });
-      this.userLayer.clearLayers();
-      this.userLayer.addLayer(marker);
+      marker.addTo(this.props.map);
+      console.log('marker:');
+      console.log(marker);
+      // this.userLayer.clearLayers();
+      // this.userLayer.addLayer(marker);
+      // console.log(this.props.map);
     }
 
     //Display a button to save the trip once we have a valid directions object

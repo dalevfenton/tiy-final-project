@@ -1,14 +1,12 @@
 var React = require('react');
 
 var WaypointLocation = require('./waypointlocation.jsx');
+var Accordion = require('./accordion.jsx');
 
 var LocationTab = React.createClass({
   getInitialState: function(){
     return {
       display: '',
-      currentLocation: false,
-      waypointLocation: false,
-      addressLocation: false
     }
   },
   callLocationSetup: function(bool, e){
@@ -101,43 +99,28 @@ var LocationTab = React.createClass({
         <div className="sidebar-waypoint-picker">no waypoints set</div>
       );
     }
+    var addressJSX = (
+      <form className="waypoint" onSubmit={this.handleSubmit}>
+        <input type="text" autoComplete="off"
+          value={this.state.display} onChange={this.setInput}
+          placeholder="Find A Stop Near An Address" />
+        <label className="waypoint-handle">
+          <span className="glyphicon glyphicon-map-marker"
+            aria-hidden="true"
+          ></span>
+        </label>
+      </form>
+    );
+
     return (
       <div className="sidebar-tab">
         <div className="waypoint-container waypoint-active">
-          <div className="sidebar-accordion">
-            <div className="sidebar-accordion-title dtr-title"
-               onClick={this.toggleAccordion} ref="currentLocation">
-              Find A Stop Near You
-            </div>
-            <div className="sidebar-accordion-body">
-              {userLocationJSX}
-            </div>
-          </div>
-          <div className="sidebar-accordion">
-            <div className="sidebar-accordion-title dtr-title"
-               onClick={this.toggleAccordion} ref="waypointLocation">
-              Find A Stop Near A Waypoint
-            </div>
-            <div className="sidebar-accordion-body">
-              {waypointsJSX}
-            </div>
-          </div>
-          <div className="sidebar-accordion">
-            <div className="sidebar-accordion-title dtr-title"
-               onClick={this.toggleAccordion} ref="addressLocation">
-              Find A Stop Near An Address
-            </div>
-            <form className="waypoint" onSubmit={this.handleSubmit}>
-              <input type="text" autoComplete="off"
-                value={this.state.display} onChange={this.setInput}
-                placeholder="Find A Stop Near An Address" />
-              <label className="waypoint-handle">
-                <span className="glyphicon glyphicon-map-marker"
-                  aria-hidden="true"
-                ></span>
-              </label>
-            </form>
-          </div>
+          <Accordion toggle={true} title={"Find A Stop Near You"}
+            jsx={userLocationJSX} />
+          <Accordion toggle={false} title={"Find A Stop Near A Waypoint"}
+            jsx={waypointsJSX} />
+          <Accordion toggle={false} title={"Find A Stop Near An Address"}
+            jsx={addressJSX} />
         </div>
       </div>
     );

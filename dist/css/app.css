@@ -6140,7 +6140,9 @@ button.waypoint-remove {
     color: #3bb2d0; }
 
 .sidebar-accordion-body {
-  padding: 10px; }
+  position: relative;
+  padding: 10px;
+  transition: .5s ease-in-out; }
 
 .sidebar-info {
   padding: 5px; }
@@ -6151,6 +6153,10 @@ button.waypoint-remove {
   font-weight: bold;
   margin-left: 5%;
   width: 30%; }
+
+.detail-item {
+  background: #f0f0f0;
+  padding: 10px; }
 
 .icon-refresh-animate {
   animation-name: rotateThis;

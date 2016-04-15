@@ -10,7 +10,7 @@ var StationsList = React.createClass({
         }
         return (
           <div className="station-detail detail-item" key={index}>
-            <h6>{station.station}</h6>
+            <h6 className="dtr-title">{station.station}</h6>
             <span className="distance">{station.distance}</span>
             <span className="address">{station.address}, {station.city}, {region}</span>
           </div>

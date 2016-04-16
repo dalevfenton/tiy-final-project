@@ -164,7 +164,7 @@ var Waypoint = React.createClass({
           <label className="waypoint-handle">{this.props.index+1}</label>
           <input type="text" id={id} autoComplete="off" />
         </form>
-        <button onClick={this.remove} className="waypoint-remove">x</button>
+        <button onClick={this.remove} className="waypoint-remove" tabIndex={-1}>x</button>
       </div>
     );
   }

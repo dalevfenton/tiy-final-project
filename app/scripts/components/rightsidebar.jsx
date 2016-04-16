@@ -1,5 +1,6 @@
 var React = require('react');
 var $ = require('jquery');
+require('leaflet.markercluster');
 
 var FoodTab = require('./rightsidebar/foodtab.jsx');
 var GasTab = require('./rightsidebar/gastab.jsx');
@@ -22,7 +23,7 @@ var RightSidebar = React.createClass({
     }
   },
   componentWillMount: function(){
-    var markerLayer = L.featureGroup().addTo(this.props.map);
+    var markerLayer = new L.MarkerClusterGroup().addTo(this.props.map); //;L.featureGroup()
     this.setState({markerLayer: markerLayer});
   },
   componentDidUpdate: function(){
@@ -59,14 +60,14 @@ var RightSidebar = React.createClass({
                       '/' + sort + '/';
 
     var url = url+endpointStr;
-    console.log( url );
+    // console.log( url );
     $.ajax( url ).then(function(data){
       console.log(data);
-      data = JSON.parse(data);
+      var gas = $.extend({}, JSON.parse(data));
       console.log('data from gas feed api');
-      console.log(data);
-      this.setMarkers(data.stations.splice(0, 20), 'gas');
-      this.setState({'stations': data});
+      console.log(gas);
+      this.setMarkers(gas.stations.slice(0, 20), 'gas');
+      this.setState({'stations': gas.stations.slice(0,20)});
     }.bind(this), function(error){
       console.log('error getting gas info');
       console.log(error);
@@ -92,27 +93,61 @@ var RightSidebar = React.createClass({
                       '&radius_filter=' + distance;
 
     var url = url+endpointStr;
-    console.log( url );
+    // console.log( url );
     $.ajax( url ).then(function(data){
       console.log('data from yelp api');
       console.log(data);
       var obj = {};
       obj[category] = data;
-      this.setMarkers(data.businesses, category);
+      this.setMarkers(data, category);
       this.setState(obj);
     }.bind(this), function(error){
       console.log('error getting yelp info');
       console.log(error);
     });
   },
+  loadMarkers(type){
+    if(type === 'all'){
+      this.setMarkers(this.state.hotels, 'hotels');
+      this.setMarkers(this.state.restaurants, 'restaurants');
+      this.setMarkers(this.state.stations, 'gas');
+    }
+    if(type === 'hotels'){
+      this.setMarkers(this.state.hotels, 'hotels');
+    }
+    if(type === 'restaurants'){
+      this.setMarkers(this.state.restaurants, 'restaurants');
+    }
+    if(type === 'gas'){
+      this.setMarkers(this.state.stations, 'gas');
+    }
+  },
   setMarkers: function(businesses, type){
+    if(!businesses){
+      return this;
+    }
+    // console.log('type: ', type);
+    if((type === 'hotels' || type === 'restaurants') && businesses.hasOwnProperty('businesses')){
+      businesses = businesses.businesses;
+    }
+    // console.log(businesses);
     businesses.forEach(function(business){
-      var coords;
+      var coords, address, city, state, zip, name;
       if(type == 'gas'){
-        console.log('gas marker: ', business);
+        // console.log('gas marker: ', business);
         coords = {latitude: business.lat, longitude: business.lng};
+        address = business.address;
+        city = business.city;
+        state = business.region;
+        zip = business.zip;
+        name = business.station;
       }else{
         coords = business.location.coordinate;
+        address = business.location.address[0];
+        city = business.location.city;
+        state = business.location.state_code;
+        zip = business.location.postal_code;
+        name = business.name;
       }
       var className = "mapbox-marker-special mapbox-marker-" + type + "-icon";
       var marker = L.marker([coords.latitude, coords.longitude],
@@ -123,15 +158,23 @@ var RightSidebar = React.createClass({
               'className': className,
           })
       });
+      console.log(business);
+      var popupContent =
+        '<div>' +
+          '<h2>' + name + '<\/h2>' +
+        '<p>' + address + '<br \/>' +
+        '' + city + ', ' + state + ' ' + zip + '<\/p>' +
+        '</div>';
+      marker.bindPopup(popupContent).openPopup();
       this.state.markerLayer.addLayer(marker);
       // marker.addTo(this.props.markerLayer);
       // this.props.directionsLayer.addLayer(marker);
     }.bind(this));
-    console.log(this.props);
-    console.log(this.state);
+    // console.log(this.props);
+    // console.log(this.state);
   },
   setLocation: function(waypoint){
-    console.log('waypoint in setLocation', waypoint);
+    // console.log('waypoint in setLocation', waypoint);
     this.props.doGeocode(waypoint, this.handleGeocode);
     this.state.markerLayer.clearLayers();
   },
@@ -156,7 +199,7 @@ var RightSidebar = React.createClass({
     }else{
       rightToggle = "map-overlay sidebar-right";
     }
-
+    this.state.markerLayer.clearLayers();
     //display the active tab
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
@@ -164,22 +207,27 @@ var RightSidebar = React.createClass({
         setLocation={this.setLocation} setupGeo={this.props.setupGeo}
         userLocation={this.props.userLocation}
         state={this.props.state} props={this.props.props} />);
+      this.loadMarkers('all');
+      // this.setMarkers(this.state.hotels.businesses, 'hotels');
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
       tab = (<HotelTab location={this.props.location} hotels={this.state.hotels} />);
+      this.loadMarkers('hotels');
     }else if(!this.state.hotels){
       hotel = "selector selector-hotel selector-disabled";
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
       tab = (<FoodTab location={this.props.location} restaurants={this.state.restaurants} />);
+      this.loadMarkers('restaurants');
     }else if(!this.state.restaurants){
       food = "selector selector-food selector-disabled";
     }
     if(this.state.currentTab == 'gas'){
       gas = "selector selector-gas selector-active";
       tab = (<GasTab location={this.props.location} stations={this.state.stations} />);
+      this.loadMarkers('gas');
     }else if(!this.state.stations){
       gas = "selector selector-gas selector-disabled";
     }

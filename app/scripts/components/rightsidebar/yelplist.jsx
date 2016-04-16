@@ -2,6 +2,7 @@ var React = require('react');
 
 var YelpList = React.createClass({
   render: function(){
+    console.log(this.props);
     var businesses = this.props.collection.businesses.map(function(business, index){
       if(index < 10){
         return (

@@ -19,7 +19,7 @@ var Accordion = React.createClass({
       <div className="sidebar-accordion">
         <div className="sidebar-accordion-title dtr-title"
            onClick={this.toggle} ref="currentLocation">
-          {this.props.title}
+          - {this.props.title} -
         </div>
         <div className={bodyClass}>
           {this.props.jsx}

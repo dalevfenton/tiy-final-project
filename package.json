@@ -31,6 +31,7 @@
     , "backbone-react-component": "^0.10.0"
     , "parse": "^1.8.1"
     , "sortablejs": "^1.4.2"
+    , "leaflet.markercluster": "^0.4.0"
     , "mapbox.js": "^2.0"
     , "mapbox-directions.js": "^0.4.0"
   },

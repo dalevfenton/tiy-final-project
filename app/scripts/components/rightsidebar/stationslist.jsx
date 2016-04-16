@@ -7,13 +7,14 @@ var StationsList = React.createClass({
         No Gas Stations Found
       </div>
     );
-    if(this.props.collection.stations.length > 0){
-      stations = this.props.collection.stations.map(function(station, index){
+    // console.log(this.props);
+    if(this.props.collection.length > 0){
+      stations = this.props.collection.map(function(station, index){
         if(index < 10){
           var region = station.region;
-          if(this.props.collection.geoLocation.region_short){
-            region = this.props.collection.geoLocation.region_short;
-          }
+          // if(this.props.collection.geoLocation.region_short){
+          //   region = this.props.collection.geoLocation.region_short;
+          // }
           return (
             <div className="station-detail detail-item" key={index}>
               <div className="dtr-title">

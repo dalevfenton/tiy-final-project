@@ -63,14 +63,27 @@ var LocationTab = React.createClass({
         </div>
       );
     }else{
-      userLocationJSX = (
-        <div>
-          To Activate Location Tracking You Will Need To Reset Your Location
-          Preferences and Reload the Page
-          <div className="geo-auth-button geolocation-authorize"
-            onClick={this.callLocationSetup.bind(this, true)}>Find Your Location</div>
-        </div>
-      );
+      if(localStorage.getItem("geolocation") === "true"){
+        userLocationJSX = (
+          <div>
+            <div className="user-location-setting-text">
+              To Activate Location Tracking You Will Need To Reset Your Location
+              Preferences and Reload the Page
+            </div>
+          </div>
+        );
+      }else{
+        userLocationJSX = (
+          <div>
+            <div className="user-location-setting-text">
+              To Activate Location Tracking You Will Need To Reset Your Location
+              Preferences and Reload the Page
+            </div>
+            <div className="geo-auth-button geolocation-authorize user-location-setting"
+              onClick={this.callLocationSetup.bind(this, true)}>Find Your Location</div>
+          </div>
+        );
+      }
     }
 
     var origin = this.props.props.directions.getOrigin()

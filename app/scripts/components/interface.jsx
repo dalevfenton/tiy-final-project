@@ -213,9 +213,7 @@ var Interface = React.createClass({
     var userLocation = null;
     if(this.state.userLocationEnabled){
       userLocation = this.state.userLocation.geometry.coordinates;
-      console.log(userLocation);
-      console.log(userLocation[0]);
-      console.log(userLocation[1]);
+
       var marker = L.marker([userLocation[1], userLocation[0]],
         {
           draggable: false,
@@ -226,11 +224,9 @@ var Interface = React.createClass({
           })
       });
       marker.addTo(this.props.map);
-      console.log('marker:');
-      console.log(marker);
-      // this.userLayer.clearLayers();
-      // this.userLayer.addLayer(marker);
-      // console.log(this.props.map);
+      // console.log('marker:');
+      // console.log(marker);
+
     }
 
     //Display a button to save the trip once we have a valid directions object

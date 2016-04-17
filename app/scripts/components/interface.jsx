@@ -242,6 +242,7 @@ var Interface = React.createClass({
         </div>
       );
     }
+    console.log('render called');
     return (
       <div>
         <LeftSidebar toggleLeft={this.toggleLeft}

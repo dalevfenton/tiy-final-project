@@ -9,6 +9,14 @@ var WaypointsTab = React.createClass({
       saveName: ''
     }
   },
+  componentDidUpdate: function(){
+    if(this.props.props.state.currentRoute){
+      var saveName = this.props.props.state.currentRoute.get('route_name');
+      if(this.state.saveName !== saveName){
+        this.setState({'saveName': saveName});
+      }
+    }
+  },
   handleInput: function(e){
     this.setState({saveName: e.target.value});
   },
@@ -18,7 +26,11 @@ var WaypointsTab = React.createClass({
   },
   saveRoute: function(e){
     e.preventDefault();
-    this.props.saveRoute(this.state.saveName, this.handleSave);
+    var type = 'new';
+    if(this.props.props.state.currentRoute){
+      type = 'edit';
+    }
+    this.props.saveRoute(this.state.saveName, this.handleSave, type);
   },
   handleSave: function(type, obj){
     console.log('handlesave called');
@@ -72,6 +84,7 @@ var WaypointsTab = React.createClass({
     var save = "trip-button geo-auth-button geolocation-deny slid-up";
     var saveInput = "route-name-input slid-up";
     var buttonText = "Save This Route";
+
     var placeholder = "Name This Route";
     if(this.props.props.directions.queryable()){
       //if we lose a complete route then make sure we're hiding this input also
@@ -86,6 +99,10 @@ var WaypointsTab = React.createClass({
       }
       save = "trip-button geo-auth-button geolocation-deny";
     }
+    if(this.props.props.state.currentRoute){
+      buttonText = "Resave This Route";
+      // routeName = this.props.props.state.currentRoute.get('route_name');
+    }
     var errorMessage = "";
     if(this.state.inError){
       errorMessage = (<div className="login-error">{this.state.error.message}</div>);
@@ -94,6 +111,7 @@ var WaypointsTab = React.createClass({
     if(this.state.message !== ""){
       message = (<div className="message-success">{this.state.message}</div>);
     }
+    console.log(this.props);
     return (
       <div>
         <div className="top-layer">

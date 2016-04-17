@@ -31,9 +31,18 @@ var LeftSidebar = React.createClass({
       this.setState({currentTab: 'savedRoutes'})
     }
   },
-  saveRoute: function(name, cb){
-    var Route = new Parse.Object.extend("Routes");
-    var route = new Route();
+  saveRoute: function(name, cb, type){
+    console.log(this.props);
+    var route;
+    if(type == 'new'){
+      var Route = new Parse.Object.extend("Routes");
+      route = new Route();
+    }else if(type == 'edit'){
+      route = this.props.state.currentRoute;
+    }else{
+      console.log('error: saveRoute called without a type');
+    }
+
     var acl = new Parse.ACL();
     acl.setPublicReadAccess(true);
     acl.setWriteAccess(Parse.User.current().id, true);

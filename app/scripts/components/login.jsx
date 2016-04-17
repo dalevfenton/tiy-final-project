@@ -13,7 +13,15 @@ var MiniProfile = React.createClass({
       //show user's image avatar
       avatar = (<img src={user.get('avatar').get('url')} />);
     }
-
+    var locationCallToAction = "";
+    if(localStorage.getItem('geolocation') === undefined){
+      locationCallToAction = (
+        <div>
+          <div>select an authorization for location tracking and let's get started!</div>
+          <div className="onscreen-or geolocation-disclaimer">or</div>
+        </div>
+      );
+    }
     return (
       <div className="login-profile">
         <div className="login-profile-avatar-wrapper">
@@ -24,10 +32,9 @@ var MiniProfile = React.createClass({
         <div className="login-welcome dtr-title">
           {"Welcome Back " + user.get('username') + "!"}
         </div>
-        <div>select an authorization for location tracking and let's get started!</div>
-        <div className="onscreen-or geolocation-disclaimer">or</div>
+        {locationCallToAction}
         <button className="geo-auth-button geolocation-authorize" onClick={this.props.logOut}
-          >Switch Accounts
+          >Log Out
         </button>
       </div>
     );
@@ -82,25 +89,27 @@ var Login = React.createClass({
     console.log(type);
     console.log(data);
     console.log(type, ' successful for user: ', data);
-    this.setState({inError: false, error: ''});
+    this.setState({inError: false, error: '', username: '',
+       email: '', password: ''});
+    this.callback('success');
   },
   userError: function(type, error, code, info){
     console.log('user login failed');
     console.log(type, error, code, info);
     this.setState({inError: true, error: error});
+    this.callback('error');
+  },
+  callback: function(type){
+    if(this.props.callback){
+      this.props.callback(type);
+    }
   },
   logOut: function(e){
     e.preventDefault()
     Parse.User.logOut().then(
-      function(user){
-        console.log('user logged out');
-        // this.setState({user: Parse.User.current()});
-        this.forceUpdate();
-      }.bind(this),
-      function(error){
-        console.log('user was not logged out');
-        this.setState({inError: true, error: error});
-      });
+      this.userSuccess.bind(this, 'logout'),
+      this.userError.bind(this, 'logout')
+    );
   },
   render: function(){
     if (Parse.User.current()){

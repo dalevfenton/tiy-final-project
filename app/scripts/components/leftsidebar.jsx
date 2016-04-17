@@ -1,36 +1,155 @@
+var $ = require('jquery');
+var _ = require('underscore');
 var React = require('react');
-// var Backbone = require('backbone');
-var Waypoint = require('./waypoint.jsx');
+var Parse = require('parse');
+
+var Login = require('./login.jsx');
+var ProfileTab = require('./leftsidebar/profiletab.jsx');
+var RoutesTab = require('./leftsidebar/routestab.jsx');
+var WaypointsTab = require('./leftsidebar/waypointstab.jsx');
 
 var LeftSidebar = React.createClass({
+  getInitialState: function(){
+    return {
+      currentTab: 'route'
+    }
+  },
+  setCurrent: function(e){
+    console.log(e);
+    if($(e.target).hasClass('glyphicon-user')){
+      this.setState({currentTab: 'profile'})
+    }
+    if($(e.target).hasClass('glyphicon-map-marker')){
+      this.setState({currentTab: 'route'})
+    }
+    if($(e.target).hasClass('glyphicon-road')){
+      this.setState({currentTab: 'savedRoutes'})
+    }
+  },
+  saveRoute: function(name){
+    console.log(name);
+    var Route = new Parse.Object.extend("Routes");
+    var route = new Route();
+    var acl = new Parse.ACL();
+    acl.setPublicReadAccess(true);
+    acl.setWriteAccess(Parse.User.current().id, true);
+    route.setACL(acl);
+    var origin = this.props.directions.getOrigin();
+    var destination = this.props.directions.getDestination();
+    var waypoints = this.props.directions.getWaypoints();
+    if(waypoints.length > 0){
+      waypoints = [].concat(origin, waypoints, destination);
+    }else{
+      waypoints = [origin, destination];
+    }
+    var coordinatesArr = this.extractCoords(waypoints);
+    route.set('waypoints', coordinatesArr);
+    route.set('origin_name', origin.properties.text || origin.properties.name);
+    route.set('destination_name', destination.properties.text || destination.properties.name);
+    route.set('user', Parse.User.current());
+    // this.setProps(waypoints, route)
+    // console.log('save the route',e);
+    // console.log(origin);
+    // console.log(destination);
+    // console.log(waypoints);
+    // console.log(route);
+    // console.log(route.attributes);
+    // route.save().then(function(route){
+    //   console.log('route saved!', route);
+    // }, function(error){
+    //   console.log('error saving route', error);
+    //   this.setState({error: error});
+    // });
+  },
+  setParseProps: function(waypoints, parseObj){
+    waypoints.each(function(waypoint){
+      for (var prop in waypoint.properties) {
+        if (!waypoint.properties.hasOwnProperty(prop)) {
+            //The current property is not a direct property of p
+            continue;
+        }
+        //Do your logic with the property here
+
+        var fieldName = prefix + prop;
+        console.log(fieldName, " - ", waypoint.properties[prop]);
+        parseObj.set(fieldName, waypoint.properties[prop]);
+      }
+    });
+  },
+  extractCoords: function(waypoints){
+    var coordinates = waypoints.map(function(waypoint){
+      return this.buildPoint(waypoint);
+    }.bind(this));
+    return coordinates;
+  },
+  buildPoint: function(waypoint, type){
+    console.log(waypoint);
+    // Parse only supports a single GeoPoint field so sending it an array of these
+    // is basically just useless as far as I can tell
+    // but this is how to instantiate one for later reference
+    // var point = new Parse.GeoPoint({
+    //   latitude: waypoint.geometry.coordinates[1],
+    //   longitude: waypoint.geometry.coordinates[0]
+    // });
+    var point = {
+      latitude: waypoint.geometry.coordinates[1],
+      longitude: waypoint.geometry.coordinates[0]
+    }
+    return point;
+  },
+  loginUpdate: function(type){
+    this.forceUpdate();
+  },
   render: function(){
-    // console.log('render of LeftSidebar', this.props);
-    // console.log(this.state);
+    var profile = "selector selector-profile";
+    var route = "selector selector-route";
+    var savedRoutes = "selector selector-saved";
+    var tab = (<div></div>);
+    var title;
+
     var leftToggle;
     if(this.props.state.toggleLeft){
       leftToggle = "map-overlay sidebar-left collapse-overlay-left collapse-overlay";
     }else{
       leftToggle = "map-overlay sidebar-left";
     }
-    //build our Waypoint components and check for the active Waypoint
-    //these are inserted into #waypoint-list in the final return
-    //we're using a for loop instead of map because we can't just loop over
-    //the full list of points since Origin and Destination are set separately
-    var waypoints = [];
-    var self = this;
-    for(var i = 0; i < self.props.state.numPoints; i++){
-      // var point = new Point();
-      var active = false;
-      if(this.props.state.activePoint == i){
-        active = true;
+
+    if(this.state.currentTab == 'profile'){
+      profile = "selector selector-profile selector-active";
+      title = "Your Profile";
+      if(!Parse.User.current()){
+        title = "Login or Signup";
+      };
+      tab = (<ProfileTab />);
+    }
+    if(this.state.currentTab == 'route'){
+      title = "Set Your Route";
+      route = "selector selector-route selector-active";
+      tab = (
+        <WaypointsTab props={this.props} state={this.state}
+          saveRoute={this.saveRoute}/>
+      );
+    }
+    var conditionalTabs = "";
+    if(Parse.User.current()){
+      if(this.state.currentTab == 'savedRoutes'){
+        var test = [{'hello': 'world'}];
+        savedRoutes = "selector selector-saved selector-active";
+        title = "Your Saved Routes";
+        tab = (
+          <RoutesTab savedRoutes={test} />
+        );
       }
-      var waypoint = (
-        <Waypoint directions={self.props.directions}
-          key={i} index={i} numPoints={self.props.state.numPoints}
-          updateMap={self.props.updateMap} active={active} setActive={this.props.setActive}
-          removePoint={this.props.removePoint}
-        /> );
-      waypoints.push(waypoint);
+
+      conditionalTabs = (
+        <li className={savedRoutes}>
+          <span className="glyphicon glyphicon-road"
+            aria-hidden="true"
+            onClick={this.setCurrent}
+            ref="selector-location"
+          ></span>
+        </li>
+      )
     }
 
     return (
@@ -40,12 +159,30 @@ var LeftSidebar = React.createClass({
             <span className="glyphicon glyphicon-menu-left" aria-hidden="true"></span>
           </span>
         </div>
-        <div>
-          <div id="waypoint-list">
-            {waypoints}
+        <div className="location-selectors">
+          <ul>
+            <li className={profile}>
+              <span className="glyphicon glyphicon-user"
+                aria-hidden="true"
+                onClick={this.setCurrent}
+                ref="selector-hotel"
+              ></span>
+            </li>
+            {conditionalTabs}
+            <li className={route}>
+              <span className="glyphicon glyphicon-map-marker"
+                aria-hidden="true"
+                onClick={this.setCurrent}
+                ref="selector-location"
+              ></span>
+            </li>
+          </ul>
+        </div>
+        <div className="sidebar-body">
+          <div className="sidebar-accordion-title dtr-title">
+            - {title} -
           </div>
-          <button className="trip-button geo-auth-button geolocation-authorize"
-            onClick={this.props.addPoint}>+ Add New Waypoint</button>
+          {tab}
         </div>
       </div>
     );

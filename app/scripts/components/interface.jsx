@@ -63,7 +63,6 @@ var Interface = React.createClass({
     var locationParsed = '';
     //figure out what type of location we have and then
     //format a string to properly work with the geocoding api
-    console.log(eObj);
     var obj;
     if(typeof eObj == 'object'){
       if(eObj.type == "Feature"){
@@ -71,24 +70,22 @@ var Interface = React.createClass({
       }else{
         obj = eObj.object;
       }
-      console.log('location is an object');
-      console.log(obj);
+      // console.log('location is an object');
       if( obj.properties.name ){
         //if we already have a name then this has been geocoded already;
         // this.setMapView(location);
-        console.log('location is already geocoded');
+        // console.log('location is already geocoded');
         this.resolveGeocode(obj, cb);
         return this;
       }else if(obj.properties.query){
         //if we only have a query string set it as the geocoding search
-        console.log('location has a query');
-        console.log(typeof obj.properties.query);
+        // console.log('location has a query');
         if(typeof obj.properties.query == 'string'){
-          console.log('query is a string');
+          // console.log('query is a string');
           locationParsed = obj.properties.query;
         }
         if(typeof obj.properties.query == 'object'){
-          console.log('query is an array');
+          // console.log('query is an array');
           locationParsed = obj.properties.query[0] + ',' + obj.properties.query[1];
         }
       }
@@ -101,22 +98,13 @@ var Interface = React.createClass({
       console.log('something inst right');
     }
 
-    console.log(locationParsed);
+    // console.log(locationParsed);
     var query = '';
-    // if(this.state.currentLocation && !_.isEmpty(this.state.currentLocation)){
-    //   var context = this.state.currentLocation.context;
-    //   var country = context[context.length-1].short_code;
-    //   query += '&country=' + country;
-    //   query += '&proximitiy=' + this.state.currentLocation.center[0] +
-    //                       "," + this.state.currentLocation.center[1];
-    // }
     var url = GEOCODER_BASE + locationParsed +
               '.json?&access_token=' + L.mapbox.accessToken +
               query ;
-    // console.log('geocoding: ', url);
     $.ajax(url).then(function(data){
-      // console.log('geocoder results for ', location);
-      // console.log(data.features[0].type == "Feature");
+      console.log(data);
       var newpoint = data.features[0];
       obj.geometry.coordinates = newpoint.center;
       obj.properties.name = newpoint.place_name;
@@ -169,13 +157,9 @@ var Interface = React.createClass({
     this.forceUpdate();
   },
   setPoint: function(e){
-    // console.log('setpoint called');
-    // console.log(e);
-
     if(typeof e[e.type] == 'object' &&
         !e[e.type].properties.hasOwnProperty('name') &&
         !this.props.directions.queryable() ){
-        console.log('need to do geocoding');
         var obj = {'type': e.type, 'object': e[e.type]}
         this.doGeocode(obj);
     }

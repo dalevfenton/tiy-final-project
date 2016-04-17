@@ -11,7 +11,9 @@ $icon-font-path: '../fonts/';
 *::after {
   box-sizing: border-box;
 }
-
+*:focus{
+  outline: none;
+}
 img {
   max-width: 100%;
 }
@@ -28,6 +30,7 @@ $accent-color-darken: darken($accent-color, 20%);
 $accent-color-lighten: lighten($accent-color, 20%);
 $error-color: rgb(190, 21, 21);
 $bg-color-lighten: rgb(240, 240, 240);
+$dark-bg-color: rgb(50,50,50);
 //------------------------------------------------------------------------------
 //                            PAGE LAYOUT STYLES
 //------------------------------------------------------------------------------
@@ -44,7 +47,7 @@ html, body{
   left: 0;
   right: 0;
   background: white;
-  color: rgb(50,50,50);
+  color: $dark-bg-color;
   overflow: hidden;
 }
 #map{
@@ -125,10 +128,10 @@ html, body{
   }
 }
 .geolocation-deny{
-  background-color: rgb(50,50,50);
+  background-color: $dark-bg-color;
   color: white;
   &:hover{
-    background: lighten(rgb(50,50,50), 20%);
+    background: lighten($dark-bg-color, 20%);
   }
 }
 .geolocation-info {
@@ -214,7 +217,14 @@ html, body{
 .sidebar-right{
   right: 0;
 }
-
+.top-layer{
+  position: relative;
+  z-index: 10;
+}
+.bottom-layer{
+  position: relative;
+  z-index: 5;
+}
 //------------------------------------------------------------------------------
 //                            LOGIN MODAL STYLES
 //------------------------------------------------------------------------------
@@ -308,13 +318,13 @@ html, body{
   }
   label, button{
     width: 20%;
-    background: rgb(50,50,50);
+    background: $dark-bg-color;
     text-align: center;
     color: white;
     font-weight: bold;
     margin: 0;
     &:not(:last-of-type){
-      border-bottom: 1px solid rgb(50,50,50);
+      border-bottom: 1px solid $dark-bg-color;
     }
   }
   label{
@@ -335,15 +345,16 @@ html, body{
 }
 button.waypoint-remove{
   position: absolute;
-  right: 15px;
+  right: 5px;
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  top: 30%;
+  width: 30px;
+  top: 5px;
+  bottom: 5px;
   padding: 0;
-  color: rgb(50,50,50);
+  color: $dark-bg-color;
   background: white;
   border: none;
+
 }
 .waypoint-active{
   label{
@@ -356,8 +367,11 @@ button.waypoint-remove{
 
 }
 .trip-button{
+  position: relative;
   width: 100%;
-  // background: rgb(50,50,50);
+  transition: .5s ease-in-out;
+  z-index: 4;
+  // background: $dark-bg-color;
   // text-align: center;
   // color: white;
   // font-weight: bold;
@@ -366,8 +380,18 @@ button.waypoint-remove{
   // padding: 5px 0;
   // border-bottom: 1px solid rgb(175,175,175);
 }
-
-
+.route-name-input{
+  position: relative;
+  z-index: 3;
+  transition: .25s ease-in-out;
+  input{
+    width: 100%;
+    padding: 10px 5%;
+  }
+}
+.slid-up{
+  transform: translateY(-250%);
+}
 //------------------------------------------------------------------------------
 //                            RIGHT SIDEBAR STYLES
 //------------------------------------------------------------------------------

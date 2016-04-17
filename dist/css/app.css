@@ -5814,6 +5814,9 @@ button.close {
 *::after {
   box-sizing: border-box; }
 
+*:focus {
+  outline: none; }
+
 img {
   max-width: 100%; }
 
@@ -5989,6 +5992,14 @@ html, body {
 .sidebar-right {
   right: 0; }
 
+.top-layer {
+  position: relative;
+  z-index: 10; }
+
+.bottom-layer {
+  position: relative;
+  z-index: 5; }
+
 .brand {
   font-family: serif;
   font-size: 14px;
@@ -6084,11 +6095,11 @@ html, body {
 
 button.waypoint-remove {
   position: absolute;
-  right: 15px;
+  right: 5px;
   display: inline-block;
-  width: 20px;
-  height: 20px;
-  top: 30%;
+  width: 30px;
+  top: 5px;
+  bottom: 5px;
   padding: 0;
   color: #323232;
   background: white;
@@ -6101,7 +6112,21 @@ button.waypoint-remove {
     background-color: #3bb2d0; }
 
 .trip-button {
-  width: 100%; }
+  position: relative;
+  width: 100%;
+  transition: .5s ease-in-out;
+  z-index: 4; }
+
+.route-name-input {
+  position: relative;
+  z-index: 3;
+  transition: .25s ease-in-out; }
+  .route-name-input input {
+    width: 100%;
+    padding: 10px 5%; }
+
+.slid-up {
+  transform: translateY(-250%); }
 
 .location-selectors {
   list-style: none; }

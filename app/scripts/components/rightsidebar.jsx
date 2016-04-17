@@ -62,7 +62,6 @@ var RightSidebar = React.createClass({
     var url = url+endpointStr;
     // console.log( url );
     $.ajax( url ).then(function(data){
-      console.log(data);
       var gas = $.extend({}, JSON.parse(data));
       console.log('data from gas feed api');
       console.log(gas);
@@ -158,7 +157,7 @@ var RightSidebar = React.createClass({
               'className': className,
           })
       });
-      console.log(business);
+      // console.log(business);
       var popupContent =
         '<div>' +
           '<h2>' + name + '<\/h2>' +

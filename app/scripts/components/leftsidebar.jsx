@@ -14,8 +14,13 @@ var LeftSidebar = React.createClass({
       currentTab: 'route'
     }
   },
+  componentDidUpdate: function(){
+    if(!Parse.User.current() && this.state.currentTab == 'savedRoutes'){
+      this.setState({currentTab: 'profile'});
+    }
+  },
   setCurrent: function(e){
-    console.log(e);
+    // console.log(e);
     if($(e.target).hasClass('glyphicon-user')){
       this.setState({currentTab: 'profile'})
     }
@@ -26,8 +31,7 @@ var LeftSidebar = React.createClass({
       this.setState({currentTab: 'savedRoutes'})
     }
   },
-  saveRoute: function(name){
-    console.log(name);
+  saveRoute: function(name, cb){
     var Route = new Parse.Object.extend("Routes");
     var route = new Route();
     var acl = new Parse.ACL();
@@ -47,19 +51,23 @@ var LeftSidebar = React.createClass({
     route.set('origin_name', origin.properties.text || origin.properties.name);
     route.set('destination_name', destination.properties.text || destination.properties.name);
     route.set('user', Parse.User.current());
-    // this.setProps(waypoints, route)
-    // console.log('save the route',e);
-    // console.log(origin);
-    // console.log(destination);
-    // console.log(waypoints);
-    // console.log(route);
-    // console.log(route.attributes);
-    // route.save().then(function(route){
-    //   console.log('route saved!', route);
-    // }, function(error){
-    //   console.log('error saving route', error);
-    //   this.setState({error: error});
-    // });
+    if(name !== ''){
+      route.set('route_name', name);
+    }
+    var self = this;
+    route.save().then(function(route){
+      self.doCb('success', route, cb);
+    }, function(error){
+      self.doCb('error', error, cb);
+    });
+  },
+  doCb(type, obj, cb){
+    if(cb){
+      cb(type, obj);
+    }else{
+      console.log('route saved with no callback provided');
+      console.log(type, obj);
+    }
   },
   setParseProps: function(waypoints, parseObj){
     waypoints.each(function(waypoint){
@@ -71,7 +79,7 @@ var LeftSidebar = React.createClass({
         //Do your logic with the property here
 
         var fieldName = prefix + prop;
-        console.log(fieldName, " - ", waypoint.properties[prop]);
+        // console.log(fieldName, " - ", waypoint.properties[prop]);
         parseObj.set(fieldName, waypoint.properties[prop]);
       }
     });
@@ -83,7 +91,7 @@ var LeftSidebar = React.createClass({
     return coordinates;
   },
   buildPoint: function(waypoint, type){
-    console.log(waypoint);
+    // console.log(waypoint);
     // Parse only supports a single GeoPoint field so sending it an array of these
     // is basically just useless as far as I can tell
     // but this is how to instantiate one for later reference
@@ -120,7 +128,7 @@ var LeftSidebar = React.createClass({
       if(!Parse.User.current()){
         title = "Login or Signup";
       };
-      tab = (<ProfileTab />);
+      tab = (<ProfileTab resetUser={this.props.resetUser} />);
     }
     if(this.state.currentTab == 'route'){
       title = "Set Your Route";
@@ -133,11 +141,11 @@ var LeftSidebar = React.createClass({
     var conditionalTabs = "";
     if(Parse.User.current()){
       if(this.state.currentTab == 'savedRoutes'){
-        var test = [{'hello': 'world'}];
         savedRoutes = "selector selector-saved selector-active";
         title = "Your Saved Routes";
+
         tab = (
-          <RoutesTab savedRoutes={test} />
+          <RoutesTab setRoute={this.props.setRoute} savedRoutes={this.props.state.routes} />
         );
       }
 

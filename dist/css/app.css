@@ -5941,14 +5941,16 @@ html, body {
   height: 100%;
   transition: .5s ease-in-out; }
   .map-overlay > *:not(.overlay-control) {
-    transition-delay: 1s;
-    transition: .25s; }
+    transition: .5s; }
   .map-overlay > .overlay-control {
     background: #207185;
     transition: .5s ease-in-out;
     color: white; }
     .map-overlay > .overlay-control:hover {
       background: #3bb2d0; }
+    .map-overlay > .overlay-control > span > span {
+      transition: .5s ease-in-out;
+      cursor: pointer; }
 
 .collapse-overlay > *:not(.overlay-control) {
   transition-delay: 0s; }
@@ -6140,6 +6142,9 @@ button.waypoint-remove {
     text-align: center; }
     .location-selectors li:not(:first-of-type) {
       margin-left: -4px; }
+
+.selector {
+  cursor: pointer; }
 
 .selector > span {
   display: inline-block;

@@ -23,6 +23,8 @@ var Interface = React.createClass({
     return {
       userLocation: this.props.userLocation,
       userLocationEnabled: this.props.userLocationEnabled,
+      routes: null,
+      currentRoute: null,
       splash: true,
       numPoints: 2,
       loginToggle: false,
@@ -37,7 +39,9 @@ var Interface = React.createClass({
     this.props.directions.on('profile, selectRoute, load', this.callback );
     this.props.directions.on('origin', this.setPoint);
     this.userLayer = L.featureGroup().addTo(this.props.map);
-
+    if(Parse.User.current()){
+      this.loadRoutes();
+    }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
     // this.props.directions.on('origin, destination, waypoint', this.setPoint);
@@ -97,7 +101,6 @@ var Interface = React.createClass({
       //something isn't right, let's get out of here
       console.log('something inst right');
     }
-
     // console.log(locationParsed);
     var query = '';
     var url = GEOCODER_BASE + locationParsed +
@@ -113,6 +116,12 @@ var Interface = React.createClass({
     }.bind(this), function(error){
       console.log(error);
     });
+  },
+  rebuildWaypoints: function(waypoints){
+    waypoints = waypoints.map(function(waypoint){
+      return L.latLng(waypoint.latitude, waypoint.longitude);
+    });
+    return waypoints;
   },
   resolveGeocode: function(obj, cb){
     if(typeof cb === 'function'){
@@ -172,6 +181,7 @@ var Interface = React.createClass({
   waypointSet: function(e){
   },
   updateMap: function(){
+    console.log(this.props.directions);
     if(this.props.directions.queryable()){
       this.props.directions.query({ proximity: this.props.map.getCenter() });
     }else{
@@ -228,18 +238,18 @@ var Interface = React.createClass({
     if(this.props.router.current == 'login'){
       login = (
         <div className="login">
-          <Login />
+          <Login callback={this.resetUser} />
         </div>
       );
     }
-
     return (
       <div>
         <LeftSidebar toggleLeft={this.toggleLeft}
           addPoint={this.addPoint} state={this.state}
           directions={this.props.directions}
           updateMap={this.updateMap} setActive={this.setActive}
-          removePoint={this.removePoint} />
+          removePoint={this.removePoint} setRoute={this.setRoute}
+          resetUser={this.resetUser} />
 
         <RightSidebar toggle={this.state.toggleRight} toggleRight={this.toggleRight}
           directions={this.props.directions} activePoint={this.state.activePoint}
@@ -259,6 +269,18 @@ var Interface = React.createClass({
   },
   loadApp: function(allowed){
 
+  },
+  loadRoutes: function(){
+    var Routes = Parse.Object.extend("Routes");
+    var query = new Parse.Query(Routes);
+    query.equalTo('user', Parse.User.current());
+    query.find().then(function(routes){
+      // console.log('routes fetched successfully', routes);
+      this.setState({'routes': routes});
+    }.bind(this), function(error){
+      //build out an alert to the user here
+      console.log('error fetching user routes on load', error);
+    });
   },
   setupGeo: function(bool){
     if ( bool && "geolocation" in navigator) {
@@ -290,11 +312,37 @@ var Interface = React.createClass({
     }
     this.callback();
   },
+  resetUser: function(result, type){
+    // console.log('callback from user action');
+    // console.log(result);
+    // console.log(type);
+    if(type === 'logout'){
+      this.setState({routes: null});
+      this.props.directions._unload();
+    }
+    if(type === 'login'){
+      this.loadRoutes();
+    }
+    if(type === 'signup'){
+      this.forceUpdate();
+    }
+  },
   setActive: function(index){
     this.setState({activePoint: index});
   },
   setLogin: function(e){
     this.setState({login: !this.state.login});
+  },
+  setRoute: function(index){
+    var waypoints = this.state.routes[index].get('waypoints');
+    waypoints = this.rebuildWaypoints(waypoints);
+    var origin = waypoints.splice(0,1)[0];
+    var destination = waypoints.splice(-1, 1)[0];
+    this.props.directions.setOrigin(origin);
+    this.props.directions.setDestination(destination);
+    this.props.directions.setWaypoints(waypoints);
+    this.updateMap();
+    this.setState({currentRoute: this.state.routes[index]});
   },
   setUserLocation: function(position, load){
     var userLocation = this.props.directions._normalizeWaypoint(

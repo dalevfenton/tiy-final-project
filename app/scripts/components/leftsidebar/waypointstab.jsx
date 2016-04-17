@@ -18,7 +18,37 @@ var WaypointsTab = React.createClass({
   },
   saveRoute: function(e){
     e.preventDefault();
-    this.props.saveRoute(this.state.saveName);
+    this.props.saveRoute(this.state.saveName, this.handleSave);
+  },
+  handleSave: function(type, obj){
+    console.log('handlesave called');
+    console.log(type);
+    console.log(obj);
+    if(type == 'success'){
+      var name;
+      if(obj.get('route_name')){
+        name = obj.get('route_name');
+      }else{
+        var origin = obj.get('origin_name');
+        var destination = obj.get('desination_name');
+        name =  origin + " to " + destination;
+      }
+      name += " saved successfully!";
+      this.setState({
+        inError: false,
+        error: '',
+        toggleSaveInput: false,
+        saveName: '',
+        message: name
+      });
+    }else if(type=='error'){
+      console.log(obj);
+      this.setState({
+        inError: true,
+        error: obj,
+        message: ''
+      });
+    }
   },
   render: function(){
     var waypoints = [];
@@ -56,7 +86,14 @@ var WaypointsTab = React.createClass({
       }
       save = "trip-button geo-auth-button geolocation-deny";
     }
-
+    var errorMessage = "";
+    if(this.state.inError){
+      errorMessage = (<div className="login-error">{this.state.error.message}</div>);
+    }
+    var message = "";
+    if(this.state.message !== ""){
+      message = (<div className="message-success">{this.state.message}</div>);
+    }
     return (
       <div>
         <div className="top-layer">
@@ -79,6 +116,8 @@ var WaypointsTab = React.createClass({
             />
           </form>
         </div>
+        {errorMessage}
+        {message}
       </div>
     );
   }

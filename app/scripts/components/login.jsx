@@ -60,7 +60,6 @@ var Login = React.createClass({
   handleSubmit: function(e){
     e.preventDefault();
     if(this.state.toggleSignUp){
-      console.log('do a signup');
       var user = new Parse.User();
       user.set("username", this.state.username);
       user.set("password", this.state.password);
@@ -74,9 +73,6 @@ var Login = React.createClass({
         this.userError.bind(this, 'signup')
       );
     }else{
-      console.log('do a login');
-      console.log(this.state.username);
-      console.log(this.state.password);
       Parse.User.logIn(this.state.username, this.state.password)
         .then(
           this.userSuccess.bind(this, 'login'),
@@ -85,23 +81,20 @@ var Login = React.createClass({
     }
   },
   userSuccess: function(type, data){
-    console.log('inside userSuccess');
-    console.log(type);
-    console.log(data);
-    console.log(type, ' successful for user: ', data);
+    // console.log(type, ' successful for user: ', data);
+    this.callback('success', type);
     this.setState({inError: false, error: '', username: '',
        email: '', password: ''});
-    this.callback('success');
   },
   userError: function(type, error, code, info){
-    console.log('user login failed');
+    // console.log('user login failed');
     console.log(type, error, code, info);
     this.setState({inError: true, error: error});
-    this.callback('error');
+    this.callback('error', type);
   },
-  callback: function(type){
+  callback: function(result, type){
     if(this.props.callback){
-      this.props.callback(type);
+      this.props.callback(result, type);
     }
   },
   logOut: function(e){
@@ -124,7 +117,8 @@ var Login = React.createClass({
     var disclaimer, button;
     if(this.state.toggleSignUp){
       email = (<input type="email" name="useremail" tabIndex={2}
-        valueLink={this.linkState('email')} placeholder="Email" />);
+        valueLink={this.linkState('email')} placeholder="Email"
+        autoComplete="off" />);
       disclaimer = "Have An Account? Log In!";
       button = "Sign Up"
     }else{
@@ -137,10 +131,12 @@ var Login = React.createClass({
       <div className="login-container signup-form">
         <form onSubmit={this.handleSubmit}>
           <input type="text" name="username" tabIndex={1}
-            valueLink={this.linkState('username')} placeholder="Username" />
+            valueLink={this.linkState('username')} placeholder="Username"
+            autoComplete="off" />
           {email}
           <input type="password" name="password" tabIndex={3}
-            valueLink={this.linkState('password')} placeholder="Password" />
+            valueLink={this.linkState('password')} placeholder="Password"
+            autoComplete="off" />
           {errorMessage}
           <a className="geolocation-disclaimer" tabIndex={5}
             href="#" onClick={this.toggleSignUp}>{disclaimer}</a>

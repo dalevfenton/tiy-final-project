@@ -25,6 +25,8 @@ var Interface = React.createClass({displayName: "Interface",
     return {
       userLocation: this.props.userLocation,
       userLocationEnabled: this.props.userLocationEnabled,
+      routes: null,
+      currentRoute: null,
       splash: true,
       numPoints: 2,
       loginToggle: false,
@@ -39,7 +41,9 @@ var Interface = React.createClass({displayName: "Interface",
     this.props.directions.on('profile, selectRoute, load', this.callback );
     this.props.directions.on('origin', this.setPoint);
     this.userLayer = L.featureGroup().addTo(this.props.map);
-
+    if(Parse.User.current()){
+      this.loadRoutes();
+    }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
     // this.props.directions.on('origin, destination, waypoint', this.setPoint);
@@ -99,7 +103,6 @@ var Interface = React.createClass({displayName: "Interface",
       //something isn't right, let's get out of here
       console.log('something inst right');
     }
-
     // console.log(locationParsed);
     var query = '';
     var url = GEOCODER_BASE + locationParsed +
@@ -115,6 +118,12 @@ var Interface = React.createClass({displayName: "Interface",
     }.bind(this), function(error){
       console.log(error);
     });
+  },
+  rebuildWaypoints: function(waypoints){
+    waypoints = waypoints.map(function(waypoint){
+      return L.latLng(waypoint.latitude, waypoint.longitude);
+    });
+    return waypoints;
   },
   resolveGeocode: function(obj, cb){
     if(typeof cb === 'function'){
@@ -174,6 +183,7 @@ var Interface = React.createClass({displayName: "Interface",
   waypointSet: function(e){
   },
   updateMap: function(){
+    console.log(this.props.directions);
     if(this.props.directions.queryable()){
       this.props.directions.query({ proximity: this.props.map.getCenter() });
     }else{
@@ -230,18 +240,18 @@ var Interface = React.createClass({displayName: "Interface",
     if(this.props.router.current == 'login'){
       login = (
         React.createElement("div", {className: "login"}, 
-          React.createElement(Login, null)
+          React.createElement(Login, {callback: this.resetUser})
         )
       );
     }
-
     return (
       React.createElement("div", null, 
         React.createElement(LeftSidebar, {toggleLeft: this.toggleLeft, 
           addPoint: this.addPoint, state: this.state, 
           directions: this.props.directions, 
           updateMap: this.updateMap, setActive: this.setActive, 
-          removePoint: this.removePoint}), 
+          removePoint: this.removePoint, setRoute: this.setRoute, 
+          resetUser: this.resetUser}), 
 
         React.createElement(RightSidebar, {toggle: this.state.toggleRight, toggleRight: this.toggleRight, 
           directions: this.props.directions, activePoint: this.state.activePoint, 
@@ -261,6 +271,18 @@ var Interface = React.createClass({displayName: "Interface",
   },
   loadApp: function(allowed){
 
+  },
+  loadRoutes: function(){
+    var Routes = Parse.Object.extend("Routes");
+    var query = new Parse.Query(Routes);
+    query.equalTo('user', Parse.User.current());
+    query.find().then(function(routes){
+      // console.log('routes fetched successfully', routes);
+      this.setState({'routes': routes});
+    }.bind(this), function(error){
+      //build out an alert to the user here
+      console.log('error fetching user routes on load', error);
+    });
   },
   setupGeo: function(bool){
     if ( bool && "geolocation" in navigator) {
@@ -292,11 +314,37 @@ var Interface = React.createClass({displayName: "Interface",
     }
     this.callback();
   },
+  resetUser: function(result, type){
+    // console.log('callback from user action');
+    // console.log(result);
+    // console.log(type);
+    if(type === 'logout'){
+      this.setState({routes: null});
+      this.props.directions._unload();
+    }
+    if(type === 'login'){
+      this.loadRoutes();
+    }
+    if(type === 'signup'){
+      this.forceUpdate();
+    }
+  },
   setActive: function(index){
     this.setState({activePoint: index});
   },
   setLogin: function(e){
     this.setState({login: !this.state.login});
+  },
+  setRoute: function(index){
+    var waypoints = this.state.routes[index].get('waypoints');
+    waypoints = this.rebuildWaypoints(waypoints);
+    var origin = waypoints.splice(0,1)[0];
+    var destination = waypoints.splice(-1, 1)[0];
+    this.props.directions.setOrigin(origin);
+    this.props.directions.setDestination(destination);
+    this.props.directions.setWaypoints(waypoints);
+    this.updateMap();
+    this.setState({currentRoute: this.state.routes[index]});
   },
   setUserLocation: function(position, load){
     var userLocation = this.props.directions._normalizeWaypoint(
@@ -459,8 +507,13 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
       currentTab: 'route'
     }
   },
+  componentDidUpdate: function(){
+    if(!Parse.User.current() && this.state.currentTab == 'savedRoutes'){
+      this.setState({currentTab: 'profile'});
+    }
+  },
   setCurrent: function(e){
-    console.log(e);
+    // console.log(e);
     if($(e.target).hasClass('glyphicon-user')){
       this.setState({currentTab: 'profile'})
     }
@@ -471,8 +524,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
       this.setState({currentTab: 'savedRoutes'})
     }
   },
-  saveRoute: function(name){
-    console.log(name);
+  saveRoute: function(name, cb){
     var Route = new Parse.Object.extend("Routes");
     var route = new Route();
     var acl = new Parse.ACL();
@@ -492,19 +544,23 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     route.set('origin_name', origin.properties.text || origin.properties.name);
     route.set('destination_name', destination.properties.text || destination.properties.name);
     route.set('user', Parse.User.current());
-    // this.setProps(waypoints, route)
-    // console.log('save the route',e);
-    // console.log(origin);
-    // console.log(destination);
-    // console.log(waypoints);
-    // console.log(route);
-    // console.log(route.attributes);
-    // route.save().then(function(route){
-    //   console.log('route saved!', route);
-    // }, function(error){
-    //   console.log('error saving route', error);
-    //   this.setState({error: error});
-    // });
+    if(name !== ''){
+      route.set('route_name', name);
+    }
+    var self = this;
+    route.save().then(function(route){
+      self.doCb('success', route, cb);
+    }, function(error){
+      self.doCb('error', error, cb);
+    });
+  },
+  doCb(type, obj, cb){
+    if(cb){
+      cb(type, obj);
+    }else{
+      console.log('route saved with no callback provided');
+      console.log(type, obj);
+    }
   },
   setParseProps: function(waypoints, parseObj){
     waypoints.each(function(waypoint){
@@ -516,7 +572,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
         //Do your logic with the property here
 
         var fieldName = prefix + prop;
-        console.log(fieldName, " - ", waypoint.properties[prop]);
+        // console.log(fieldName, " - ", waypoint.properties[prop]);
         parseObj.set(fieldName, waypoint.properties[prop]);
       }
     });
@@ -528,7 +584,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     return coordinates;
   },
   buildPoint: function(waypoint, type){
-    console.log(waypoint);
+    // console.log(waypoint);
     // Parse only supports a single GeoPoint field so sending it an array of these
     // is basically just useless as far as I can tell
     // but this is how to instantiate one for later reference
@@ -565,7 +621,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
       if(!Parse.User.current()){
         title = "Login or Signup";
       };
-      tab = (React.createElement(ProfileTab, null));
+      tab = (React.createElement(ProfileTab, {resetUser: this.props.resetUser}));
     }
     if(this.state.currentTab == 'route'){
       title = "Set Your Route";
@@ -578,11 +634,11 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     var conditionalTabs = "";
     if(Parse.User.current()){
       if(this.state.currentTab == 'savedRoutes'){
-        var test = [{'hello': 'world'}];
         savedRoutes = "selector selector-saved selector-active";
         title = "Your Saved Routes";
+
         tab = (
-          React.createElement(RoutesTab, {savedRoutes: test})
+          React.createElement(RoutesTab, {setRoute: this.props.setRoute, savedRoutes: this.props.state.routes})
         );
       }
 
@@ -645,7 +701,7 @@ var Login = require('../login.jsx');
 var ProfileTab = React.createClass({displayName: "ProfileTab",
   render: function(){
     return (
-      React.createElement(Login, {callback: this.loginUpdate})
+      React.createElement(Login, {callback: this.props.resetUser})
     );
   }
 });
@@ -656,21 +712,46 @@ module.exports = ProfileTab;
 "use strict";
 var React = require('react');
 
+var RouteButton = React.createClass({displayName: "RouteButton",
+  setRoute: function(e){
+    e.preventDefault();
+    this.props.setRoute(this.props.index);
+  },
+  render: function(){
+    var button;
+    if(this.props.route.get('route_name')){
+      button = (
+        React.createElement("button", null, 
+          this.props.route.get('route_name')
+        )
+      );
+    }else{
+      button = (
+        React.createElement("button", null, 
+          this.props.route.get('origin_name') + " ", 
+          React.createElement("span", {className: "glyphicon glyphicon-menu-right", "aria-hidden": "true"}), 
+          React.createElement("span", {className: "glyphicon glyphicon-menu-right", "aria-hidden": "true"}), 
+          React.createElement("span", {className: "glyphicon glyphicon-menu-right", "aria-hidden": "true"}), 
+          " " + this.props.route.get('destination_name')
+        )
+      )
+    }
+    return (
+      React.createElement("div", {className: "sidebar-waypoint-picker", onClick: this.setRoute}, 
+        button
+      )
+    );
+  }
+});
+
 var RoutesTab = React.createClass({displayName: "RoutesTab",
   render: function(){
     var routes = this.props.savedRoutes.map(function(route, index){
       return (
-        React.createElement("div", {className: "sidebar-waypoint-picker", key: index}, 
-          React.createElement("button", null, 
-            "Origin ", 
-            React.createElement("span", {className: "glyphicon glyphicon-menu-right", "aria-hidden": "true"}), 
-            React.createElement("span", {className: "glyphicon glyphicon-menu-right", "aria-hidden": "true"}), 
-            React.createElement("span", {className: "glyphicon glyphicon-menu-right", "aria-hidden": "true"}), 
-            " Destination"
-          )
-        )
+        React.createElement(RouteButton, {key: index, index: index, route: route, 
+          setRoute: this.props.setRoute})
       )
-    });
+    }.bind(this));
     return (
       React.createElement("div", null, 
         routes
@@ -881,7 +962,37 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
   },
   saveRoute: function(e){
     e.preventDefault();
-    this.props.saveRoute(this.state.saveName);
+    this.props.saveRoute(this.state.saveName, this.handleSave);
+  },
+  handleSave: function(type, obj){
+    console.log('handlesave called');
+    console.log(type);
+    console.log(obj);
+    if(type == 'success'){
+      var name;
+      if(obj.get('route_name')){
+        name = obj.get('route_name');
+      }else{
+        var origin = obj.get('origin_name');
+        var destination = obj.get('desination_name');
+        name =  origin + " to " + destination;
+      }
+      name += " saved successfully!";
+      this.setState({
+        inError: false,
+        error: '',
+        toggleSaveInput: false,
+        saveName: '',
+        message: name
+      });
+    }else if(type=='error'){
+      console.log(obj);
+      this.setState({
+        inError: true,
+        error: obj,
+        message: ''
+      });
+    }
   },
   render: function(){
     var waypoints = [];
@@ -919,7 +1030,14 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
       }
       save = "trip-button geo-auth-button geolocation-deny";
     }
-
+    var errorMessage = "";
+    if(this.state.inError){
+      errorMessage = (React.createElement("div", {className: "login-error"}, this.state.error.message));
+    }
+    var message = "";
+    if(this.state.message !== ""){
+      message = (React.createElement("div", {className: "message-success"}, this.state.message));
+    }
     return (
       React.createElement("div", null, 
         React.createElement("div", {className: "top-layer"}, 
@@ -941,7 +1059,9 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
               onChange: this.handleInput, placeholder: placeholder}
             )
           )
-        )
+        ), 
+        errorMessage, 
+        message
       )
     );
   }
@@ -1031,7 +1151,6 @@ var Login = React.createClass({displayName: "Login",
   handleSubmit: function(e){
     e.preventDefault();
     if(this.state.toggleSignUp){
-      console.log('do a signup');
       var user = new Parse.User();
       user.set("username", this.state.username);
       user.set("password", this.state.password);
@@ -1045,9 +1164,6 @@ var Login = React.createClass({displayName: "Login",
         this.userError.bind(this, 'signup')
       );
     }else{
-      console.log('do a login');
-      console.log(this.state.username);
-      console.log(this.state.password);
       Parse.User.logIn(this.state.username, this.state.password)
         .then(
           this.userSuccess.bind(this, 'login'),
@@ -1056,23 +1172,20 @@ var Login = React.createClass({displayName: "Login",
     }
   },
   userSuccess: function(type, data){
-    console.log('inside userSuccess');
-    console.log(type);
-    console.log(data);
-    console.log(type, ' successful for user: ', data);
+    // console.log(type, ' successful for user: ', data);
+    this.callback('success', type);
     this.setState({inError: false, error: '', username: '',
        email: '', password: ''});
-    this.callback('success');
   },
   userError: function(type, error, code, info){
-    console.log('user login failed');
+    // console.log('user login failed');
     console.log(type, error, code, info);
     this.setState({inError: true, error: error});
-    this.callback('error');
+    this.callback('error', type);
   },
-  callback: function(type){
+  callback: function(result, type){
     if(this.props.callback){
-      this.props.callback(type);
+      this.props.callback(result, type);
     }
   },
   logOut: function(e){
@@ -1095,7 +1208,8 @@ var Login = React.createClass({displayName: "Login",
     var disclaimer, button;
     if(this.state.toggleSignUp){
       email = (React.createElement("input", {type: "email", name: "useremail", tabIndex: 2, 
-        valueLink: this.linkState('email'), placeholder: "Email"}));
+        valueLink: this.linkState('email'), placeholder: "Email", 
+        autoComplete: "off"}));
       disclaimer = "Have An Account? Log In!";
       button = "Sign Up"
     }else{
@@ -1108,10 +1222,12 @@ var Login = React.createClass({displayName: "Login",
       React.createElement("div", {className: "login-container signup-form"}, 
         React.createElement("form", {onSubmit: this.handleSubmit}, 
           React.createElement("input", {type: "text", name: "username", tabIndex: 1, 
-            valueLink: this.linkState('username'), placeholder: "Username"}), 
+            valueLink: this.linkState('username'), placeholder: "Username", 
+            autoComplete: "off"}), 
           email, 
           React.createElement("input", {type: "password", name: "password", tabIndex: 3, 
-            valueLink: this.linkState('password'), placeholder: "Password"}), 
+            valueLink: this.linkState('password'), placeholder: "Password", 
+            autoComplete: "off"}), 
           errorMessage, 
           React.createElement("a", {className: "geolocation-disclaimer", tabIndex: 5, 
             href: "#", onClick: this.toggleSignUp}, disclaimer), 

@@ -155,8 +155,7 @@ html, body{
   & > *:not(.overlay-control) {
     //delay doesn't seem to be working correctly here
     //investigate later
-    transition-delay: 1s;
-    transition: .25s;
+    transition: .5s;
   }
   & > .overlay-control{
     background: $accent-color-darken;
@@ -164,6 +163,10 @@ html, body{
     color: white;
     &:hover{
       background: $accent-color;
+    }
+    & > span > span {
+      transition: .5s ease-in-out;
+      cursor: pointer;
     }
   }
 }
@@ -412,7 +415,9 @@ button.waypoint-remove{
     }
   }
 }
-
+.selector{
+  cursor: pointer;
+}
 .selector > span{
   display: inline-block;
   width: 100%;

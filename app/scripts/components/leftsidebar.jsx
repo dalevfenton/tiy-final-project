@@ -123,7 +123,9 @@ var LeftSidebar = React.createClass({
     }else{
       leftToggle = "map-overlay sidebar-left";
     }
-
+    if(this.props.state.priorityTab === 'right'){
+      leftToggle += " mobile-collapse";
+    }
     if(this.state.currentTab == 'profile'){
       profile = "selector selector-profile selector-active";
       title = "Your Profile";

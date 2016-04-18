@@ -30,6 +30,7 @@ var Interface = React.createClass({
       loginToggle: false,
       toggleLeft: false,
       toggleRight: false,
+      priorityTab: 'left',
       activePoint: 0,
       currentLocation: {}
     }
@@ -306,9 +307,6 @@ var Interface = React.createClass({
     this.callback();
   },
   resetRoute: function(){
-    console.log('current top level status on reset Route');
-    console.log(this.props);
-    console.log(this.state);
     this.props.directions._unload();
     this.props.directionsLayer._unload();
     this.props.directions.setOrigin('');
@@ -375,10 +373,24 @@ var Interface = React.createClass({
     }
   },
   toggleLeft: function(e){
-    this.setState({toggleLeft: !this.state.toggleLeft});
+    var priority = 'none';
+    if(this.state.toggleLeft && !this.state.toggleRight){
+      priority = 'left';
+    }
+    this.setState({
+      toggleLeft: !this.state.toggleLeft,
+      priorityTab: priority
+    });
   },
   toggleRight: function(e){
-    this.setState({toggleRight: !this.state.toggleRight});
+    var priority = 'none';
+    if(!this.state.toggleLeft && this.state.toggleRight){
+      priority = 'right';
+    }
+    this.setState({
+      toggleRight: !this.state.toggleRight,
+      priorityTab: priority
+    });
   },
   userLocationError: function(error){
     if(error.code == 1){

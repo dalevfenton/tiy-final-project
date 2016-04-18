@@ -5854,9 +5854,11 @@ html, body {
 
 #mapbox-ui {
   position: absolute;
-  width: 60%;
+  width: 100%;
   bottom: 0;
-  left: 20%;
+  left: 0;
+  padding-left: 20%;
+  padding-right: 20%;
   background: black; }
 
 .splash-screen {
@@ -5997,6 +5999,9 @@ html, body {
 .sidebar-right {
   right: 0; }
 
+.sidebar-tab {
+  overflow-y: auto; }
+
 .top-layer {
   position: relative;
   z-index: 10; }
@@ -6067,7 +6072,7 @@ html, body {
 
 #waypoint-list {
   max-height: 50vh;
-  overflow-y: scroll; }
+  overflow-y: auto; }
 
 .waypoint-container {
   position: relative; }
@@ -6318,5 +6323,25 @@ button.waypoint-remove {
   to {
     transform: scale(0.8);
     background: #3bb2d0; } }
+@media (max-width: 1200px) {
+  .splash-container {
+    width: 90%; }
+
+  .map-overlay {
+    width: 45%; } }
+@media (max-width: 550px) {
+  .map-overlay {
+    width: 90%; }
+
+  .sidebar-left.mobile-collapse {
+    transform: translateX(-90%); }
+
+  .sidebar-right.mobile-collapse {
+    transform: translateX(90%); }
+
+  .mobile-collapse > *:not(.overlay-control) {
+    opacity: 0; }
+    .mobile-collapse > *:not(.overlay-control) .collapse-overlay > .overlay-control > span > span {
+      transform: rotate(180deg); } }
 
 /*# sourceMappingURL=app.css.map */

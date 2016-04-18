@@ -235,6 +235,9 @@ var RightSidebar = React.createClass({
     }else{
       rightToggle = "map-overlay sidebar-right";
     }
+    if(this.props.state.priorityTab === 'left'){
+      rightToggle += " mobile-collapse";
+    }
     this.state.markerLayer.clearLayers();
     //display the active tab
     if(this.state.currentTab == 'location'){

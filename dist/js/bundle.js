@@ -32,6 +32,7 @@ var Interface = React.createClass({displayName: "Interface",
       loginToggle: false,
       toggleLeft: false,
       toggleRight: false,
+      priorityTab: 'left',
       activePoint: 0,
       currentLocation: {}
     }
@@ -308,9 +309,6 @@ var Interface = React.createClass({displayName: "Interface",
     this.callback();
   },
   resetRoute: function(){
-    console.log('current top level status on reset Route');
-    console.log(this.props);
-    console.log(this.state);
     this.props.directions._unload();
     this.props.directionsLayer._unload();
     this.props.directions.setOrigin('');
@@ -377,10 +375,24 @@ var Interface = React.createClass({displayName: "Interface",
     }
   },
   toggleLeft: function(e){
-    this.setState({toggleLeft: !this.state.toggleLeft});
+    var priority = 'none';
+    if(this.state.toggleLeft && !this.state.toggleRight){
+      priority = 'left';
+    }
+    this.setState({
+      toggleLeft: !this.state.toggleLeft,
+      priorityTab: priority
+    });
   },
   toggleRight: function(e){
-    this.setState({toggleRight: !this.state.toggleRight});
+    var priority = 'none';
+    if(!this.state.toggleLeft && this.state.toggleRight){
+      priority = 'right';
+    }
+    this.setState({
+      toggleRight: !this.state.toggleRight,
+      priorityTab: priority
+    });
   },
   userLocationError: function(error){
     if(error.code == 1){
@@ -635,7 +647,9 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     }else{
       leftToggle = "map-overlay sidebar-left";
     }
-
+    if(this.props.state.priorityTab === 'right'){
+      leftToggle += " mobile-collapse";
+    }
     if(this.state.currentTab == 'profile'){
       profile = "selector selector-profile selector-active";
       title = "Your Profile";
@@ -1610,6 +1624,9 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
       rightToggle = "map-overlay sidebar-right collapse-overlay-right collapse-overlay";
     }else{
       rightToggle = "map-overlay sidebar-right";
+    }
+    if(this.props.state.priorityTab === 'left'){
+      rightToggle += " mobile-collapse";
     }
     this.state.markerLayer.clearLayers();
     //display the active tab

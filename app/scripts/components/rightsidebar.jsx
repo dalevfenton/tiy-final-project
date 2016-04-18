@@ -13,6 +13,7 @@ var PROXYURL = 'http://node-proxy-dvf.herokuapp.com/api/';
 var RightSidebar = React.createClass({
   getInitialState: function(){
     return {
+      currentBusiness: null,
       currentTab: "location",
       currentLocation: null,
       distance: 1610,
@@ -122,6 +123,23 @@ var RightSidebar = React.createClass({
       this.setMarkers(this.state.stations, 'gas');
     }
   },
+  setBusiness: function(type, index){
+    // var businesses;
+    // console.log(type, index);
+    // if(type === 'hotels'){
+    //   businesses = this.state.hotels.businesses;
+    // }
+    // if(type === 'restaurants'){
+    //   businesses = this.state.retaurants.businesses;
+    // }
+    // if(type === 'gas'){
+    //   businesses = this.state.stations;
+    // }
+    // console.log(this.state);
+    // console.log(businesses);
+    // console.log(businesses[index]);
+    this.setState({currentBusiness: {type: type, index: index}});
+  },
   setMarkers: function(businesses, type){
     if(!businesses){
       return this;
@@ -131,7 +149,7 @@ var RightSidebar = React.createClass({
       businesses = businesses.businesses;
     }
     // console.log(businesses);
-    businesses.forEach(function(business){
+    businesses.forEach(function(business, index){
       var coords, address, city, state, zip, name;
       if(type == 'gas'){
         // console.log('gas marker: ', business);
@@ -150,6 +168,11 @@ var RightSidebar = React.createClass({
         name = business.name;
       }
       var className = "mapbox-marker-special mapbox-marker-" + type + "-icon";
+      if(this.state.currentBusiness &&
+        this.state.currentBusiness.type == type &&
+        this.state.currentBusiness.index == index ){
+        className += " marker-active";
+      }
       var marker = L.marker([coords.latitude, coords.longitude],
         {
           draggable: false,
@@ -212,14 +235,16 @@ var RightSidebar = React.createClass({
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
-      tab = (<HotelTab location={this.props.location} hotels={this.state.hotels} />);
+      tab = (<HotelTab location={this.props.location} hotels={this.state.hotels}
+        setBusiness={this.setBusiness} />);
       this.loadMarkers('hotels');
     }else if(!this.state.hotels){
       hotel = "selector selector-hotel selector-disabled";
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
-      tab = (<FoodTab location={this.props.location} restaurants={this.state.restaurants} />);
+      tab = (<FoodTab location={this.props.location}
+        restaurants={this.state.restaurants} setBusiness={this.setBusiness} />);
       this.loadMarkers('restaurants');
     }else if(!this.state.restaurants){
       food = "selector selector-food selector-disabled";

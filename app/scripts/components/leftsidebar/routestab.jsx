@@ -3,12 +3,10 @@ var React = require('react');
 var RouteButton = React.createClass({
   setRoute: function(e){
     e.preventDefault();
-    console.log('setRoute called');
     this.props.setRoute(this.props.index);
   },
   remove: function(e){
     e.preventDefault();
-    console.log('why you delete index: ' + this.props.index);
     this.props.setupDelete(this.props.index);
   },
   render: function(){
@@ -49,7 +47,8 @@ var RoutesTab = React.createClass({
   getInitialState: function(){
     return {
       toggleDeleteConfirm: false,
-      deleteTarget: null
+      deleteTarget: null,
+      message: null
     }
   },
   setupDelete: function(index){
@@ -61,7 +60,16 @@ var RoutesTab = React.createClass({
   },
   doDelete: function(e){
     e.preventDefault();
-    this.props.deleteRoute(this.state.deleteTarget);
+    this.props.deleteRoute(this.state.deleteTarget, this.reset);
+  },
+  reset: function(result, data){
+    console.log('route tab reset called with result ', result);
+    console.log('and data or error: ', data);
+    if(result == 'success'){
+      this.setState({toggleDeleteConfirm: false, deleteTarget: null, message: 'Route Deleted'});
+    }else if( result == 'error' ){
+      this.setState({message: 'Error Deleting The Route'});
+    }
   },
   render: function(){
     var routes = this.props.savedRoutes.map(function(route, index){
@@ -76,24 +84,34 @@ var RoutesTab = React.createClass({
     }.bind(this));
 
     var deleteConfirm = "";
+    var deletePromptClass = "trip-button geo-auth-button geolocation-deny delete-buttons-holder slid-up";
+    var deleteButtonsClass = "route-name-input slid-up";
     if(this.state.toggleDeleteConfirm){
       var routeName = this.props.savedRoutes[this.state.deleteTarget];
       routeName = routeName.get('route_name');
-
-      deleteConfirm = (
-        <div>
-          <div>Really Delete {routeName}?</div>
-          <div>
-            <button onClick={this.doDelete}>Yes</button>
-            <button onClick={this.cancelDelete}>No</button>
-          </div>
-        </div>
-      )
+      deletePromptClass = "trip-button geo-auth-button geolocation-deny delete-buttons-holder";
+      deleteButtonsClass = "route-name-input";
     }
     return (
       <div>
-        {routes}
-        {deleteConfirm}
+        <div className="top-layer">
+          {routes}
+        </div>
+        <div className="bottom-layer">
+            <div className={deletePromptClass}>
+              Really Delete {routeName}?
+            </div>
+            <div className={deleteButtonsClass}>
+              <button className="splash-half geo-auth-button geolocation-deny"
+                onClick={this.doDelete}>
+                Yes
+              </button>
+              <button className="splash-half geo-auth-button geolocation-authorize"
+                onClick={this.cancelDelete}>
+                No
+              </button>
+            </div>
+        </div>
       </div>
     );
   }

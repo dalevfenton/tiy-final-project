@@ -227,7 +227,7 @@ var Interface = React.createClass({
     return (
       <div>
         <LeftSidebar toggleLeft={this.toggleLeft}
-          addPoint={this.addPoint} state={this.state}
+          addPoint={this.addPoint} addRoute={this.addRoute} state={this.state}
           directions={this.props.directions}
           updateMap={this.updateMap} setActive={this.setActive}
           removePoint={this.removePoint} setRoute={this.setRoute}
@@ -248,27 +248,26 @@ var Interface = React.createClass({
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
   },
-  deleteRoute: function(index){
+  addRoute: function(route){
+    var routes = this.state.routes;
+    routes.push(route);
+    this.setState({'routes': routes});
+  },
+  deleteRoute: function(index, cb){
     var routes = this.state.routes;
     var route = routes.splice(index, 1)[0];
-    console.log('set to delete this route:', route, ' at index: ', index);
     route.destroy().then(function(data){
-      console.log('route destroyed from server');
-      this.setState({routes: routes});
+      cb('success', data);
     }.bind(this), function(error){
       console.log('error destroying route');
-    });
-
-  },
-  loadApp: function(allowed){
-
+      cb('error', error);
+    }.bind(this));
   },
   loadRoutes: function(){
     var Routes = Parse.Object.extend("Routes");
     var query = new Parse.Query(Routes);
     query.equalTo('user', Parse.User.current());
     query.find().then(function(routes){
-      // console.log('routes fetched successfully', routes);
       this.setState({'routes': routes});
     }.bind(this), function(error){
       //build out an alert to the user here
@@ -291,7 +290,6 @@ var Interface = React.createClass({
       }
       this.userLocationError(error);
     }
-
   },
   removePoint: function(index){
     // TODO: figure out why this is not correctly setting the state
@@ -306,9 +304,6 @@ var Interface = React.createClass({
     this.callback();
   },
   resetUser: function(result, type){
-    // console.log('callback from user action');
-    // console.log(result);
-    // console.log(type);
     if(type === 'logout'){
       this.setState({routes: null});
       this.props.directions._unload();

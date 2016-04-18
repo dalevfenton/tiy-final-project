@@ -229,7 +229,7 @@ var Interface = React.createClass({displayName: "Interface",
     return (
       React.createElement("div", null, 
         React.createElement(LeftSidebar, {toggleLeft: this.toggleLeft, 
-          addPoint: this.addPoint, state: this.state, 
+          addPoint: this.addPoint, addRoute: this.addRoute, state: this.state, 
           directions: this.props.directions, 
           updateMap: this.updateMap, setActive: this.setActive, 
           removePoint: this.removePoint, setRoute: this.setRoute, 
@@ -250,27 +250,26 @@ var Interface = React.createClass({displayName: "Interface",
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
   },
-  deleteRoute: function(index){
+  addRoute: function(route){
+    var routes = this.state.routes;
+    routes.push(route);
+    this.setState({'routes': routes});
+  },
+  deleteRoute: function(index, cb){
     var routes = this.state.routes;
     var route = routes.splice(index, 1)[0];
-    console.log('set to delete this route:', route, ' at index: ', index);
     route.destroy().then(function(data){
-      console.log('route destroyed from server');
-      this.setState({routes: routes});
+      cb('success', data);
     }.bind(this), function(error){
       console.log('error destroying route');
-    });
-
-  },
-  loadApp: function(allowed){
-
+      cb('error', error);
+    }.bind(this));
   },
   loadRoutes: function(){
     var Routes = Parse.Object.extend("Routes");
     var query = new Parse.Query(Routes);
     query.equalTo('user', Parse.User.current());
     query.find().then(function(routes){
-      // console.log('routes fetched successfully', routes);
       this.setState({'routes': routes});
     }.bind(this), function(error){
       //build out an alert to the user here
@@ -293,7 +292,6 @@ var Interface = React.createClass({displayName: "Interface",
       }
       this.userLocationError(error);
     }
-
   },
   removePoint: function(index){
     // TODO: figure out why this is not correctly setting the state
@@ -308,9 +306,6 @@ var Interface = React.createClass({displayName: "Interface",
     this.callback();
   },
   resetUser: function(result, type){
-    // console.log('callback from user action');
-    // console.log(result);
-    // console.log(type);
     if(type === 'logout'){
       this.setState({routes: null});
       this.props.directions._unload();
@@ -327,7 +322,6 @@ var Interface = React.createClass({displayName: "Interface",
   },
   setLocation: function(waypoint, index){
     // console.log(waypoint, index);
-    this.doGeocode(waypoint, this.handleGeocode);
     this.setState({activePoint: index});
   },
   setLogin: function(e){
@@ -557,6 +551,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     var self = this;
     route.save().then(function(route){
       self.doCb('success', route, cb);
+      self.props.addRoute(route);
     }, function(error){
       self.doCb('error', error, cb);
     });
@@ -591,14 +586,6 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     return coordinates;
   },
   buildPoint: function(waypoint, type){
-    // console.log(waypoint);
-    // Parse only supports a single GeoPoint field so sending it an array of these
-    // is basically just useless as far as I can tell
-    // but this is how to instantiate one for later reference
-    // var point = new Parse.GeoPoint({
-    //   latitude: waypoint.geometry.coordinates[1],
-    //   longitude: waypoint.geometry.coordinates[0]
-    // });
     var point = {
       latitude: waypoint.geometry.coordinates[1],
       longitude: waypoint.geometry.coordinates[0]
@@ -630,6 +617,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
       };
       tab = (React.createElement(ProfileTab, {resetUser: this.props.resetUser}));
     }
+
     if(this.state.currentTab == 'route'){
       title = "Set Your Route";
       route = "selector selector-route selector-active";
@@ -638,6 +626,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
           saveRoute: this.saveRoute})
       );
     }
+
     var conditionalTabs = "";
     if(Parse.User.current()){
       if(this.state.currentTab == 'savedRoutes'){
@@ -650,6 +639,8 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
             savedRoutes: this.props.state.routes, 
             currentRoute: this.props.state.currentRoute})
         );
+      }else if(!this.props.state.routes){
+        savedRoutes = "selector selector-saved selector-disabled";
       }
 
       conditionalTabs = (
@@ -725,12 +716,10 @@ var React = require('react');
 var RouteButton = React.createClass({displayName: "RouteButton",
   setRoute: function(e){
     e.preventDefault();
-    console.log('setRoute called');
     this.props.setRoute(this.props.index);
   },
   remove: function(e){
     e.preventDefault();
-    console.log('why you delete index: ' + this.props.index);
     this.props.setupDelete(this.props.index);
   },
   render: function(){
@@ -771,7 +760,8 @@ var RoutesTab = React.createClass({displayName: "RoutesTab",
   getInitialState: function(){
     return {
       toggleDeleteConfirm: false,
-      deleteTarget: null
+      deleteTarget: null,
+      message: null
     }
   },
   setupDelete: function(index){
@@ -783,7 +773,16 @@ var RoutesTab = React.createClass({displayName: "RoutesTab",
   },
   doDelete: function(e){
     e.preventDefault();
-    this.props.deleteRoute(this.state.deleteTarget);
+    this.props.deleteRoute(this.state.deleteTarget, this.reset);
+  },
+  reset: function(result, data){
+    console.log('route tab reset called with result ', result);
+    console.log('and data or error: ', data);
+    if(result == 'success'){
+      this.setState({toggleDeleteConfirm: false, deleteTarget: null, message: 'Route Deleted'});
+    }else if( result == 'error' ){
+      this.setState({message: 'Error Deleting The Route'});
+    }
   },
   render: function(){
     var routes = this.props.savedRoutes.map(function(route, index){
@@ -798,24 +797,34 @@ var RoutesTab = React.createClass({displayName: "RoutesTab",
     }.bind(this));
 
     var deleteConfirm = "";
+    var deletePromptClass = "trip-button geo-auth-button geolocation-deny delete-buttons-holder slid-up";
+    var deleteButtonsClass = "route-name-input slid-up";
     if(this.state.toggleDeleteConfirm){
       var routeName = this.props.savedRoutes[this.state.deleteTarget];
       routeName = routeName.get('route_name');
-
-      deleteConfirm = (
-        React.createElement("div", null, 
-          React.createElement("div", null, "Really Delete ", routeName, "?"), 
-          React.createElement("div", null, 
-            React.createElement("button", {onClick: this.doDelete}, "Yes"), 
-            React.createElement("button", {onClick: this.cancelDelete}, "No")
-          )
-        )
-      )
+      deletePromptClass = "trip-button geo-auth-button geolocation-deny delete-buttons-holder";
+      deleteButtonsClass = "route-name-input";
     }
     return (
       React.createElement("div", null, 
-        routes, 
-        deleteConfirm
+        React.createElement("div", {className: "top-layer"}, 
+          routes
+        ), 
+        React.createElement("div", {className: "bottom-layer"}, 
+            React.createElement("div", {className: deletePromptClass}, 
+              "Really Delete ", routeName, "?"
+            ), 
+            React.createElement("div", {className: deleteButtonsClass}, 
+              React.createElement("button", {className: "splash-half geo-auth-button geolocation-deny", 
+                onClick: this.doDelete}, 
+                "Yes"
+              ), 
+              React.createElement("button", {className: "splash-half geo-auth-button geolocation-authorize", 
+                onClick: this.cancelDelete}, 
+                "No"
+              )
+            )
+        )
       )
     );
   }
@@ -1003,7 +1012,9 @@ module.exports = Waypoint;
 
 },{"jquery":174,"react":566}],6:[function(require,module,exports){
 "use strict";
+var $ = require('jquery');
 var React = require('react');
+
 
 var Waypoint = require('./waypoint.jsx');
 
@@ -1038,9 +1049,6 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
     this.props.saveRoute(this.state.saveName, this.handleSave, type);
   },
   handleSave: function(type, obj){
-    // console.log('handlesave called');
-    // console.log(type);
-    // console.log(obj);
     if(type == 'success'){
       var name;
       if(obj.get('route_name')){
@@ -1058,6 +1066,9 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
         saveName: '',
         message: name
       });
+      setTimeout(function(){
+        $('#success-message').addClass('color-in');
+      }, 150);
     }else if(type=='error'){
       console.log(obj);
       this.setState({
@@ -1071,7 +1082,6 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
     var waypoints = [];
     var self = this;
     for(var i = 0; i < self.props.props.state.numPoints; i++){
-      // var point = new Point();
       var active = false;
       if(self.props.props.state.activePoint == i){
         active = true;
@@ -1114,7 +1124,7 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
     }
     var message = "";
     if(this.state.message !== ""){
-      message = (React.createElement("div", {className: "message-success"}, this.state.message));
+      message = (React.createElement("div", {id: "success-message", className: "message-success text-center"}, this.state.message));
     }
     return (
       React.createElement("div", null, 
@@ -1147,7 +1157,7 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
 
 module.exports = WaypointsTab;
 
-},{"./waypoint.jsx":5,"react":566}],7:[function(require,module,exports){
+},{"./waypoint.jsx":5,"jquery":174,"react":566}],7:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Glyphicon = require('react-bootstrap').Glyphicon;
@@ -1336,6 +1346,7 @@ var PROXYURL = 'http://node-proxy-dvf.herokuapp.com/api/';
 var RightSidebar = React.createClass({displayName: "RightSidebar",
   getInitialState: function(){
     return {
+      currentBusiness: null,
       currentTab: "location",
       currentLocation: null,
       distance: 1610,
@@ -1445,6 +1456,23 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
       this.setMarkers(this.state.stations, 'gas');
     }
   },
+  setBusiness: function(type, index){
+    // var businesses;
+    // console.log(type, index);
+    // if(type === 'hotels'){
+    //   businesses = this.state.hotels.businesses;
+    // }
+    // if(type === 'restaurants'){
+    //   businesses = this.state.retaurants.businesses;
+    // }
+    // if(type === 'gas'){
+    //   businesses = this.state.stations;
+    // }
+    // console.log(this.state);
+    // console.log(businesses);
+    // console.log(businesses[index]);
+    this.setState({currentBusiness: {type: type, index: index}});
+  },
   setMarkers: function(businesses, type){
     if(!businesses){
       return this;
@@ -1454,7 +1482,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
       businesses = businesses.businesses;
     }
     // console.log(businesses);
-    businesses.forEach(function(business){
+    businesses.forEach(function(business, index){
       var coords, address, city, state, zip, name;
       if(type == 'gas'){
         // console.log('gas marker: ', business);
@@ -1473,6 +1501,11 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
         name = business.name;
       }
       var className = "mapbox-marker-special mapbox-marker-" + type + "-icon";
+      if(this.state.currentBusiness &&
+        this.state.currentBusiness.type == type &&
+        this.state.currentBusiness.index == index ){
+        className += " marker-active";
+      }
       var marker = L.marker([coords.latitude, coords.longitude],
         {
           draggable: false,
@@ -1535,14 +1568,16 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
-      tab = (React.createElement(HotelTab, {location: this.props.location, hotels: this.state.hotels}));
+      tab = (React.createElement(HotelTab, {location: this.props.location, hotels: this.state.hotels, 
+        setBusiness: this.setBusiness}));
       this.loadMarkers('hotels');
     }else if(!this.state.hotels){
       hotel = "selector selector-hotel selector-disabled";
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
-      tab = (React.createElement(FoodTab, {location: this.props.location, restaurants: this.state.restaurants}));
+      tab = (React.createElement(FoodTab, {location: this.props.location, 
+        restaurants: this.state.restaurants, setBusiness: this.setBusiness}));
       this.loadMarkers('restaurants');
     }else if(!this.state.restaurants){
       food = "selector selector-food selector-disabled";
@@ -1656,7 +1691,8 @@ var FoodTab = React.createClass({displayName: "FoodTab",
   render: function(){
     var restaurants = (React.createElement(Loading, null));
     if(this.props.restaurants){
-      restaurants = React.createElement(YelpList, {collection: this.props.restaurants})
+      restaurants = React.createElement(YelpList, {collection: this.props.restaurants, 
+        type: "restaurants", setBusiness: this.props.setBusiness})
     }
     return (
       React.createElement("div", {className: "sidebar-tab"}, 
@@ -1706,7 +1742,8 @@ var HotelTab = React.createClass({displayName: "HotelTab",
   render: function(){
     var hotels = (React.createElement(Loading, null));
     if(this.props.hotels){
-      hotels = React.createElement(YelpList, {collection: this.props.hotels})
+      hotels = React.createElement(YelpList, {collection: this.props.hotels, type: "hotels", 
+        setBusiness: this.props.setBusiness})
     }
     return (
       React.createElement("div", {className: "sidebar-tab"}, 
@@ -1979,22 +2016,38 @@ module.exports = WaypointLocation;
 "use strict";
 var React = require('react');
 
-var YelpList = React.createClass({displayName: "YelpList",
+var YelpDetail = React.createClass({displayName: "YelpDetail",
+  setBusiness: function(){
+    this.props.setBusiness(this.props.index);
+  },
   render: function(){
-    console.log(this.props);
+    var business = this.props.business;
+    return (
+      React.createElement("div", {className: "business-detail detail-item", key: this.props.index, onClick: this.setBusiness}, 
+        React.createElement("a", {href: business.url}, 
+          React.createElement("h6", {className: "business-detail-title dtr-title"}, business.name)
+        ), 
+        React.createElement("div", {className: "business-detail-info"}, 
+          React.createElement("span", {className: "rating"}, React.createElement("img", {src: business.rating_img_url})), 
+          React.createElement("span", {className: "reviews"}, React.createElement("a", {href: business.url}, "(", business.review_count, ") Reviews"))
+        ), 
+        React.createElement("span", {className: "business-detail-address"}, business.location.address, ", ", business.location.city, ", ", business.location.state_code)
+      )
+    );
+  }
+});
+
+var YelpList = React.createClass({displayName: "YelpList",
+  setBusiness: function(index){
+    this.props.setBusiness(this.props.type, index);
+  },
+  render: function(){
     var businesses = this.props.collection.businesses.map(function(business, index){
       if(index < 10){
         return (
-          React.createElement("div", {className: "business-detail detail-item", key: index}, 
-            React.createElement("a", {href: business.url}, 
-              React.createElement("h6", {className: "business-detail-title dtr-title"}, business.name)
-            ), 
-            React.createElement("div", {className: "business-detail-info"}, 
-              React.createElement("span", {className: "rating"}, React.createElement("img", {src: business.rating_img_url})), 
-              React.createElement("span", {className: "reviews"}, React.createElement("a", {href: business.url}, "(", business.review_count, ") Reviews"))
-            ), 
-            React.createElement("span", {className: "business-detail-address"}, business.location.address, ", ", business.location.city, ", ", business.location.state_code)
-          )
+          React.createElement(YelpDetail, {business: business, index: index, key: index, 
+            setBusiness: this.setBusiness})
+
         );
       }
     }.bind(this));

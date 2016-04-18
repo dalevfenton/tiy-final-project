@@ -10,7 +10,8 @@ var FoodTab = React.createClass({
   render: function(){
     var restaurants = (<Loading />);
     if(this.props.restaurants){
-      restaurants = <YelpList collection={this.props.restaurants}  />
+      restaurants = <YelpList collection={this.props.restaurants}
+        type="restaurants" setBusiness={this.props.setBusiness} />
     }
     return (
       <div className="sidebar-tab">

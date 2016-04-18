@@ -6125,13 +6125,38 @@ button.waypoint-remove {
 .route-name-input {
   position: relative;
   z-index: 3;
-  transition: .25s ease-in-out; }
+  transition: .5s ease-in-out; }
   .route-name-input input {
     width: 100%;
     padding: 10px 5%; }
 
 .slid-up {
   transform: translateY(-250%); }
+
+.message-success {
+  color: white;
+  padding: 10px 5%; }
+
+.color-in {
+  background: #207185;
+  animation-name: color-in;
+  animation-duration: 1s;
+  animation-iteration-count: 1;
+  animation-timing-function: linear; }
+
+@keyframes color-in {
+  0% {
+    color: #f0f0f0; }
+  25% {
+    color: #8dd2e4; }
+  50% {
+    color: #f0f0f0; }
+  75% {
+    color: #8dd2e4; }
+  100% {
+    color: #f0f0f0; } }
+.delete-buttons-holder {
+  padding: 10px 5%; }
 
 .location-selectors {
   list-style: none; }
@@ -6282,6 +6307,9 @@ button.waypoint-remove {
 
 .mapbox-marker-user-icon::before {
   content: ''; }
+
+.marker-active {
+  background: #207185; }
 
 @keyframes color-pulse {
   from {

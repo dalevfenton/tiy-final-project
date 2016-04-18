@@ -66,6 +66,7 @@ var LeftSidebar = React.createClass({
     var self = this;
     route.save().then(function(route){
       self.doCb('success', route, cb);
+      self.props.addRoute(route);
     }, function(error){
       self.doCb('error', error, cb);
     });
@@ -100,14 +101,6 @@ var LeftSidebar = React.createClass({
     return coordinates;
   },
   buildPoint: function(waypoint, type){
-    // console.log(waypoint);
-    // Parse only supports a single GeoPoint field so sending it an array of these
-    // is basically just useless as far as I can tell
-    // but this is how to instantiate one for later reference
-    // var point = new Parse.GeoPoint({
-    //   latitude: waypoint.geometry.coordinates[1],
-    //   longitude: waypoint.geometry.coordinates[0]
-    // });
     var point = {
       latitude: waypoint.geometry.coordinates[1],
       longitude: waypoint.geometry.coordinates[0]
@@ -139,6 +132,7 @@ var LeftSidebar = React.createClass({
       };
       tab = (<ProfileTab resetUser={this.props.resetUser} />);
     }
+
     if(this.state.currentTab == 'route'){
       title = "Set Your Route";
       route = "selector selector-route selector-active";
@@ -147,6 +141,7 @@ var LeftSidebar = React.createClass({
           saveRoute={this.saveRoute}/>
       );
     }
+
     var conditionalTabs = "";
     if(Parse.User.current()){
       if(this.state.currentTab == 'savedRoutes'){
@@ -159,6 +154,8 @@ var LeftSidebar = React.createClass({
             savedRoutes={this.props.state.routes}
             currentRoute={this.props.state.currentRoute} />
         );
+      }else if(!this.props.state.routes){
+        savedRoutes = "selector selector-saved selector-disabled";
       }
 
       conditionalTabs = (

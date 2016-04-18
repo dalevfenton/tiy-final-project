@@ -1,4 +1,6 @@
+var $ = require('jquery');
 var React = require('react');
+
 
 var Waypoint = require('./waypoint.jsx');
 
@@ -33,9 +35,6 @@ var WaypointsTab = React.createClass({
     this.props.saveRoute(this.state.saveName, this.handleSave, type);
   },
   handleSave: function(type, obj){
-    // console.log('handlesave called');
-    // console.log(type);
-    // console.log(obj);
     if(type == 'success'){
       var name;
       if(obj.get('route_name')){
@@ -53,6 +52,9 @@ var WaypointsTab = React.createClass({
         saveName: '',
         message: name
       });
+      setTimeout(function(){
+        $('#success-message').addClass('color-in');
+      }, 150);
     }else if(type=='error'){
       console.log(obj);
       this.setState({
@@ -66,7 +68,6 @@ var WaypointsTab = React.createClass({
     var waypoints = [];
     var self = this;
     for(var i = 0; i < self.props.props.state.numPoints; i++){
-      // var point = new Point();
       var active = false;
       if(self.props.props.state.activePoint == i){
         active = true;
@@ -109,7 +110,7 @@ var WaypointsTab = React.createClass({
     }
     var message = "";
     if(this.state.message !== ""){
-      message = (<div className="message-success">{this.state.message}</div>);
+      message = (<div id="success-message" className="message-success text-center">{this.state.message}</div>);
     }
     return (
       <div>

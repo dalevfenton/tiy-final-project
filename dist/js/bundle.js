@@ -233,6 +233,7 @@ var Interface = React.createClass({displayName: "Interface",
           directions: this.props.directions, 
           updateMap: this.updateMap, setActive: this.setActive, 
           removePoint: this.removePoint, setRoute: this.setRoute, 
+          resetRoute: this.resetRoute, 
           resetUser: this.resetUser, deleteRoute: this.deleteRoute}), 
 
         React.createElement(RightSidebar, {toggle: this.state.toggleRight, toggleRight: this.toggleRight, 
@@ -240,6 +241,7 @@ var Interface = React.createClass({displayName: "Interface",
           numPoints: this.state.numPoints, doGeocode: this.doGeocode, 
           setupGeo: this.setupGeo, setLocation: this.setLocation, 
           directionsLayer: this.props.directionsLayer, map: this.props.map, 
+          resetRightSidebarDone: this.resetRightSidebarDone, 
           userLocation: this.state.userLocation, state: this.state, props: this.props})
       )
     );
@@ -305,10 +307,35 @@ var Interface = React.createClass({displayName: "Interface",
     }
     this.callback();
   },
+  resetRoute: function(){
+    console.log('current top level status on reset Route');
+    console.log(this.props);
+    console.log(this.state);
+    this.props.directions._unload();
+    this.props.directionsLayer._unload();
+    this.props.directions.setOrigin('');
+    this.props.directions.setDestination('');
+    this.setState({
+      resetRightSidebar: true,
+      currentRoute: null,
+      numPoints: 2,
+      activePoint: 0,
+      // currentLocation: {}
+    });
+  },
+  resetRightSidebarDone: function(){
+    console.log('turning off rightSidebar Reset');
+    this.setState({resetRightSidebar: false});
+  },
   resetUser: function(result, type){
+    var startPt = [39.833333, -98.583333];
     if(type === 'logout'){
-      this.setState({routes: null});
-      this.props.directions._unload();
+      this.setState({
+        routes: null,
+        userLocation: this.props.directions._normalizeWaypoint( L.latLng(startPt[0], startPt[1]) ),
+        userLocationEnabled: false
+      });
+      this.resetRoute();
     }
     if(type === 'login'){
       this.loadRoutes();
@@ -623,7 +650,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
       route = "selector selector-route selector-active";
       tab = (
         React.createElement(WaypointsTab, {props: this.props, state: this.state, 
-          saveRoute: this.saveRoute})
+          saveRoute: this.saveRoute, resetRoute: this.props.resetRoute})
       );
     }
 
@@ -1040,6 +1067,13 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
     e.preventDefault();
     this.setState({toggleSaveInput: !this.state.toggleSaveInput});
   },
+  resetRoute: function(e){
+    this.props.resetRoute();
+    this.setState({
+      toggleSaveInput: false,
+      saveName: ''
+    });
+  },
   saveRoute: function(e){
     e.preventDefault();
     var type = 'new';
@@ -1114,10 +1148,18 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
       }
       save = "trip-button geo-auth-button geolocation-deny";
     }
+    var newButton;
     if(this.props.props.state.currentRoute){
       buttonText = "Resave This Route";
+      newButton = (
+        React.createElement("button", {onClick: this.resetRoute, 
+          className: "trip-button geo-auth-button geolocation-deny"}, 
+          "Create New Route"
+        )
+      );
       // routeName = this.props.props.state.currentRoute.get('route_name');
     }
+
     var errorMessage = "";
     if(this.state.inError){
       errorMessage = (React.createElement("div", {className: "login-error"}, this.state.error.message));
@@ -1135,7 +1177,8 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
           React.createElement("button", {className: "trip-button geo-auth-button geolocation-authorize", 
             onClick: this.props.props.addPoint}, 
             "+ Add New Waypoint"
-          )
+          ), 
+          newButton
         ), 
         React.createElement("div", {className: "bottom-layer"}, 
           React.createElement("button", {className: save, 
@@ -1365,6 +1408,19 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     if(this.props.activePoint < 0 || this.props.activePoint > this.props.numPoints-1 ){
       console.log('current location not set');
       return 'no current location set, aborting RightSidebar queries';
+    }
+    if(this.props.state.resetRightSidebar){
+      //reset the state of this sidebar
+      console.log('reseting right sidebar');
+      this.setState({
+        currentBusiness: null,
+        currentTab: "location",
+        // currentLocation: null,
+        hotels: null,
+        restaurants: null,
+        stations: null
+      });
+      this.props.resetRightSidebarDone();
     }
   },
   setCurrent: function(e){
@@ -2230,6 +2286,7 @@ function setupApp(startPt, startZoom, userLocationEnabled){
       'map': map,
       'directions': directions,
       'directionsLayer': directionsLayer,
+      'directionsRoutesControl': directionsRoutesControl,
       'userLocation': startPt,
       'userLocationEnabled': userLocationEnabled
     } ),
@@ -82239,7 +82296,9 @@ module.exports = function (container, directions) {
         container.selectAll('.mapbox-directions-route')
             .classed('mapbox-directions-route-active', function (route) { return route === e.route; });
     });
-
+    directions.on('unload', function(e){
+        container.html('');
+    });
     return control;
 };
 

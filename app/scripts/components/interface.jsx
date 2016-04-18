@@ -231,6 +231,7 @@ var Interface = React.createClass({
           directions={this.props.directions}
           updateMap={this.updateMap} setActive={this.setActive}
           removePoint={this.removePoint} setRoute={this.setRoute}
+          resetRoute={this.resetRoute}
           resetUser={this.resetUser} deleteRoute={this.deleteRoute} />
 
         <RightSidebar toggle={this.state.toggleRight} toggleRight={this.toggleRight}
@@ -238,6 +239,7 @@ var Interface = React.createClass({
           numPoints={this.state.numPoints} doGeocode={this.doGeocode}
           setupGeo={this.setupGeo} setLocation={this.setLocation}
           directionsLayer={this.props.directionsLayer} map={this.props.map}
+          resetRightSidebarDone={this.resetRightSidebarDone}
           userLocation={this.state.userLocation} state={this.state} props={this.props} />
       </div>
     );
@@ -303,10 +305,35 @@ var Interface = React.createClass({
     }
     this.callback();
   },
+  resetRoute: function(){
+    console.log('current top level status on reset Route');
+    console.log(this.props);
+    console.log(this.state);
+    this.props.directions._unload();
+    this.props.directionsLayer._unload();
+    this.props.directions.setOrigin('');
+    this.props.directions.setDestination('');
+    this.setState({
+      resetRightSidebar: true,
+      currentRoute: null,
+      numPoints: 2,
+      activePoint: 0,
+      // currentLocation: {}
+    });
+  },
+  resetRightSidebarDone: function(){
+    console.log('turning off rightSidebar Reset');
+    this.setState({resetRightSidebar: false});
+  },
   resetUser: function(result, type){
+    var startPt = [39.833333, -98.583333];
     if(type === 'logout'){
-      this.setState({routes: null});
-      this.props.directions._unload();
+      this.setState({
+        routes: null,
+        userLocation: this.props.directions._normalizeWaypoint( L.latLng(startPt[0], startPt[1]) ),
+        userLocationEnabled: false
+      });
+      this.resetRoute();
     }
     if(type === 'login'){
       this.loadRoutes();

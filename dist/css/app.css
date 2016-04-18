@@ -6067,7 +6067,7 @@ html, body {
 
 #waypoint-list {
   max-height: 50vh;
-  overflow: scroll; }
+  overflow-y: scroll; }
 
 .waypoint-container {
   position: relative; }

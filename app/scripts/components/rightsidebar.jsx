@@ -33,6 +33,19 @@ var RightSidebar = React.createClass({
       console.log('current location not set');
       return 'no current location set, aborting RightSidebar queries';
     }
+    if(this.props.state.resetRightSidebar){
+      //reset the state of this sidebar
+      console.log('reseting right sidebar');
+      this.setState({
+        currentBusiness: null,
+        currentTab: "location",
+        // currentLocation: null,
+        hotels: null,
+        restaurants: null,
+        stations: null
+      });
+      this.props.resetRightSidebarDone();
+    }
   },
   setCurrent: function(e){
     if($(e.target).hasClass('glyphicon-map-marker')){

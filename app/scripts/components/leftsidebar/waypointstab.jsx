@@ -26,6 +26,13 @@ var WaypointsTab = React.createClass({
     e.preventDefault();
     this.setState({toggleSaveInput: !this.state.toggleSaveInput});
   },
+  resetRoute: function(e){
+    this.props.resetRoute();
+    this.setState({
+      toggleSaveInput: false,
+      saveName: ''
+    });
+  },
   saveRoute: function(e){
     e.preventDefault();
     var type = 'new';
@@ -100,10 +107,18 @@ var WaypointsTab = React.createClass({
       }
       save = "trip-button geo-auth-button geolocation-deny";
     }
+    var newButton;
     if(this.props.props.state.currentRoute){
       buttonText = "Resave This Route";
+      newButton = (
+        <button onClick={this.resetRoute}
+          className="trip-button geo-auth-button geolocation-deny">
+          Create New Route
+        </button>
+      );
       // routeName = this.props.props.state.currentRoute.get('route_name');
     }
+
     var errorMessage = "";
     if(this.state.inError){
       errorMessage = (<div className="login-error">{this.state.error.message}</div>);
@@ -122,6 +137,7 @@ var WaypointsTab = React.createClass({
             onClick={this.props.props.addPoint}>
             + Add New Waypoint
           </button>
+          {newButton}
         </div>
         <div className="bottom-layer">
           <button className={save}

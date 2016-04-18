@@ -93,6 +93,7 @@ function setupApp(startPt, startZoom, userLocationEnabled){
       'map': map,
       'directions': directions,
       'directionsLayer': directionsLayer,
+      'directionsRoutesControl': directionsRoutesControl,
       'userLocation': startPt,
       'userLocationEnabled': userLocationEnabled
     } ),

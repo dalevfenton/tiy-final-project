@@ -32,14 +32,14 @@ var LocationTab = React.createClass({
   },
   handleWaypointLocation: function(waypointProps){
     console.log(waypointProps);
-    this.props.setLocation(waypointProps.waypoint);
-    this.setState({'loading': 'waypointLocation'});
+    this.props.setLocation(waypointProps.waypoint, waypointProps.index);
   },
   toggleAccordion: function(e){
     e.preventDefault();
-    console.log(this.refs);
+    // console.log(this.refs);
   },
   render: function(){
+    // console.log(this.props);
     var id = "waypoint-input-" + this.props.index;
     var userLocationJSX
     var waypointsJSX = [];
@@ -86,27 +86,41 @@ var LocationTab = React.createClass({
       }
     }
 
-    var origin = this.props.props.directions.getOrigin()
-    var destination = this.props.props.directions.getDestination()
-    var waypoints = this.props.props.directions.getWaypoints()
+    var origin = this.props.props.directions.getOrigin();
+    var destination = this.props.props.directions.getDestination();
+    var waypoints = this.props.props.directions.getWaypoints();
+    var active;
     if(origin){
+      active = false;
+      if(this.props.state.activePoint == 0){
+        active = true;
+      }
       waypointsJSX.push(
         <WaypointLocation setWaypoint={this.handleWaypointLocation} waypoint={origin}
-          type="origin" key={0} />
+          type="origin" key={0} index={0} active={active} />
       )
     }
     if(waypoints){
       waypoints.forEach(function(waypoint, index){
+        active = false;
+        if(this.props.state.activePoint == index+1){
+          active = true;
+        }
         waypointsJSX.push(
           <WaypointLocation setWaypoint={this.handleWaypointLocation} waypoint={waypoint}
-            type="waypoint" index={index} key={index+1} />
+            type="waypoint" index={index+1} key={index+1} active={active} />
         )
       }.bind(this));
     }
     if(destination){
+      active = false;
+      if(this.props.state.activePoint == waypoints.length+1 ){
+        active = true;
+      }
       waypointsJSX.push(
         <WaypointLocation setWaypoint={this.handleWaypointLocation} waypoint={destination}
-          type="destination" key={waypoints.length+1} />
+          type="destination" key={waypoints.length+1}
+          index={waypoints.length+1} active={active} />
       )
     }
     if(waypointsJSX.length < 1){

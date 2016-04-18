@@ -154,7 +154,10 @@ var LeftSidebar = React.createClass({
         title = "Your Saved Routes";
 
         tab = (
-          <RoutesTab setRoute={this.props.setRoute} savedRoutes={this.props.state.routes} />
+          <RoutesTab setRoute={this.props.setRoute}
+            deleteRoute={this.props.deleteRoute}
+            savedRoutes={this.props.state.routes}
+            currentRoute={this.props.state.currentRoute} />
         );
       }
 

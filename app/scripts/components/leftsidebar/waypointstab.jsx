@@ -33,9 +33,9 @@ var WaypointsTab = React.createClass({
     this.props.saveRoute(this.state.saveName, this.handleSave, type);
   },
   handleSave: function(type, obj){
-    console.log('handlesave called');
-    console.log(type);
-    console.log(obj);
+    // console.log('handlesave called');
+    // console.log(type);
+    // console.log(obj);
     if(type == 'success'){
       var name;
       if(obj.get('route_name')){
@@ -111,7 +111,6 @@ var WaypointsTab = React.createClass({
     if(this.state.message !== ""){
       message = (<div className="message-success">{this.state.message}</div>);
     }
-    console.log(this.props);
     return (
       <div>
         <div className="top-layer">

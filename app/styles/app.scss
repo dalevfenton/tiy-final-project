@@ -24,7 +24,9 @@ button{
 .text-center{
   text-align: center;
 }
-
+.hide-me{
+  display: none;
+}
 $accent-color: rgb(59, 178, 208);
 $accent-color-darken: darken($accent-color, 20%);
 $accent-color-lighten: lighten($accent-color, 20%);
@@ -417,6 +419,7 @@ button.waypoint-remove{
 }
 .selector{
   cursor: pointer;
+  position: relative;
 }
 .selector > span{
   display: inline-block;
@@ -436,11 +439,23 @@ button.waypoint-remove{
 
 .selector-disabled{
   color: lighten(black, 70%);
+  cursor: default;
   & > span:hover{
     color: lighten(black, 70%);
   }
 }
-
+.selector-indicator{
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  vertical-align: middle;
+  background: $accent-color-darken;
+  color: white;
+  position: absolute;
+  top: 0;
+  right: 20%;
+  font-size: 8px;
+}
 .sidebar-accordion-title{
   padding: 10px;
   background-color: $bg-color-lighten;
@@ -489,6 +504,7 @@ button.waypoint-remove{
   width: 30%;
 }
 .sidebar-waypoint-picker{
+  position: relative;
   &:not(:last-of-type){
     border-bottom: 1px solid white;
   }
@@ -499,6 +515,17 @@ button.waypoint-remove{
     &:hover{
       background-color: $accent-color;
     }
+  }
+  .waypoint-remove{
+    width: 10%;
+    background-color: white;
+    color: $accent-color-darken;
+  }
+}
+.waypoint-picker-active{
+  button{
+    background: darken($accent-color-darken, 20%);
+    font-weight: bold;
   }
 }
 .detail-item{

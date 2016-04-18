@@ -13,9 +13,12 @@ var WaypointLocation = React.createClass({
     }else{
       displayText = this.props.type;
     }
-
+    var className = "sidebar-waypoint-picker";
+    if(this.props.active){
+      className = "sidebar-waypoint-picker waypoint-picker-active";
+    }
     return (
-      <div className="sidebar-waypoint-picker">
+      <div className={className} >
         <button onClick={this.setWaypoint}>{displayText}</button>
       </div>
     );

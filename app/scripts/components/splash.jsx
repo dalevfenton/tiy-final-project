@@ -55,7 +55,7 @@ var Splash = React.createClass({
           </div>
 
           <div className="splash-half splash-login">
-            <Login />
+            <Login callback={this.props.resetUser} />
           </div>
         </div>
       </div>

@@ -200,7 +200,11 @@ var Interface = React.createClass({
 
     //if we are doing our initial load then show the splash screen:
     if(this.state.splash && localStorage.getItem("geolocation") === null ){
-      return (<Splash setupGeo={this.setupGeo}/>)
+      return (
+        <Splash setupGeo={this.setupGeo}
+          resetUser={this.props.resetUser}
+        />
+      );
     }
 
     //check if the user's location is known and if so update their marker on the map
@@ -218,31 +222,8 @@ var Interface = React.createClass({
           })
       });
       marker.addTo(this.props.map);
-      // console.log('marker:');
-      // console.log(marker);
-
     }
 
-    //Display a button to save the trip once we have a valid directions object
-    var button;
-    if(this.props.directions.queryable()){
-      button = (
-        <div className="login-button">
-          <a href="#login">Save This Trip</a>
-        </div>
-      );
-    }
-
-    //Display the login / signup form based on state
-    var login;
-    if(this.props.router.current == 'login'){
-      login = (
-        <div className="login">
-          <Login callback={this.resetUser} />
-        </div>
-      );
-    }
-    console.log('render called');
     return (
       <div>
         <LeftSidebar toggleLeft={this.toggleLeft}
@@ -250,15 +231,14 @@ var Interface = React.createClass({
           directions={this.props.directions}
           updateMap={this.updateMap} setActive={this.setActive}
           removePoint={this.removePoint} setRoute={this.setRoute}
-          resetUser={this.resetUser} />
+          resetUser={this.resetUser} deleteRoute={this.deleteRoute} />
 
         <RightSidebar toggle={this.state.toggleRight} toggleRight={this.toggleRight}
           directions={this.props.directions} activePoint={this.state.activePoint}
           numPoints={this.state.numPoints} doGeocode={this.doGeocode}
-          setupGeo={this.setupGeo}
+          setupGeo={this.setupGeo} setLocation={this.setLocation}
           directionsLayer={this.props.directionsLayer} map={this.props.map}
           userLocation={this.state.userLocation} state={this.state} props={this.props} />
-        {login}
       </div>
     );
   },
@@ -267,6 +247,18 @@ var Interface = React.createClass({
   //----------------------------------------------------------------------------
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
+  },
+  deleteRoute: function(index){
+    var routes = this.state.routes;
+    var route = routes.splice(index, 1)[0];
+    console.log('set to delete this route:', route, ' at index: ', index);
+    route.destroy().then(function(data){
+      console.log('route destroyed from server');
+      this.setState({routes: routes});
+    }.bind(this), function(error){
+      console.log('error destroying route');
+    });
+
   },
   loadApp: function(allowed){
 
@@ -329,6 +321,10 @@ var Interface = React.createClass({
     }
   },
   setActive: function(index){
+    this.setState({activePoint: index});
+  },
+  setLocation: function(waypoint, index){
+    // console.log(waypoint, index);
     this.setState({activePoint: index});
   },
   setLogin: function(e){

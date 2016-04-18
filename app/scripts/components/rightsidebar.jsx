@@ -6,6 +6,7 @@ var FoodTab = require('./rightsidebar/foodtab.jsx');
 var GasTab = require('./rightsidebar/gastab.jsx');
 var HotelTab = require('./rightsidebar/hoteltab.jsx');
 var LocationTab = require('./rightsidebar/locationtab.jsx');
+var Indicator = require('./rightsidebar/indicator.jsx');
 
 var PROXYURL = 'http://node-proxy-dvf.herokuapp.com/api/';
 
@@ -172,10 +173,10 @@ var RightSidebar = React.createClass({
     // console.log(this.props);
     // console.log(this.state);
   },
-  setLocation: function(waypoint){
-    // console.log('waypoint in setLocation', waypoint);
-    this.props.doGeocode(waypoint, this.handleGeocode);
+  setLocation(waypoint, index){
     this.state.markerLayer.clearLayers();
+    this.props.doGeocode(waypoint, this.handleGeocode);
+    this.props.setLocation(waypoint, index);
   },
   handleGeocode: function(waypoint){
     this.setState({'currentLocation': waypoint});
@@ -253,6 +254,7 @@ var RightSidebar = React.createClass({
                 onClick={this.setCurrent}
                 ref="selector-hotel"
               ></span>
+              <Indicator items={this.state.hotels}/>
             </li>
             <li className={food}>
               <span className="glyphicon glyphicon-apple"
@@ -260,6 +262,7 @@ var RightSidebar = React.createClass({
                 onClick={this.setCurrent}
                 ref="selector-food"
               ></span>
+              <Indicator items={this.state.restaurants}/>
             </li>
             <li className={gas}>
               <span className="glyphicon glyphicon-flash"
@@ -267,6 +270,7 @@ var RightSidebar = React.createClass({
                 onClick={this.setCurrent}
                 ref="selector-gas"
               ></span>
+            <Indicator items={this.state.stations}/>
             </li>
           </ul>
         </div>

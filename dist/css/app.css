@@ -5827,6 +5827,9 @@ button {
 .text-center {
   text-align: center; }
 
+.hide-me {
+  display: none; }
+
 html, body {
   height: 100%;
   min-height: 100%;
@@ -6144,7 +6147,8 @@ button.waypoint-remove {
       margin-left: -4px; }
 
 .selector {
-  cursor: pointer; }
+  cursor: pointer;
+  position: relative; }
 
 .selector > span {
   display: inline-block;
@@ -6160,9 +6164,22 @@ button.waypoint-remove {
   color: #207185; }
 
 .selector-disabled {
-  color: #b3b3b3; }
+  color: #b3b3b3;
+  cursor: default; }
   .selector-disabled > span:hover {
     color: #b3b3b3; }
+
+.selector-indicator {
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  vertical-align: middle;
+  background: #207185;
+  color: white;
+  position: absolute;
+  top: 0;
+  right: 20%;
+  font-size: 8px; }
 
 .sidebar-accordion-title {
   padding: 10px;
@@ -6197,14 +6214,24 @@ button.waypoint-remove {
   margin-left: 10%;
   width: 30%; }
 
-.sidebar-waypoint-picker:not(:last-of-type) {
-  border-bottom: 1px solid white; }
-.sidebar-waypoint-picker button {
-  width: 100%;
-  background-color: #207185;
-  color: white; }
-  .sidebar-waypoint-picker button:hover {
-    background-color: #3bb2d0; }
+.sidebar-waypoint-picker {
+  position: relative; }
+  .sidebar-waypoint-picker:not(:last-of-type) {
+    border-bottom: 1px solid white; }
+  .sidebar-waypoint-picker button {
+    width: 100%;
+    background-color: #207185;
+    color: white; }
+    .sidebar-waypoint-picker button:hover {
+      background-color: #3bb2d0; }
+  .sidebar-waypoint-picker .waypoint-remove {
+    width: 10%;
+    background-color: white;
+    color: #207185; }
+
+.waypoint-picker-active button {
+  background: #0c2b33;
+  font-weight: bold; }
 
 .detail-item {
   background: #f0f0f0;

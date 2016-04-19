@@ -13,8 +13,6 @@ var LeftSidebar = require('./leftsidebar.jsx');
 var Splash = require('./splash.jsx');
 var Login = require('./login.jsx');
 
-var haversine = require('../functions').haversine;
-var distance = require('../functions').distance;
 // var GEOCODER_BASE = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
 // use the old v4 api in order to match up with the format retrieved by the
 // mapbox directions library
@@ -124,50 +122,6 @@ var Interface = React.createClass({displayName: "Interface",
     }.bind(this), function(error){
       console.log(error);
     });
-  },
-  offsetWaypoint: function(waypoint, offset, type){
-    // var testRaw = {"latitude":36.06280691708765,"longitude":-94.15738738233847};
-    // var test = [ -94.157387, 36.062806 ];
-    // console.log(this.props.directions);
-    if(this.props.directions.routes){
-      var memo = [null, 0];
-      var coords = this.props.directions.routes[0].geometry.coordinates;
-      coords.forEach(function(point, index){
-        var dist = distance(waypoint, point);
-        if(!memo[0]){
-          memo[0] = dist;
-        }
-        if(dist < memo[0]){
-          memo = [dist, index, coords[index]];
-          // console.log(memo);
-        }
-      });
-      console.log('closest point found to test');
-      console.log(memo);
-
-      var testDist = offset;
-      var curIndex = memo[1];
-      var curCoords = memo[2];
-      var segment;
-      while(testDist > 0){
-        //get the distance between the current and next point and subtract from
-        //testDist
-        var d = haversine(curCoords, coords[curIndex +1]);
-        testDist -= d;
-        if(testDist < 0){
-          segment = [coords[curIndex], coords[curIndex+1]];
-          var interpolate = (d+testDist)/d;
-          var newX = (segment[0][0] - segment[1][0]) * interpolate;
-          var newY = (segment[0][1] - segment[1][1]) * interpolate;
-          var newPt = [segment[0][0] + newX, segment[0][1] + newY];
-          console.log(newPt);
-          return newPt;
-          // break;
-        }
-        curIndex += 1;
-        curCoords = coords[curIndex];
-      }
-    }
   },
   rebuildWaypoints: function(waypoints){
     waypoints = waypoints.map(function(waypoint){
@@ -574,7 +528,7 @@ var Interface = React.createClass({displayName: "Interface",
 
 module.exports = Interface;
 
-},{"../functions":21,"./leftsidebar.jsx":2,"./login.jsx":8,"./rightsidebar.jsx":9,"./splash.jsx":20,"jquery":176,"parse":278,"react":568,"sortablejs":569,"underscore":573}],2:[function(require,module,exports){
+},{"./leftsidebar.jsx":2,"./login.jsx":8,"./rightsidebar.jsx":9,"./splash.jsx":20,"jquery":176,"parse":278,"react":568,"sortablejs":569,"underscore":573}],2:[function(require,module,exports){
 "use strict";
 var $ = require('jquery');
 var _ = require('underscore');
@@ -1446,6 +1400,9 @@ var React = require('react');
 var $ = require('jquery');
 require('leaflet.markercluster');
 
+var haversine = require('../functions').haversine;
+var distance = require('../functions').distance;
+
 var FoodTab = require('./rightsidebar/foodtab.jsx');
 var GasTab = require('./rightsidebar/gastab.jsx');
 var HotelTab = require('./rightsidebar/hoteltab.jsx');
@@ -1470,8 +1427,9 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }
   },
   componentWillMount: function(){
-    var markerLayer = new L.MarkerClusterGroup().addTo(this.props.map); //;L.featureGroup()
-    this.setState({markerLayer: markerLayer});
+    var markerLayer = new L.MarkerClusterGroup().addTo(this.props.map);
+    var offsetLayer = new L.featureGroup();
+    this.setState({markerLayer: markerLayer, offsetLayer: offsetLayer});
   },
   componentDidUpdate: function(){
     if(this.props.activePoint < 0 || this.props.activePoint > this.props.numPoints-1 ){
@@ -1582,6 +1540,75 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
       this.setMarkers(this.state.stations, 'gas');
     }
   },
+  offsetWaypoint: function(waypoint, offset, type){
+    // var testRaw = {"latitude":36.06280691708765,"longitude":-94.15738738233847};
+    // var test = [ -94.157387, 36.062806 ];
+    // console.log(this.props.directions);
+    this.state.offsetLayer.clearLayers();
+    console.log('inside offsetWaypoint');
+    waypoint = waypoint.geometry.coordinates;
+    console.log('decomposed waypoint');
+    console.log(waypoint);
+    console.log(this.props.directions);
+    var check = this.props.directions.directions;
+    if(check){
+      var memo = [null, 0];
+      var coords = check.routes[0].geometry.coordinates;
+      coords.forEach(function(point, index){
+        var dist = distance(waypoint, point);
+        if(!memo[0]){
+          memo[0] = dist;
+        }
+        if(dist < memo[0]){
+          memo = [dist, index, coords[index]];
+        }
+      });
+      console.log('closest point found to test');
+      console.log(memo);
+      var closestPt = memo[2];
+      var testDist = offset;
+      var curIndex = memo[1];
+      var curCoords = memo[2];
+      var segment;
+      while(testDist > 0){
+        //get the distance between the current and next point and subtract from
+        //testDist
+        var d = haversine(curCoords, coords[curIndex +1]);
+        testDist -= d;
+
+        if(testDist < 0){
+          segment = [coords[curIndex], coords[curIndex+1]];
+          var interpolate = (d+testDist)/d;
+          var newX = (segment[0][0] - segment[1][0]) * interpolate;
+          var newY = (segment[0][1] - segment[1][1]) * interpolate;
+          var newPt = [segment[0][0] + newX, segment[0][1] + newY];
+          console.log(newPt);
+          var offsetFound = L.marker([newPt[1], newPt[0]], {
+            draggable: false,
+            icon: L.mapbox.marker.icon({
+                'marker-size': 'medium',
+                'marker-color': '#FF0000',
+                'marker-symbol': '2'
+            })
+          });
+          var offsetOrigin = L.marker([closestPt[1], closestPt[0]], {
+            draggable: false,
+            icon: L.mapbox.marker.icon({
+                'marker-size': 'medium',
+                'marker-color': '#FF0000',
+                'marker-symbol': '1'
+            })
+          });
+          this.state.offsetLayer.addLayer(offsetFound);
+          this.state.offsetLayer.addLayer(offsetOrigin);
+          return newPt;
+          // break;
+        }
+        curIndex += 1;
+        curCoords = coords[curIndex];
+      }
+    }
+  },
   setBusiness: function(type, index){
     // var businesses;
     // console.log(type, index);
@@ -1656,8 +1683,15 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
   },
   setLocation(waypoint, index){
     this.state.markerLayer.clearLayers();
-    this.props.doGeocode(waypoint, this.handleGeocode);
-    this.props.setLocation(waypoint, index);
+    //do location offset if needed here
+    console.log('setLocation call area');
+    console.log(waypoint);
+    waypoint = this.offsetWaypoint(waypoint, 50);
+    console.log(waypoint);
+    console.log('props inside right sidebar');
+    console.log(this.props);
+    // this.props.doGeocode(waypoint, this.handleGeocode);
+    // this.props.setLocation(waypoint, index);
   },
   handleGeocode: function(waypoint){
     this.setState({'currentLocation': waypoint});
@@ -1777,7 +1811,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
 
 module.exports = RightSidebar;
 
-},{"./rightsidebar/foodtab.jsx":11,"./rightsidebar/gastab.jsx":12,"./rightsidebar/hoteltab.jsx":13,"./rightsidebar/indicator.jsx":14,"./rightsidebar/locationtab.jsx":15,"jquery":176,"leaflet.markercluster":178,"react":568}],10:[function(require,module,exports){
+},{"../functions":21,"./rightsidebar/foodtab.jsx":11,"./rightsidebar/gastab.jsx":12,"./rightsidebar/hoteltab.jsx":13,"./rightsidebar/indicator.jsx":14,"./rightsidebar/locationtab.jsx":15,"jquery":176,"leaflet.markercluster":178,"react":568}],10:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Panel = require('react-bootstrap').Panel;
@@ -2183,7 +2217,7 @@ var React = require('react');
 
 var WaypointSettings = React.createClass({displayName: "WaypointSettings",
   render: function(){
-    console.log(this.props);
+    // console.log(this.props);
     return (
       React.createElement("div", {className: "waypoint-search-settings"}, 
         React.createElement("label", null, "Miles"), 

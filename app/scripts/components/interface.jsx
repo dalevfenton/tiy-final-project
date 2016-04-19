@@ -11,8 +11,6 @@ var LeftSidebar = require('./leftsidebar.jsx');
 var Splash = require('./splash.jsx');
 var Login = require('./login.jsx');
 
-var haversine = require('../functions').haversine;
-var distance = require('../functions').distance;
 // var GEOCODER_BASE = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
 // use the old v4 api in order to match up with the format retrieved by the
 // mapbox directions library
@@ -122,50 +120,6 @@ var Interface = React.createClass({
     }.bind(this), function(error){
       console.log(error);
     });
-  },
-  offsetWaypoint: function(waypoint, offset, type){
-    // var testRaw = {"latitude":36.06280691708765,"longitude":-94.15738738233847};
-    // var test = [ -94.157387, 36.062806 ];
-    // console.log(this.props.directions);
-    if(this.props.directions.routes){
-      var memo = [null, 0];
-      var coords = this.props.directions.routes[0].geometry.coordinates;
-      coords.forEach(function(point, index){
-        var dist = distance(waypoint, point);
-        if(!memo[0]){
-          memo[0] = dist;
-        }
-        if(dist < memo[0]){
-          memo = [dist, index, coords[index]];
-          // console.log(memo);
-        }
-      });
-      console.log('closest point found to test');
-      console.log(memo);
-
-      var testDist = offset;
-      var curIndex = memo[1];
-      var curCoords = memo[2];
-      var segment;
-      while(testDist > 0){
-        //get the distance between the current and next point and subtract from
-        //testDist
-        var d = haversine(curCoords, coords[curIndex +1]);
-        testDist -= d;
-        if(testDist < 0){
-          segment = [coords[curIndex], coords[curIndex+1]];
-          var interpolate = (d+testDist)/d;
-          var newX = (segment[0][0] - segment[1][0]) * interpolate;
-          var newY = (segment[0][1] - segment[1][1]) * interpolate;
-          var newPt = [segment[0][0] + newX, segment[0][1] + newY];
-          console.log(newPt);
-          return newPt;
-          // break;
-        }
-        curIndex += 1;
-        curCoords = coords[curIndex];
-      }
-    }
   },
   rebuildWaypoints: function(waypoints){
     waypoints = waypoints.map(function(waypoint){

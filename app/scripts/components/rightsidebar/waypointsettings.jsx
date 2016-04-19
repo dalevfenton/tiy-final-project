@@ -2,7 +2,7 @@ var React = require('react');
 
 var WaypointSettings = React.createClass({
   render: function(){
-    console.log(this.props);
+    // console.log(this.props);
     return (
       <div className="waypoint-search-settings">
         <label>Miles</label>

@@ -11,6 +11,8 @@ var LeftSidebar = require('./leftsidebar.jsx');
 var Splash = require('./splash.jsx');
 var Login = require('./login.jsx');
 
+var haversine = require('../functions').haversine;
+var distance = require('../functions').distance;
 // var GEOCODER_BASE = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
 // use the old v4 api in order to match up with the format retrieved by the
 // mapbox directions library
@@ -42,6 +44,9 @@ var Interface = React.createClass({
     this.userLayer = L.featureGroup().addTo(this.props.map);
     if(Parse.User.current()){
       this.loadRoutes();
+    }
+    if(this.state.userLocationEnabled){
+      this.setUserLocation(this.state.userLocation);
     }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
@@ -108,7 +113,7 @@ var Interface = React.createClass({
               '.json?&access_token=' + L.mapbox.accessToken +
               query ;
     $.ajax(url).then(function(data){
-      console.log(data);
+      // console.log(data);
       var newpoint = data.features[0];
       obj.geometry.coordinates = newpoint.center;
       obj.properties.name = newpoint.place_name;
@@ -117,6 +122,50 @@ var Interface = React.createClass({
     }.bind(this), function(error){
       console.log(error);
     });
+  },
+  offsetWaypoint: function(waypoint, offset, type){
+    // var testRaw = {"latitude":36.06280691708765,"longitude":-94.15738738233847};
+    // var test = [ -94.157387, 36.062806 ];
+    // console.log(this.props.directions);
+    if(this.props.directions.routes){
+      var memo = [null, 0];
+      var coords = this.props.directions.routes[0].geometry.coordinates;
+      coords.forEach(function(point, index){
+        var dist = distance(waypoint, point);
+        if(!memo[0]){
+          memo[0] = dist;
+        }
+        if(dist < memo[0]){
+          memo = [dist, index, coords[index]];
+          // console.log(memo);
+        }
+      });
+      console.log('closest point found to test');
+      console.log(memo);
+
+      var testDist = offset;
+      var curIndex = memo[1];
+      var curCoords = memo[2];
+      var segment;
+      while(testDist > 0){
+        //get the distance between the current and next point and subtract from
+        //testDist
+        var d = haversine(curCoords, coords[curIndex +1]);
+        testDist -= d;
+        if(testDist < 0){
+          segment = [coords[curIndex], coords[curIndex+1]];
+          var interpolate = (d+testDist)/d;
+          var newX = (segment[0][0] - segment[1][0]) * interpolate;
+          var newY = (segment[0][1] - segment[1][1]) * interpolate;
+          var newPt = [segment[0][0] + newX, segment[0][1] + newY];
+          console.log(newPt);
+          return newPt;
+          // break;
+        }
+        curIndex += 1;
+        curCoords = coords[curIndex];
+      }
+    }
   },
   rebuildWaypoints: function(waypoints){
     waypoints = waypoints.map(function(waypoint){
@@ -133,7 +182,7 @@ var Interface = React.createClass({
   },
   setMapView: function(newpoint){
     //check if we have a route on the screen
-    console.log('setMapView called', newpoint);
+    // console.log('setMapView called', newpoint);
     if(this.props.directionsLayer._currentWaypoint !== undefined){
       //a drag is happening so don't reset view
       return newpoint;
@@ -182,7 +231,7 @@ var Interface = React.createClass({
   waypointSet: function(e){
   },
   updateMap: function(){
-    console.log(this.props.directions);
+    // console.log(this.props.directions);
     if(this.props.directions.queryable()){
       this.props.directions.query({ proximity: this.props.map.getCenter() });
     }else{
@@ -212,17 +261,17 @@ var Interface = React.createClass({
     var userLocation = null;
     if(this.state.userLocationEnabled){
       userLocation = this.state.userLocation.geometry.coordinates;
-
+      // console.log(userLocation);
       var marker = L.marker([userLocation[1], userLocation[0]],
         {
           draggable: false,
           icon: L.divIcon({
               iconSize: L.point(16, 16),
-              iconAnchor: L.point(8, 8),
               'className': "mapbox-marker-special mapbox-marker-user-icon",
           })
       });
-      marker.addTo(this.props.map);
+      this.userLayer.clearLayers();
+      this.userLayer.addLayer(marker);
     }
 
     return (
@@ -320,7 +369,7 @@ var Interface = React.createClass({
     });
   },
   resetRightSidebarDone: function(){
-    console.log('turning off rightSidebar Reset');
+    // console.log('turning off rightSidebar Reset');
     this.setState({resetRightSidebar: false});
   },
   resetUser: function(result, type){
@@ -361,11 +410,15 @@ var Interface = React.createClass({
     this.updateMap();
     this.setState({currentRoute: this.state.routes[index]});
   },
-  setUserLocation: function(position, load){
-    var userLocation = this.props.directions._normalizeWaypoint(
-      L.latLng(position.coords.latitude, position.coords.longitude)
-    );
-    console.log('location from geolocation watch', userLocation);
+  setUserLocation: function(position){
+    if(position.hasOwnProperty('coords')){
+      position = this.props.directions._normalizeWaypoint(
+        L.latLng(position.coords.latitude, position.coords.longitude)
+      );
+    }
+    this.doGeocode(position, this.userGeocoded);
+  },
+  userGeocoded: function(userLocation){
     this.setState({'userLocation': userLocation, 'userLocationEnabled': true});
     if(this.state.splash){
       this.setMapView(userLocation);
@@ -426,6 +479,7 @@ var Interface = React.createClass({
     if(numPoints < 2){
       numPoints = 2;
     }
+
     this.setMapView();
     this.setState({'numPoints': numPoints});
     // this.forceUpdate();

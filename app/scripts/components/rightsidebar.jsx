@@ -16,7 +16,8 @@ var RightSidebar = React.createClass({
       currentBusiness: null,
       currentTab: "location",
       currentLocation: null,
-      distance: 1610,
+      distance: 1,
+      offsetType: 'after',
       fuelType: 'reg',
       sort: 'distance',
       hotels: null,
@@ -97,9 +98,10 @@ var RightSidebar = React.createClass({
     var url = PROXYURL + 'yelp';
     var lat = waypoint.geometry.coordinates[1] || '-82.3985';
     var long = waypoint.geometry.coordinates[0] || '34.8514';
-    var distance = this.state.distance || '1610'; //distance is in meters, max of 40000
+    // var distance = this.state.distance || '1';
     var catTerm = category + "Term";
     var term = this.state[catTerm] || '';
+    var distance = 1609; //convert miles to meters, max of 40000
     var endpointStr = '?term=' + term +
                       // '&limit=' + 10 +
                       '&ll=' + lat + "," + long +
@@ -157,7 +159,6 @@ var RightSidebar = React.createClass({
     if(!businesses){
       return this;
     }
-    // console.log('type: ', type);
     if((type === 'hotels' || type === 'restaurants') && businesses.hasOwnProperty('businesses')){
       businesses = businesses.businesses;
     }
@@ -221,6 +222,12 @@ var RightSidebar = React.createClass({
     this.getRestaurants(waypoint);
     this.getHotels(waypoint);
   },
+  setSearch: function(field, e){
+    console.log(field, e.target.value);
+    var obj = {};
+    obj[field] = e.target.value;
+    this.setState(obj);
+  },
   render: function(){
     var location = "selector selector-location";
     var hotel = "selector selector-hotel";
@@ -245,7 +252,8 @@ var RightSidebar = React.createClass({
       tab = (<LocationTab location={this.props.location}
         setLocation={this.setLocation} setupGeo={this.props.setupGeo}
         userLocation={this.props.userLocation}
-        state={this.props.state} props={this.props.props} />);
+        state={this.props.state} props={this.props.props}
+        settings={this.state} setSearch={this.setSearch} />);
       this.loadMarkers('all');
       // this.setMarkers(this.state.hotels.businesses, 'hotels');
     }

@@ -1,12 +1,14 @@
 var React = require('react');
 
 var WaypointLocation = require('./waypointlocation.jsx');
+var WaypointSettings = require('./waypointsettings.jsx');
 var Accordion = require('./accordion.jsx');
 
 var LocationTab = React.createClass({
   getInitialState: function(){
     return {
       display: '',
+      activePanel: 'location'
     }
   },
   callLocationSetup: function(bool, e){
@@ -22,21 +24,20 @@ var LocationTab = React.createClass({
   handleSubmit: function(e){
     e.preventDefault();
     this.props.setLocation(this.state.display);
-    this.setState({'loading': 'inputLocation'});
+    // this.setState({'loading': 'inputLocation'});
   },
   handleUserLocation: function(e){
     e.preventDefault();
     console.log(e.target.value);
     this.props.setLocation(this.props.userLocation);
-    this.setState({'loading': 'userLocation'});
+    // this.setState({'loading': 'userLocation'});
   },
   handleWaypointLocation: function(waypointProps){
     console.log(waypointProps);
     this.props.setLocation(waypointProps.waypoint, waypointProps.index);
   },
-  toggleAccordion: function(e){
-    e.preventDefault();
-    // console.log(this.refs);
+  toggleAccordion: function(panel){
+    this.setState({activePanel: panel});
   },
   render: function(){
     // console.log(this.props);
@@ -45,18 +46,25 @@ var LocationTab = React.createClass({
     var waypointsJSX = [];
     // console.log(this.props);
     if(this.props.state.userLocationEnabled){
-      var userLocation = this.props.userLocation.geometry.coordinates;
+      var userLocation = this.props.userLocation;
+      var coords = userLocation.geometry.coordinates;
+      var lat = userLocation[1];
       userLocationJSX = (
         <div>
           <div className="dtr-title">Your Current Location</div>
           <div className="sidebar-info">
-            <span className="sidebar-label">latitude:</span>
-            <span className="sidebar-label-info">{userLocation[1]}</span>
+            <span className="sidebar-label">latitude: </span>
+            <span className="sidebar-label-info">{String(coords[1]).slice(0, 7)}</span>
           </div>
           <div className="sidebar-info">
-            <span className="sidebar-label">longitude:</span>
-            <span className="sidebar-label-info">{userLocation[0]}</span>
+            <span className="sidebar-label">longitude: </span>
+            <span className="sidebar-label-info">{String(coords[0]).slice(0, 8)}</span>
           </div>
+          <div className="sidebar-info">
+            <span className="sidebar-label">address: </span>
+            <span className="sidebar-label-info">{userLocation.properties.name}</span>
+          </div>
+          <WaypointSettings setSearch={this.props.setSearch} props={this.props.settings} />
           <div className="sidebar-waypoint-picker">
             <button  onClick={this.handleUserLocation}>Lookup Stops</button>
           </div>
@@ -123,7 +131,9 @@ var LocationTab = React.createClass({
           index={waypoints.length+1} active={active} />
       )
     }
+    var waypointDisable = false;
     if(waypointsJSX.length < 1){
+      waypointDisable = true;
       waypointsJSX = (
         <div className="sidebar-waypoint-picker text-center">no waypoints set</div>
       );
@@ -141,15 +151,30 @@ var LocationTab = React.createClass({
       </form>
     );
 
+    var locationToggle = false;
+    var waypointsToggle = false;
+    var addressToggle = false;
+    if(this.state.activePanel == 'location'){
+      locationToggle = true;
+    }
+    if(this.state.activePanel == 'waypoints'){
+      waypointsToggle = true;
+    }
+    if(this.state.activePanel == 'address'){
+      addressToggle = true;
+    }
     return (
       <div className="sidebar-tab">
         <div className="waypoint-container waypoint-active">
-          <Accordion toggle={true} title={"Find A Stop Near You"}
-            jsx={userLocationJSX} />
-          <Accordion toggle={false} title={"Find A Stop Near A Waypoint"}
-            jsx={waypointsJSX} />
-          <Accordion toggle={false} title={"Find A Stop Near An Address"}
-            jsx={addressJSX} />
+          <Accordion toggle={locationToggle} title={"Find A Stop Near You"}
+            jsx={userLocationJSX} panel="location"
+            toggleAccordion={this.toggleAccordion} disabled={false} />    
+          <Accordion toggle={addressToggle} title={"Find A Stop Near An Address"}
+            jsx={addressJSX} panel="address"
+            toggleAccordion={this.toggleAccordion} disabled={false} />
+          <Accordion toggle={waypointsToggle} title={"Find A Stop Near A Waypoint"}
+            jsx={waypointsJSX} panel="waypoints"
+            toggleAccordion={this.toggleAccordion} disabled={waypointDisable} />
         </div>
       </div>
     );

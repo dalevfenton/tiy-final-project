@@ -1,29 +1,34 @@
 var React = require('react');
+var Panel = require('react-bootstrap').Panel;
 
 var Accordion = React.createClass({
-  getInitialState: function(){
-    return {
-      toggle: this.props.toggle
-    }
-  },
   toggle: function(e){
     e.preventDefault();
-    this.setState({toggle: !this.state.toggle});
+    console.log(this.props.panel);
+    if(!this.props.disabled){
+      this.props.toggleAccordion(this.props.panel);
+    }
   },
   render: function(){
     var bodyClass = "sidebar-accordion-body accordion-hide";
-    if(!this.state.toggle){
+    if(!this.props.toggle){
       bodyClass = "sidebar-accordion-body"
+    }
+    var titleClass = "sidebar-accordion-title dtr-title";
+    if(this.props.disabled){
+      titleClass += " selector-disabled"
     }
     return (
       <div className="sidebar-accordion">
-        <div className="sidebar-accordion-title dtr-title"
+        <div className={titleClass}
            onClick={this.toggle} ref="currentLocation">
           - {this.props.title} -
         </div>
-        <div className={bodyClass}>
-          {this.props.jsx}
-        </div>
+        <Panel collapsible expanded={this.props.toggle}>
+          <div className={bodyClass}>
+            {this.props.jsx}
+          </div>
+        </Panel>
       </div>
     );
   }

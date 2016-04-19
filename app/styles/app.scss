@@ -460,13 +460,6 @@ button.waypoint-remove{
   color: $accent-color-darken;
 }
 
-.selector-disabled{
-  color: lighten(black, 70%);
-  cursor: default;
-  & > span:hover{
-    color: lighten(black, 70%);
-  }
-}
 .selector-indicator{
   width: 16px;
   height: 16px;
@@ -479,6 +472,12 @@ button.waypoint-remove{
   right: 20%;
   font-size: 8px;
 }
+.sidebar-accordion{
+  border-bottom: 1px solid $accent-color-darken;
+  &:first-of-type{
+    border-top: 1px solid $accent-color-darken;
+  }
+}
 .sidebar-accordion-title{
   padding: 10px;
   background-color: $bg-color-lighten;
@@ -489,13 +488,20 @@ button.waypoint-remove{
     color: $accent-color;
   }
 }
+.panel{
+  margin: 0;
+}
+.panel-body{
+  padding: 0;
+}
+.panel-default{
+  border: none;
+}
 .sidebar-accordion-body{
   position: relative;
-  // max-height: 80%;
-  // overflow-y: scroll;
-  // overflow-x: hidden;
-  //
-  padding: 10px 0;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 0;
   transition: .5s ease-in-out;
 }
 // .accordion-hide{
@@ -523,8 +529,15 @@ button.waypoint-remove{
   display: inline-block;
   padding: 0 5px 5px 5px;
   font-weight: bold;
-  margin-left: 10%;
+  margin-left: 5%;
   width: 30%;
+  vertical-align: top;
+}
+.sidebar-label-info{
+  display: inline-block;
+  width: 50%;
+  margin-right: 5%;
+  margin-left: -4px;
 }
 .sidebar-waypoint-picker{
   position: relative;
@@ -564,6 +577,9 @@ button.waypoint-remove{
 .station-detail-distance{
 
 }
+.address{
+  text-align: center;
+}
 //Loading Component Styles
 .icon-refresh-animate {
   animation-name: rotateThis;
@@ -600,11 +616,11 @@ button.waypoint-remove{
 }
 .mapbox-marker-user-icon{
   background: $accent-color-darken;
-  animation-name: color-pulse;
-  animation-duration: 1s;
-  animation-direction: alternate;
-  animation-iteration-count: infinite;
-  animation-timing-function: linear;
+  // animation-name: color-pulse;
+  // animation-duration: 1s;
+  // animation-direction: alternate;
+  // animation-iteration-count: infinite;
+  // animation-timing-function: linear;
 }
 .mapbox-marker-user-icon::before{
   content: '';
@@ -617,11 +633,29 @@ button.waypoint-remove{
   to   { transform: scale( .8 ); background: $accent-color; }
 }
 
-@media (max-width: 1200px) {
+.selector-disabled{
+  color: lighten(black, 70%);
+  cursor: default;
+  &:hover{
+    color: lighten(black, 70%);
+  }
+  & > span:hover{
+    color: lighten(black, 70%);
+  }
+}
+
+@media (max-width: 1500px) {
   //setup sidebars to take up 50% of the screen width when open
   .splash-container{
     width: 90%;
   }
+  .map-overlay{
+    width: 35%;
+  }
+}
+
+@media (max-width: 900px) {
+  //setup sidebars to take up 50% of the screen width when open
   .map-overlay{
     width: 45%;
   }

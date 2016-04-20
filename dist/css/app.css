@@ -5836,7 +5836,7 @@ button {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20% 0; }
+  padding: 5em 0; }
 
 .hourglass {
   display: block;
@@ -6041,7 +6041,7 @@ html, body {
   transition: .25s;
   display: inline-block;
   margin-left: -4px; }
-  .close-overlay:hover, .close-overlay:active {
+  .close-overlay:hover {
     color: rbg(150, 150, 150); }
 
 .sidebar-left {
@@ -6219,6 +6219,7 @@ button.waypoint-remove {
   .location-selectors li {
     display: inline-block;
     width: 25%;
+    height: 40px;
     text-align: center; }
     .location-selectors li:not(:first-of-type) {
       margin-left: -4px; }
@@ -6234,11 +6235,32 @@ button.waypoint-remove {
   padding: 10px 0;
   transition: .25s ease-in-out; }
   .selector > span:hover {
-    color: #3bb2d0; }
+    color: #3bb2d0;
+    fill: #3bb2d0; }
+
+.selector > svg {
+  height: 30px;
+  padding: 5px 0;
+  vertical-align: bottom;
+  transition: .25s ease-in-out; }
+  .selector > svg:hover {
+    color: #3bb2d0;
+    fill: #3bb2d0; }
 
 .selector-active {
   background: #f0f0f0;
-  color: #207185; }
+  color: #207185;
+  fill: #207185; }
+
+.selector-disabled {
+  color: #b3b3b3;
+  fill: #b3b3b3;
+  cursor: default; }
+  .selector-disabled:hover {
+    color: #b3b3b3; }
+  .selector-disabled > span:hover, .selector-disabled > svg:hover, .selector-disabled > svg:active {
+    color: #b3b3b3;
+    fill: #b3b3b3; }
 
 .selector-indicator {
   width: 16px;
@@ -6387,14 +6409,6 @@ button.waypoint-remove {
   to {
     transform: scale(0.8);
     background: #3bb2d0; } }
-.selector-disabled {
-  color: #b3b3b3;
-  cursor: default; }
-  .selector-disabled:hover {
-    color: #b3b3b3; }
-  .selector-disabled > span:hover {
-    color: #b3b3b3; }
-
 @media (max-width: 1500px) {
   .splash-container {
     width: 90%; }

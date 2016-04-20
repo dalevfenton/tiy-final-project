@@ -219,13 +219,13 @@ var Interface = React.createClass({displayName: "Interface",
     if(this.state.userLocationEnabled){
       userLocation = this.state.userLocation.geometry.coordinates;
       // console.log(userLocation);
-      var marker = L.marker([userLocation[1], userLocation[0]],
-        {
-          draggable: false,
-          icon: L.divIcon({
-              iconSize: L.point(16, 16),
-              'className': "mapbox-marker-special mapbox-marker-user-icon",
-          })
+      var marker = L.marker([userLocation[1], userLocation[0]], {
+        draggable: false,
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'medium',
+            'marker-color': '#DF8E7A',
+            'marker-symbol': 'star'
+        })
       });
       this.userLayer.clearLayers();
       this.userLayer.addLayer(marker);
@@ -1510,7 +1510,9 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }
   },
   componentWillMount: function(){
-    var markerLayer = new L.MarkerClusterGroup().addTo(this.props.map);
+    var markerLayer = new L.MarkerClusterGroup({
+      disableClusteringAtZoom: 15
+    }).addTo(this.props.map);
     var offsetLayer = new L.featureGroup().addTo(this.props.map);
     this.setState({markerLayer: markerLayer, offsetLayer: offsetLayer});
   },
@@ -1695,20 +1697,6 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }
   },
   setBusiness: function(type, index){
-    // var businesses;
-    // console.log(type, index);
-    // if(type === 'hotels'){
-    //   businesses = this.state.hotels.businesses;
-    // }
-    // if(type === 'restaurants'){
-    //   businesses = this.state.retaurants.businesses;
-    // }
-    // if(type === 'gas'){
-    //   businesses = this.state.stations;
-    // }
-    // console.log(this.state);
-    // console.log(businesses);
-    // console.log(businesses[index]);
     this.setState({currentBusiness: {type: type, index: index}});
   },
   setMarkers: function(businesses, type){
@@ -1718,11 +1706,9 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     if((type === 'hotels' || type === 'restaurants') && businesses.hasOwnProperty('businesses')){
       businesses = businesses.businesses;
     }
-    // console.log(businesses);
     businesses.forEach(function(business, index){
       var coords, address, city, state, zip, name;
       if(type == 'gas'){
-        // console.log('gas marker: ', business);
         coords = {latitude: business.lat, longitude: business.lng};
         address = business.address;
         city = business.city;
@@ -1743,14 +1729,34 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
         this.state.currentBusiness.index == index ){
         className += " marker-active";
       }
+      var icon;
+      if(type == 'restaurants'){
+        icon = L.mapbox.marker.icon({
+            'marker-size': 'small',
+            'marker-color': '#3bb2d0',
+            'marker-symbol': 'restaurant'
+        })
+      }
+      if(type == 'hotels'){
+        icon = L.mapbox.marker.icon({
+            'marker-size': 'small',
+            'marker-color': '#3bb2d0',
+            'marker-symbol': 'lodging'
+        })
+      }
+      if(type == 'gas'){
+        icon = L.mapbox.marker.icon({
+            'marker-size': 'small',
+            'marker-color': '#3bb2d0',
+            'marker-symbol': 'fuel'
+        })
+      }
       var marker = L.marker([coords.latitude, coords.longitude],
         {
           draggable: false,
-          icon: L.divIcon({
-              iconSize: L.point(32, 32),
-              'className': className,
-          })
+          icon: icon
       });
+
       // console.log(business);
       var popupContent =
         '<div>' +
@@ -1873,7 +1879,8 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
                 "aria-hidden": "true", 
                 onClick: this.setCurrent, 
                 ref: "selector-food"
-              }), 
+              }
+              ), 
               React.createElement(Indicator, {items: this.state.restaurants})
             ), 
             React.createElement("li", {className: gas}, 

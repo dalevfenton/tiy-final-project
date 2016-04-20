@@ -217,13 +217,13 @@ var Interface = React.createClass({
     if(this.state.userLocationEnabled){
       userLocation = this.state.userLocation.geometry.coordinates;
       // console.log(userLocation);
-      var marker = L.marker([userLocation[1], userLocation[0]],
-        {
-          draggable: false,
-          icon: L.divIcon({
-              iconSize: L.point(16, 16),
-              'className': "mapbox-marker-special mapbox-marker-user-icon",
-          })
+      var marker = L.marker([userLocation[1], userLocation[0]], {
+        draggable: false,
+        icon: L.mapbox.marker.icon({
+            'marker-size': 'medium',
+            'marker-color': '#DF8E7A',
+            'marker-symbol': 'star'
+        })
       });
       this.userLayer.clearLayers();
       this.userLayer.addLayer(marker);

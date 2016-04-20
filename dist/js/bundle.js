@@ -2311,7 +2311,9 @@ var React = require('react');
 
 var WaypointSettings = React.createClass({displayName: "WaypointSettings",
   render: function(){
-    // console.log(this.props);
+    //find closest point to current route
+    //find distance to start and end of route from that point
+    //set slider to min 0 and max of distance based on radio
     return (
       React.createElement("div", {className: "waypoint-search-settings"}, 
         React.createElement("label", null, "Miles"), 

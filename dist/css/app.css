@@ -6119,7 +6119,7 @@ html, body {
   text-transform: capitalize; }
 
 #waypoint-list {
-  max-height: 80vh;
+  max-height: 60vh;
   overflow-y: auto; }
 
 .waypoint-container {
@@ -6276,10 +6276,12 @@ button.waypoint-remove {
 .panel-default {
   border: none; }
 
+.sidebar-body {
+  overflow-y: auto;
+  max-height: 75vh; }
+
 .sidebar-accordion-body {
   position: relative;
-  max-height: 60vh;
-  overflow-y: auto;
   padding: 0;
   transition: .5s ease-in-out; }
 

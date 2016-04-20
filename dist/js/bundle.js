@@ -350,7 +350,6 @@ var Interface = React.createClass({displayName: "Interface",
     this.setState({activePoint: index});
   },
   setLocation: function(waypoint, index){
-    // console.log(waypoint, index);
     this.setState({activePoint: index});
   },
   setLogin: function(e){
@@ -1485,6 +1484,8 @@ require('leaflet.markercluster');
 
 var haversine = require('../functions').haversine;
 var distance = require('../functions').distance;
+var findClosest = require('../functions').findClosest;
+var offsetWaypoint = require('../functions').offsetWaypoint;
 
 var FoodTab = require('./rightsidebar/foodtab.jsx');
 var GasTab = require('./rightsidebar/gastab.jsx');
@@ -1625,76 +1626,51 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }
   },
   offsetWaypoint: function(waypoint, offset, type){
-    if(!this.state.currentLocation){
+    console.log('inside offsetWaypoint');
+    var original = waypoint;
+    console.log(this.state.currentLocation);
+    console.log(waypoint);
+    // if(!this.state.currentLocation){
+    //   return waypoint;
+    // }
+    var check = this.props.directions.directions;
+    console.log(check);
+    if(!check){
       return waypoint;
     }
     this.state.offsetLayer.clearLayers();
-    console.log('inside offsetWaypoint');
-    waypoint = waypoint.geometry.coordinates;
-    console.log('decomposed waypoint');
-    console.log(waypoint);
-    console.log(this.props.directions);
-    var check = this.props.directions.directions;
-    if(check){
-      var memo = [null, 0];
-      var coords = check.routes[0].geometry.coordinates;
-      coords.forEach(function(point, index){
-        var dist = distance(waypoint, point);
-        if(!memo[0]){
-          memo[0] = dist;
-        }
-        if(dist < memo[0]){
-          memo = [dist, index, coords[index]];
-        }
-      });
-      console.log('closest point found to test');
-      console.log(memo);
-      var closestPt = memo[2];
-      var testDist = offset;
-      var curIndex = memo[1];
-      var curCoords = memo[2];
-      var segment;
-      while(testDist > 0 || curIndex < coords.length){
-        //get the distance between the current and next point and subtract from
-        //testDist
-        var d = haversine(curCoords, coords[curIndex +1]);
-        testDist -= d;
+    // waypoint = waypoint.geometry.coordinates;
+    var coords = check.routes[0].geometry.coordinates;
 
-        if(testDist < 0 ){
-          segment = [coords[curIndex], coords[curIndex+1]];
-          var interpolate = (d+testDist)/d;
-          var newX = (segment[0][0] - segment[1][0]) * interpolate;
-          var newY = (segment[0][1] - segment[1][1]) * interpolate;
-          var newPt = [segment[0][0] + newX, segment[0][1] + newY];
+    var memo = findClosest(waypoint, coords);
+    console.log('result from findClosest in rightsidebar.offsetWaypoint');
+    console.log(memo);
+    var curIndex = memo[1];
+    var curCoords = memo[2];
 
-          var offsetFound = L.marker([newPt[1], newPt[0]], {
-            draggable: false,
-            icon: L.mapbox.marker.icon({
-                'marker-size': 'medium',
-                'marker-color': '#FF0000',
-                'marker-symbol': '2'
-            })
-          });
-          var offsetOrigin = L.marker([closestPt[1], closestPt[0]], {
-            draggable: false,
-            icon: L.mapbox.marker.icon({
-                'marker-size': 'medium',
-                'marker-color': '#FF0000',
-                'marker-symbol': '1'
-            })
-          });
-          this.state.offsetLayer.addLayer(offsetFound);
-          this.state.offsetLayer.addLayer(offsetOrigin);
-          console.log(newPt);
-          newPt = this.props.directions._normalizeWaypoint(newPt);
-          console.log(newPt);
-          return newPt;
-          // break;
-        }
-        curIndex += 1;
-        curCoords = coords[curIndex];
-      }
-    }
+
+    var newPt = offsetWaypoint(offset, coords, curIndex, curCoords);
+    var offsetFound = L.marker([newPt[1], newPt[0]], {
+      draggable: false,
+      icon: L.mapbox.marker.icon({
+          'marker-size': 'medium',
+          'marker-color': '#FF0000',
+          'marker-symbol': '2'
+      })
+    });
+    var offsetOrigin = L.marker([memo[2][1], memo[2][0]], {
+      draggable: false,
+      icon: L.mapbox.marker.icon({
+          'marker-size': 'medium',
+          'marker-color': '#FF0000',
+          'marker-symbol': '1'
+      })
+    });
+    this.state.offsetLayer.addLayer(offsetFound);
+    this.state.offsetLayer.addLayer(offsetOrigin);
+    newPt = this.props.directions._normalizeWaypoint(L.latLng(newPt[0], newPt[1]));
+    console.log(newPt);
+    return newPt;
   },
   setBusiness: function(type, index){
     this.setState({currentBusiness: {type: type, index: index}});
@@ -1818,7 +1794,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     //display the active tab
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
-      tab = (React.createElement(LocationTab, {location: this.props.location, 
+      tab = (React.createElement(LocationTab, {currentLocation: this.props.currentLocation, 
         setLocation: this.setLocation, setupGeo: this.props.setupGeo, 
         userLocation: this.props.userLocation, 
         state: this.props.state, props: this.props.props, 
@@ -1828,7 +1804,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
-      tab = (React.createElement(HotelTab, {location: this.props.location, hotels: this.state.hotels, 
+      tab = (React.createElement(HotelTab, {hotels: this.state.hotels, 
         setBusiness: this.setBusiness}));
       this.loadMarkers('hotels');
     }else if(!this.state.hotels){
@@ -1836,15 +1812,16 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
-      tab = (React.createElement(FoodTab, {location: this.props.location, 
-        restaurants: this.state.restaurants, setBusiness: this.setBusiness}));
+      tab = (React.createElement(FoodTab, {restaurants: this.state.restaurants, 
+        setBusiness: this.setBusiness}));
       this.loadMarkers('restaurants');
     }else if(!this.state.restaurants){
       food = "selector selector-food selector-disabled";
     }
     if(this.state.currentTab == 'gas'){
       gas = "selector selector-gas selector-active";
-      tab = (React.createElement(GasTab, {location: this.props.location, stations: this.state.stations}));
+      tab = (React.createElement(GasTab, {stations: this.state.stations, 
+        setBusiness: this.setBusiness}));
       this.loadMarkers('gas');
     }else if(!this.state.stations){
       gas = "selector selector-gas selector-disabled";
@@ -2180,13 +2157,17 @@ var LocationTab = React.createClass({displayName: "LocationTab",
     var waypointDisable = false;
     var waypointSettings = (
       React.createElement(WaypointSettings, {setSearch: this.props.setSearch, 
-        props: this.props.settings}
+        props: this.props.settings, directions: this.props.props.directions}
       ) );
     if(waypointsJSX.length < 1){
       waypointDisable = true;
       waypointsJSX = (
         React.createElement("div", {className: "sidebar-waypoint-picker text-center"}, "no waypoints set")
       );
+      waypointSettings = "";
+    }
+    // console.log('this.props: ', this.props);
+    if(!this.props.settings.currentLocation || waypointDisable ){
       waypointSettings = "";
     }
     var addressJSX = (
@@ -2316,13 +2297,27 @@ module.exports = WaypointLocation;
 "use strict";
 var React = require('react');
 
+var findClosest = require('../../functions').findClosest;
+var offsetWaypoint = require('../../functions').offsetWaypoint;
+
 var WaypointSettings = React.createClass({displayName: "WaypointSettings",
   render: function(){
     //find closest point to current route
+    // console.log(this.props);
+    // var check = this.props.directions.directions;
+    // if(!check){
+    //   return (<div></div>);
+    // }
+    // console.log(this.props);
+    // var coords = check.routes[0].geometry.coordinates;
+    // var closestPt = findClosest(this.props.props.currentLocation, coords);
+    // console.log('closest point found to route from currentLocation');
+    // console.log(closestPt);
     //find distance to start and end of route from that point
     //set slider to min 0 and max of distance based on radio
     return (
       React.createElement("div", {className: "waypoint-search-settings"}, 
+        React.createElement("input", {type: "range"}), 
         React.createElement("label", null, "Miles"), 
         React.createElement("input", {type: "number", min: 0, max: 10, placeholder: "1", 
           onChange: this.props.setSearch.bind(null, 'distance'), 
@@ -2341,7 +2336,7 @@ var WaypointSettings = React.createClass({displayName: "WaypointSettings",
 
 module.exports = WaypointSettings;
 
-},{"react":568}],19:[function(require,module,exports){
+},{"../../functions":21,"react":568}],19:[function(require,module,exports){
 "use strict";
 var React = require('react');
 
@@ -2466,7 +2461,9 @@ module.exports = Splash;
 "use strict";
 module.exports = {
   haversine: haversine,
-  distance: distance
+  distance: distance,
+  findClosest: findClosest,
+  offsetWaypoint: offsetWaypoint
 }
 
 //extend Number prototype with toRadians and toDegrees methods
@@ -2502,13 +2499,60 @@ function haversine(coord1, coord2){
           Math.sin(Δλ/2) * Math.sin(Δλ/2); //do crazy trig math
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); //more math
   return (R * c);
-}
+};
 
 //simple coordinate distance between two points on a cartesian plane
 function distance(pt1, pt2){
   var dX = pt1[0] - pt2[0];
   var dY = pt1[1] - pt2[1];
   return Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2));
+};
+
+function findClosest(waypoint, coords){
+  // console.log(waypoint);
+  // console.log(coords);
+  if(!waypoint || !coords ){
+    return waypoint;
+  }
+  waypoint = waypoint.geometry.coordinates;
+
+  var memo = [null, 0];
+  coords.forEach(function(point, index){
+    var dist = distance(waypoint, point);
+    if(!memo[0]){
+      memo[0] = dist;
+    }
+    if(dist < memo[0]){
+      memo = [dist, index, coords[index]];
+    }
+  });
+  console.log('closest point found to route');
+  console.log(memo);
+  return memo;
+};
+
+function offsetWaypoint( offset, coords, curIndex, curCoords){
+  var segment;
+  while( offset > 0 || curIndex < coords.length ){
+    //get the distance between the current and next point and subtract from
+    //the offset we have
+    var d = haversine(curCoords, coords[curIndex +1]);
+    offset -= d;
+
+    if(offset < 0 ){
+      segment = [coords[curIndex], coords[curIndex+1]];
+      var interpolate = (d+offset)/d;
+      var newX = (segment[0][0] - segment[1][0]) * interpolate;
+      var newY = (segment[0][1] - segment[1][1]) * interpolate;
+      var newPt = [segment[0][0] + newX, segment[0][1] + newY];
+      console.log(newPt);
+      return newPt;
+      // break;
+    }
+    curIndex += 1;
+    curCoords = coords[curIndex];
+  }
+
 };
 
 },{}],22:[function(require,module,exports){

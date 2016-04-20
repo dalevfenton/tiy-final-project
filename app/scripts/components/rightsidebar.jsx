@@ -4,6 +4,8 @@ require('leaflet.markercluster');
 
 var haversine = require('../functions').haversine;
 var distance = require('../functions').distance;
+var findClosest = require('../functions').findClosest;
+var offsetWaypoint = require('../functions').offsetWaypoint;
 
 var FoodTab = require('./rightsidebar/foodtab.jsx');
 var GasTab = require('./rightsidebar/gastab.jsx');
@@ -144,76 +146,51 @@ var RightSidebar = React.createClass({
     }
   },
   offsetWaypoint: function(waypoint, offset, type){
-    if(!this.state.currentLocation){
+    console.log('inside offsetWaypoint');
+    var original = waypoint;
+    console.log(this.state.currentLocation);
+    console.log(waypoint);
+    // if(!this.state.currentLocation){
+    //   return waypoint;
+    // }
+    var check = this.props.directions.directions;
+    console.log(check);
+    if(!check){
       return waypoint;
     }
     this.state.offsetLayer.clearLayers();
-    console.log('inside offsetWaypoint');
-    waypoint = waypoint.geometry.coordinates;
-    console.log('decomposed waypoint');
-    console.log(waypoint);
-    console.log(this.props.directions);
-    var check = this.props.directions.directions;
-    if(check){
-      var memo = [null, 0];
-      var coords = check.routes[0].geometry.coordinates;
-      coords.forEach(function(point, index){
-        var dist = distance(waypoint, point);
-        if(!memo[0]){
-          memo[0] = dist;
-        }
-        if(dist < memo[0]){
-          memo = [dist, index, coords[index]];
-        }
-      });
-      console.log('closest point found to test');
-      console.log(memo);
-      var closestPt = memo[2];
-      var testDist = offset;
-      var curIndex = memo[1];
-      var curCoords = memo[2];
-      var segment;
-      while(testDist > 0 || curIndex < coords.length){
-        //get the distance between the current and next point and subtract from
-        //testDist
-        var d = haversine(curCoords, coords[curIndex +1]);
-        testDist -= d;
+    // waypoint = waypoint.geometry.coordinates;
+    var coords = check.routes[0].geometry.coordinates;
 
-        if(testDist < 0 ){
-          segment = [coords[curIndex], coords[curIndex+1]];
-          var interpolate = (d+testDist)/d;
-          var newX = (segment[0][0] - segment[1][0]) * interpolate;
-          var newY = (segment[0][1] - segment[1][1]) * interpolate;
-          var newPt = [segment[0][0] + newX, segment[0][1] + newY];
+    var memo = findClosest(waypoint, coords);
+    console.log('result from findClosest in rightsidebar.offsetWaypoint');
+    console.log(memo);
+    var curIndex = memo[1];
+    var curCoords = memo[2];
 
-          var offsetFound = L.marker([newPt[1], newPt[0]], {
-            draggable: false,
-            icon: L.mapbox.marker.icon({
-                'marker-size': 'medium',
-                'marker-color': '#FF0000',
-                'marker-symbol': '2'
-            })
-          });
-          var offsetOrigin = L.marker([closestPt[1], closestPt[0]], {
-            draggable: false,
-            icon: L.mapbox.marker.icon({
-                'marker-size': 'medium',
-                'marker-color': '#FF0000',
-                'marker-symbol': '1'
-            })
-          });
-          this.state.offsetLayer.addLayer(offsetFound);
-          this.state.offsetLayer.addLayer(offsetOrigin);
-          console.log(newPt);
-          newPt = this.props.directions._normalizeWaypoint(newPt);
-          console.log(newPt);
-          return newPt;
-          // break;
-        }
-        curIndex += 1;
-        curCoords = coords[curIndex];
-      }
-    }
+
+    var newPt = offsetWaypoint(offset, coords, curIndex, curCoords);
+    var offsetFound = L.marker([newPt[1], newPt[0]], {
+      draggable: false,
+      icon: L.mapbox.marker.icon({
+          'marker-size': 'medium',
+          'marker-color': '#FF0000',
+          'marker-symbol': '2'
+      })
+    });
+    var offsetOrigin = L.marker([memo[2][1], memo[2][0]], {
+      draggable: false,
+      icon: L.mapbox.marker.icon({
+          'marker-size': 'medium',
+          'marker-color': '#FF0000',
+          'marker-symbol': '1'
+      })
+    });
+    this.state.offsetLayer.addLayer(offsetFound);
+    this.state.offsetLayer.addLayer(offsetOrigin);
+    newPt = this.props.directions._normalizeWaypoint(L.latLng(newPt[0], newPt[1]));
+    console.log(newPt);
+    return newPt;
   },
   setBusiness: function(type, index){
     this.setState({currentBusiness: {type: type, index: index}});
@@ -337,7 +314,7 @@ var RightSidebar = React.createClass({
     //display the active tab
     if(this.state.currentTab == 'location'){
       location = "selector selector-location selector-active";
-      tab = (<LocationTab location={this.props.location}
+      tab = (<LocationTab currentLocation={this.props.currentLocation}
         setLocation={this.setLocation} setupGeo={this.props.setupGeo}
         userLocation={this.props.userLocation}
         state={this.props.state} props={this.props.props}
@@ -347,7 +324,7 @@ var RightSidebar = React.createClass({
     }
     if(this.state.currentTab == 'hotel'){
       hotel = "selector selector-hotel selector-active";
-      tab = (<HotelTab location={this.props.location} hotels={this.state.hotels}
+      tab = (<HotelTab hotels={this.state.hotels}
         setBusiness={this.setBusiness} />);
       this.loadMarkers('hotels');
     }else if(!this.state.hotels){
@@ -355,15 +332,16 @@ var RightSidebar = React.createClass({
     }
     if(this.state.currentTab == 'food'){
       food = "selector selector-food selector-active";
-      tab = (<FoodTab location={this.props.location}
-        restaurants={this.state.restaurants} setBusiness={this.setBusiness} />);
+      tab = (<FoodTab restaurants={this.state.restaurants}
+        setBusiness={this.setBusiness} />);
       this.loadMarkers('restaurants');
     }else if(!this.state.restaurants){
       food = "selector selector-food selector-disabled";
     }
     if(this.state.currentTab == 'gas'){
       gas = "selector selector-gas selector-active";
-      tab = (<GasTab location={this.props.location} stations={this.state.stations} />);
+      tab = (<GasTab stations={this.state.stations}
+        setBusiness={this.setBusiness} />);
       this.loadMarkers('gas');
     }else if(!this.state.stations){
       gas = "selector selector-gas selector-disabled";

@@ -348,7 +348,6 @@ var Interface = React.createClass({
     this.setState({activePoint: index});
   },
   setLocation: function(waypoint, index){
-    // console.log(waypoint, index);
     this.setState({activePoint: index});
   },
   setLogin: function(e){

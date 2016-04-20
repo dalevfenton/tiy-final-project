@@ -1,6 +1,8 @@
 module.exports = {
   haversine: haversine,
-  distance: distance
+  distance: distance,
+  findClosest: findClosest,
+  offsetWaypoint: offsetWaypoint
 }
 
 //extend Number prototype with toRadians and toDegrees methods
@@ -36,11 +38,58 @@ function haversine(coord1, coord2){
           Math.sin(Δλ/2) * Math.sin(Δλ/2); //do crazy trig math
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); //more math
   return (R * c);
-}
+};
 
 //simple coordinate distance between two points on a cartesian plane
 function distance(pt1, pt2){
   var dX = pt1[0] - pt2[0];
   var dY = pt1[1] - pt2[1];
   return Math.sqrt(Math.pow(dX, 2) + Math.pow(dY, 2));
+};
+
+function findClosest(waypoint, coords){
+  // console.log(waypoint);
+  // console.log(coords);
+  if(!waypoint || !coords ){
+    return waypoint;
+  }
+  waypoint = waypoint.geometry.coordinates;
+
+  var memo = [null, 0];
+  coords.forEach(function(point, index){
+    var dist = distance(waypoint, point);
+    if(!memo[0]){
+      memo[0] = dist;
+    }
+    if(dist < memo[0]){
+      memo = [dist, index, coords[index]];
+    }
+  });
+  console.log('closest point found to route');
+  console.log(memo);
+  return memo;
+};
+
+function offsetWaypoint( offset, coords, curIndex, curCoords){
+  var segment;
+  while( offset > 0 || curIndex < coords.length ){
+    //get the distance between the current and next point and subtract from
+    //the offset we have
+    var d = haversine(curCoords, coords[curIndex +1]);
+    offset -= d;
+
+    if(offset < 0 ){
+      segment = [coords[curIndex], coords[curIndex+1]];
+      var interpolate = (d+offset)/d;
+      var newX = (segment[0][0] - segment[1][0]) * interpolate;
+      var newY = (segment[0][1] - segment[1][1]) * interpolate;
+      var newPt = [segment[0][0] + newX, segment[0][1] + newY];
+      console.log(newPt);
+      return newPt;
+      // break;
+    }
+    curIndex += 1;
+    curCoords = coords[curIndex];
+  }
+
 };

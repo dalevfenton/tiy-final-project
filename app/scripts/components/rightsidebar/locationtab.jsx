@@ -134,13 +134,17 @@ var LocationTab = React.createClass({
     var waypointDisable = false;
     var waypointSettings = (
       <WaypointSettings setSearch={this.props.setSearch}
-        props={this.props.settings}
+        props={this.props.settings} directions={this.props.props.directions}
       /> );
     if(waypointsJSX.length < 1){
       waypointDisable = true;
       waypointsJSX = (
         <div className="sidebar-waypoint-picker text-center">no waypoints set</div>
       );
+      waypointSettings = "";
+    }
+    // console.log('this.props: ', this.props);
+    if(!this.props.settings.currentLocation || waypointDisable ){
       waypointSettings = "";
     }
     var addressJSX = (

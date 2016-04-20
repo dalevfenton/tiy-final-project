@@ -74,8 +74,6 @@ var Interface = React.createClass({displayName: "Interface",
     //figure out what type of location we have and then
     //format a string to properly work with the geocoding api
     var obj;
-    console.log('eObj inside doGeocode:');
-    console.log(eObj);
     if(typeof eObj == 'object'){
       if(eObj.type == "Feature"){
         obj = eObj;
@@ -108,6 +106,7 @@ var Interface = React.createClass({displayName: "Interface",
     }else{
       //something isn't right, let's get out of here
       console.log('something inst right');
+      return this;
     }
     // console.log(locationParsed);
     var query = '';
@@ -369,7 +368,6 @@ var Interface = React.createClass({displayName: "Interface",
     this.setState({currentRoute: this.state.routes[index]});
   },
   setUserLocation: function(position){
-    console.log('does position have the property coords?', position.hasOwnProperty('coords'));
     if(position.coords){
       position = this.props.directions._normalizeWaypoint(
         L.latLng(position.coords.latitude, position.coords.longitude)
@@ -2433,21 +2431,26 @@ Parse.serverURL = 'http://tiy-dvf-final-project.herokuapp.com';
 
 var startPt, startZoom, userLocationEnabled;
 
-if ("geolocation" in navigator && localStorage.getItem("geolocation") === "true") {
-  /* geolocation is available */
-  navigator.geolocation.getCurrentPosition(function(position) {
-    startPt = [position.coords.latitude, position.coords.longitude];
-    startZoom = 13;
-    userLocationEnabled = true;
-    setupApp(startPt, startZoom, userLocationEnabled);
-  }, function(error){
+setTimeout(doStuff, 0);
+
+function doStuff(){
+  if ("geolocation" in navigator && localStorage.getItem("geolocation") === "true") {
+    /* geolocation is available */
+    navigator.geolocation.getCurrentPosition(function(position) {
+      startPt = [position.coords.latitude, position.coords.longitude];
+      startZoom = 13;
+      userLocationEnabled = true;
+      setupApp(startPt, startZoom, userLocationEnabled);
+    }, function(error){
+      doNoPositionSetup(error);
+    });
+  } else {
+    /* geolocation IS NOT available */
+    var error = {code: 4, message:'geolocation not available'};
     doNoPositionSetup(error);
-  });
-} else {
-  /* geolocation IS NOT available */
-  var error = {code: 4, message:'geolocation not available'};
-  doNoPositionSetup(error);
+  }
 }
+
 // doNoPositionSetup({code: '5', message: 'app starting user not prompted'});
 
 function doNoPositionSetup(error){

@@ -5830,6 +5830,39 @@ button {
 .hide-me {
   display: none; }
 
+.hourglass-wrapper {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20% 0; }
+
+.hourglass {
+  display: block;
+  background: #f0f0f0;
+  margin: 3em auto;
+  width: 4em;
+  height: 8em;
+  box-shadow: inset #f0f0f0 0 0 0 0, inset #207185 0 4em 0 0, inset #f0f0f0 0 0 8em 0;
+  animation: hourglass 1s linear infinite; }
+
+.outer {
+  fill: #207185; }
+
+.middle {
+  fill: #f0f0f0; }
+
+@keyframes hourglass {
+  0% {
+    transform: rotate(0deg);
+    box-shadow: inset #f0f0f0 0 0 0 0, inset #207185 0 4em 0 0, inset #f0f0f0 0 8em 0 0, inset #207185 0 8em 0 0; }
+  80% {
+    transform: rotate(0deg);
+    box-shadow: inset #f0f0f0 0 4em 0 0, inset #207185 0 4em 0 0, inset #f0f0f0 0 4em 0 0, inset #207185 0 8em 0 0; }
+  100% {
+    transform: rotate(180deg);
+    box-shadow: inset #f0f0f0 0 4em 0 0, inset #207185 0 4em 0 0, inset #f0f0f0 0 4em 0 0, inset #207185 0 8em 0 0; } }
 html, body {
   height: 100%;
   min-height: 100%;
@@ -5850,7 +5883,8 @@ html, body {
   top: 0;
   left: 0;
   height: 100%;
-  width: 100%; }
+  width: 100%;
+  background: #f0f0f0; }
 
 #mapbox-ui {
   position: absolute;
@@ -6071,7 +6105,7 @@ html, body {
   text-transform: capitalize; }
 
 #waypoint-list {
-  max-height: 50vh;
+  max-height: 80vh;
   overflow-y: auto; }
 
 .waypoint-container {
@@ -6230,7 +6264,7 @@ button.waypoint-remove {
 
 .sidebar-accordion-body {
   position: relative;
-  max-height: 40vh;
+  max-height: 60vh;
   overflow-y: auto;
   padding: 0;
   transition: .5s ease-in-out; }

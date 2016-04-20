@@ -14,21 +14,26 @@ Parse.serverURL = 'http://tiy-dvf-final-project.herokuapp.com';
 
 var startPt, startZoom, userLocationEnabled;
 
-if ("geolocation" in navigator && localStorage.getItem("geolocation") === "true") {
-  /* geolocation is available */
-  navigator.geolocation.getCurrentPosition(function(position) {
-    startPt = [position.coords.latitude, position.coords.longitude];
-    startZoom = 13;
-    userLocationEnabled = true;
-    setupApp(startPt, startZoom, userLocationEnabled);
-  }, function(error){
+setTimeout(doStuff, 0);
+
+function doStuff(){
+  if ("geolocation" in navigator && localStorage.getItem("geolocation") === "true") {
+    /* geolocation is available */
+    navigator.geolocation.getCurrentPosition(function(position) {
+      startPt = [position.coords.latitude, position.coords.longitude];
+      startZoom = 13;
+      userLocationEnabled = true;
+      setupApp(startPt, startZoom, userLocationEnabled);
+    }, function(error){
+      doNoPositionSetup(error);
+    });
+  } else {
+    /* geolocation IS NOT available */
+    var error = {code: 4, message:'geolocation not available'};
     doNoPositionSetup(error);
-  });
-} else {
-  /* geolocation IS NOT available */
-  var error = {code: 4, message:'geolocation not available'};
-  doNoPositionSetup(error);
+  }
 }
+
 // doNoPositionSetup({code: '5', message: 'app starting user not prompted'});
 
 function doNoPositionSetup(error){

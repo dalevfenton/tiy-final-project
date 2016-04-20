@@ -33,6 +33,66 @@ $accent-color-lighten: lighten($accent-color, 20%);
 $error-color: rgb(190, 21, 21);
 $bg-color-lighten: rgb(240, 240, 240);
 $dark-bg-color: rgb(50,50,50);
+
+//------------------------------------------------------------------------------
+//                            LOADING SCREEN
+//------------------------------------------------------------------------------
+.hourglass-wrapper{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20% 0;
+}
+.hourglass{
+    display:block;
+    background: $bg-color-lighten;
+    margin:3em auto;
+    width:4em;
+    height:8em;
+    box-shadow:
+        inset $bg-color-lighten 0 0 0 0,
+        inset $accent-color-darken 0 4em 0 0,
+        inset $bg-color-lighten 0 0 8em 0;
+    animation:hourglass 1s linear infinite;
+}
+
+.outer{
+    fill: $accent-color-darken;
+}
+
+.middle{
+    fill: $bg-color-lighten;
+}
+
+@keyframes hourglass{
+    0%{
+        transform:rotate(0deg);
+        box-shadow:
+            inset $bg-color-lighten 0 0 0 0,
+            inset $accent-color-darken 0 4em 0 0,
+            inset $bg-color-lighten 0 8em 0 0,
+            inset $accent-color-darken 0 8em 0 0;
+    }
+    80%{
+        transform:rotate(0deg);
+        box-shadow:
+            inset $bg-color-lighten 0 4em 0 0,
+            inset $accent-color-darken 0 4em 0 0,
+            inset $bg-color-lighten 0 4em 0 0,
+            inset $accent-color-darken 0 8em 0 0;
+    }
+    100%{
+        transform:rotate(180deg);
+        box-shadow:
+            inset $bg-color-lighten 0 4em 0 0,
+            inset $accent-color-darken 0 4em 0 0,
+            inset $bg-color-lighten 0 4em 0 0,
+            inset $accent-color-darken 0 8em 0 0;
+    }
+}
+
 //------------------------------------------------------------------------------
 //                            PAGE LAYOUT STYLES
 //------------------------------------------------------------------------------
@@ -41,6 +101,7 @@ html, body{
   height: 100%;
   min-height: 100%;
   font-family: 'Open Sans', sans-serif;
+
 }
 .map-container{
   position: absolute;
@@ -58,6 +119,7 @@ html, body{
   left: 0;
   height: 100%;
   width: 100%;
+  background: $bg-color-lighten;
 }
 #mapbox-ui{
   position: absolute;
@@ -313,7 +375,7 @@ html, body{
 //------------------------------------------------------------------------------
 
 #waypoint-list{
-  max-height: 50vh;
+  max-height: 80vh;
   overflow-y: auto;
 }
 .waypoint-container{
@@ -499,7 +561,7 @@ button.waypoint-remove{
 }
 .sidebar-accordion-body{
   position: relative;
-  max-height: 40vh;
+  max-height: 60vh;
   overflow-y: auto;
   padding: 0;
   transition: .5s ease-in-out;

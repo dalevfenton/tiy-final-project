@@ -17,7 +17,7 @@ var RightSidebar = React.createClass({
   getInitialState: function(){
     return {
       currentBusiness: null,
-      currentTab: "location",
+      currentTab: 'location',
       currentLocation: null,
       distance: 1,
       offsetType: 'after',
@@ -30,7 +30,7 @@ var RightSidebar = React.createClass({
   },
   componentWillMount: function(){
     var markerLayer = new L.MarkerClusterGroup().addTo(this.props.map);
-    var offsetLayer = new L.featureGroup();
+    var offsetLayer = new L.featureGroup().addTo(this.props.map);
     this.setState({markerLayer: markerLayer, offsetLayer: offsetLayer});
   },
   componentDidUpdate: function(){
@@ -80,7 +80,6 @@ var RightSidebar = React.createClass({
                       '/' + sort + '/';
 
     var url = url+endpointStr;
-    // console.log( url );
     $.ajax( url ).then(function(data){
       var gas = $.extend({}, JSON.parse(data));
       console.log('data from gas feed api');
@@ -143,9 +142,9 @@ var RightSidebar = React.createClass({
     }
   },
   offsetWaypoint: function(waypoint, offset, type){
-    // var testRaw = {"latitude":36.06280691708765,"longitude":-94.15738738233847};
-    // var test = [ -94.157387, 36.062806 ];
-    // console.log(this.props.directions);
+    if(!this.state.currentLocation){
+      return waypoint;
+    }
     this.state.offsetLayer.clearLayers();
     console.log('inside offsetWaypoint');
     waypoint = waypoint.geometry.coordinates;
@@ -172,19 +171,19 @@ var RightSidebar = React.createClass({
       var curIndex = memo[1];
       var curCoords = memo[2];
       var segment;
-      while(testDist > 0){
+      while(testDist > 0 || curIndex < coords.length){
         //get the distance between the current and next point and subtract from
         //testDist
         var d = haversine(curCoords, coords[curIndex +1]);
         testDist -= d;
 
-        if(testDist < 0){
+        if(testDist < 0 ){
           segment = [coords[curIndex], coords[curIndex+1]];
           var interpolate = (d+testDist)/d;
           var newX = (segment[0][0] - segment[1][0]) * interpolate;
           var newY = (segment[0][1] - segment[1][1]) * interpolate;
           var newPt = [segment[0][0] + newX, segment[0][1] + newY];
-          console.log(newPt);
+
           var offsetFound = L.marker([newPt[1], newPt[0]], {
             draggable: false,
             icon: L.mapbox.marker.icon({
@@ -203,6 +202,9 @@ var RightSidebar = React.createClass({
           });
           this.state.offsetLayer.addLayer(offsetFound);
           this.state.offsetLayer.addLayer(offsetOrigin);
+          console.log(newPt);
+          newPt = this.props.directions._normalizeWaypoint(newPt);
+          console.log(newPt);
           return newPt;
           // break;
         }
@@ -286,14 +288,14 @@ var RightSidebar = React.createClass({
   setLocation(waypoint, index){
     this.state.markerLayer.clearLayers();
     //do location offset if needed here
-    console.log('setLocation call area');
-    console.log(waypoint);
-    waypoint = this.offsetWaypoint(waypoint, 50);
-    console.log(waypoint);
-    console.log('props inside right sidebar');
-    console.log(this.props);
-    // this.props.doGeocode(waypoint, this.handleGeocode);
-    // this.props.setLocation(waypoint, index);
+    // console.log('setLocation call area');
+    // console.log(waypoint);
+    waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
+    // console.log(waypoint);
+    // console.log('props inside right sidebar');
+    // console.log(this.props);
+    this.props.doGeocode(waypoint, this.handleGeocode);
+    this.props.setLocation(waypoint, index);
   },
   handleGeocode: function(waypoint){
     this.setState({'currentLocation': waypoint});

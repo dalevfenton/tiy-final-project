@@ -6136,7 +6136,7 @@ button.waypoint-remove {
     padding: 10px 5%; }
 
 .slid-up {
-  transform: translateY(-250%); }
+  transform: scaleY(0); }
 
 .message-success {
   color: white;

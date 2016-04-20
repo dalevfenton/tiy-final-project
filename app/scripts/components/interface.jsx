@@ -72,6 +72,8 @@ var Interface = React.createClass({
     //figure out what type of location we have and then
     //format a string to properly work with the geocoding api
     var obj;
+    console.log('eObj inside doGeocode:');
+    console.log(eObj);
     if(typeof eObj == 'object'){
       if(eObj.type == "Feature"){
         obj = eObj;
@@ -365,7 +367,8 @@ var Interface = React.createClass({
     this.setState({currentRoute: this.state.routes[index]});
   },
   setUserLocation: function(position){
-    if(position.hasOwnProperty('coords')){
+    console.log('does position have the property coords?', position.hasOwnProperty('coords'));
+    if(position.coords){
       position = this.props.directions._normalizeWaypoint(
         L.latLng(position.coords.latitude, position.coords.longitude)
       );

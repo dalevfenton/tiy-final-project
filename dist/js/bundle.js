@@ -1753,7 +1753,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     //do location offset if needed here
     // console.log('setLocation call area');
     // console.log(waypoint);
-    waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
+    // waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
     // console.log(waypoint);
     // console.log('props inside right sidebar');
     // console.log(this.props);
@@ -2209,8 +2209,8 @@ var LocationTab = React.createClass({displayName: "LocationTab",
             toggleAccordion: this.toggleAccordion, disabled: false}), 
           React.createElement(Accordion, {toggle: waypointsToggle, title: "Find A Stop Near A Waypoint", 
             jsx: waypointsJSX, panel: "waypoints", 
-            toggleAccordion: this.toggleAccordion, disabled: waypointDisable}), 
-          waypointSettings
+            toggleAccordion: this.toggleAccordion, disabled: waypointDisable})
+        
         )
       )
     );

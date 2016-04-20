@@ -273,7 +273,7 @@ var RightSidebar = React.createClass({
     //do location offset if needed here
     // console.log('setLocation call area');
     // console.log(waypoint);
-    waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
+    // waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
     // console.log(waypoint);
     // console.log('props inside right sidebar');
     // console.log(this.props);

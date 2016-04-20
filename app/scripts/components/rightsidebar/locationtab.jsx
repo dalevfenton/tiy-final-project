@@ -64,7 +64,7 @@ var LocationTab = React.createClass({
             <span className="sidebar-label">address: </span>
             <span className="sidebar-label-info">{userLocation.properties.name}</span>
           </div>
-          <WaypointSettings setSearch={this.props.setSearch} props={this.props.settings} />
+
           <div className="sidebar-waypoint-picker">
             <button  onClick={this.handleUserLocation}>Lookup Stops</button>
           </div>
@@ -132,11 +132,16 @@ var LocationTab = React.createClass({
       )
     }
     var waypointDisable = false;
+    var waypointSettings = (
+      <WaypointSettings setSearch={this.props.setSearch}
+        props={this.props.settings}
+      /> );
     if(waypointsJSX.length < 1){
       waypointDisable = true;
       waypointsJSX = (
         <div className="sidebar-waypoint-picker text-center">no waypoints set</div>
       );
+      waypointSettings = "";
     }
     var addressJSX = (
       <form className="waypoint" onSubmit={this.handleSubmit}>
@@ -163,18 +168,22 @@ var LocationTab = React.createClass({
     if(this.state.activePanel == 'address'){
       addressToggle = true;
     }
+
+
+
     return (
       <div className="sidebar-tab">
         <div className="waypoint-container waypoint-active">
           <Accordion toggle={locationToggle} title={"Find A Stop Near You"}
             jsx={userLocationJSX} panel="location"
-            toggleAccordion={this.toggleAccordion} disabled={false} />    
+            toggleAccordion={this.toggleAccordion} disabled={false} />
           <Accordion toggle={addressToggle} title={"Find A Stop Near An Address"}
             jsx={addressJSX} panel="address"
             toggleAccordion={this.toggleAccordion} disabled={false} />
           <Accordion toggle={waypointsToggle} title={"Find A Stop Near A Waypoint"}
             jsx={waypointsJSX} panel="waypoints"
             toggleAccordion={this.toggleAccordion} disabled={waypointDisable} />
+          {waypointSettings}
         </div>
       </div>
     );

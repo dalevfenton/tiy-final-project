@@ -75,6 +75,8 @@ function setupApp(startPt, startZoom, userLocationEnabled){
   // var directionsErrorsControl = L.mapbox.directions.errorsControl('errors', directions)
   //     .addTo(map);
 
+
+  //we should duplicate some of this functionality
   var directionsRoutesControl = L.mapbox.directions.routesControl('routes', directions)
       .addTo(map);
 

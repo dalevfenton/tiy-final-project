@@ -128,7 +128,7 @@ var WaypointsTab = React.createClass({
       message = (<div id="success-message" className="message-success text-center">{this.state.message}</div>);
     }
     return (
-      <div>
+      <div className="sidebar-body">
         <div className="top-layer">
           <div id="waypoint-list">
             {waypoints}

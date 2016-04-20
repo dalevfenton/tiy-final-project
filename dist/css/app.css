@@ -5895,6 +5895,9 @@ html, body {
   padding-right: 20%;
   background: black; }
 
+#directions {
+  display: none; }
+
 .splash-screen {
   position: absolute;
   top: 0;
@@ -6117,10 +6120,6 @@ html, body {
 
 .login-welcome {
   text-transform: capitalize; }
-
-#waypoint-list {
-  max-height: 60vh;
-  overflow-y: auto; }
 
 .waypoint-container {
   position: relative; }

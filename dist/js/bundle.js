@@ -1274,7 +1274,7 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
       message = (React.createElement("div", {id: "success-message", className: "message-success text-center"}, this.state.message));
     }
     return (
-      React.createElement("div", null, 
+      React.createElement("div", {className: "sidebar-body"}, 
         React.createElement("div", {className: "top-layer"}, 
           React.createElement("div", {id: "waypoint-list"}, 
             waypoints
@@ -2583,6 +2583,8 @@ function setupApp(startPt, startZoom, userLocationEnabled){
   // var directionsErrorsControl = L.mapbox.directions.errorsControl('errors', directions)
   //     .addTo(map);
 
+
+  //we should duplicate some of this functionality
   var directionsRoutesControl = L.mapbox.directions.routesControl('routes', directions)
       .addTo(map);
 

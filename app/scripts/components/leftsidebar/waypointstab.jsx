@@ -25,8 +25,6 @@ var WaypointsTab = React.createClass({
     }
   },
   handleInput: function(e){
-    console.log('handle input called');
-    console.log(e.target.value);
     this.setState({saveName: e.target.value});
   },
   toggleSaveInput: function(e){

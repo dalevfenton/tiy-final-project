@@ -145,6 +145,7 @@ var Interface = React.createClass({
     // console.log('setMapView called', newpoint);
     if(this.props.directionsLayer._currentWaypoint !== undefined){
       //a drag is happening so don't reset view
+      console.log('drag detected');
       return newpoint;
     }
     var origin = this.props.directions.getOrigin();
@@ -344,6 +345,7 @@ var Interface = React.createClass({
       // console.log(this.state.activePoint);
     }
     this.callback();
+    this.updateMap();
   },
   resetRoute: function(){
     this.props.directions._unload();
@@ -397,8 +399,6 @@ var Interface = React.createClass({
     this.props.directions.setDestination(destination);
     this.props.directions.setWaypoints(waypoints);
     this.updateMap();
-    console.log('setRoute index', index);
-    console.log('setRoute routes', this.state.routes);
     this.setState({currentRoute: this.state.routes[index], updateRoute: true });
   },
   setUserLocation: function(position){

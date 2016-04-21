@@ -402,16 +402,16 @@ var Interface = React.createClass({
   userLocationError: function(error){
     if(error.code == 1){
       //permission denied
-      console.log('gelocation permission denied');
+      // console.log('gelocation permission denied');
     }else if(error.code == 2){
       //position unavailable
-      console.log('geolocation position is unavailable');
+      // console.log('geolocation position is unavailable');
     }else if(error.code == 3){
       //position lookup has timed out
-      console.log('geolocation position lookup timed out');
+      // console.log('geolocation position lookup timed out');
     }else if(error.code == 4){
       //geolocation not available in this browser
-      console.log('geolocation not available');
+      // console.log('geolocation not available');
     }
     this.setState({
       'userLocationEnabled': false,

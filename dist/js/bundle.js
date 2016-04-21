@@ -404,16 +404,16 @@ var Interface = React.createClass({displayName: "Interface",
   userLocationError: function(error){
     if(error.code == 1){
       //permission denied
-      console.log('gelocation permission denied');
+      // console.log('gelocation permission denied');
     }else if(error.code == 2){
       //position unavailable
-      console.log('geolocation position is unavailable');
+      // console.log('geolocation position is unavailable');
     }else if(error.code == 3){
       //position lookup has timed out
-      console.log('geolocation position lookup timed out');
+      // console.log('geolocation position lookup timed out');
     }else if(error.code == 4){
       //geolocation not available in this browser
-      console.log('geolocation not available');
+      // console.log('geolocation not available');
     }
     this.setState({
       'userLocationEnabled': false,
@@ -1753,7 +1753,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
     //do location offset if needed here
     // console.log('setLocation call area');
     // console.log(waypoint);
-    // waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
+    waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
     // console.log(waypoint);
     // console.log('props inside right sidebar');
     // console.log(this.props);
@@ -2209,8 +2209,8 @@ var LocationTab = React.createClass({displayName: "LocationTab",
             toggleAccordion: this.toggleAccordion, disabled: false}), 
           React.createElement(Accordion, {toggle: waypointsToggle, title: "Find A Stop Near A Waypoint", 
             jsx: waypointsJSX, panel: "waypoints", 
-            toggleAccordion: this.toggleAccordion, disabled: waypointDisable})
-        
+            toggleAccordion: this.toggleAccordion, disabled: waypointDisable}), 
+          waypointSettings
         )
       )
     );

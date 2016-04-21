@@ -5904,7 +5904,8 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(212, 212, 212, 0.8); }
+  background: rgba(212, 212, 212, 0.8);
+  overflow-y: auto; }
 
 .splash-container {
   width: 50%;
@@ -6417,7 +6418,18 @@ button.waypoint-remove {
     width: 35%; } }
 @media (max-width: 900px) {
   .map-overlay {
-    width: 45%; } }
+    width: 45%; }
+
+  .geolocation-logo {
+    display: none; }
+
+  .geolocation-info {
+    width: 100%;
+    margin: 0;
+    text-align: center; }
+
+  .splash-container {
+    margin: 5% auto 40% auto; } }
 @media (max-width: 550px) {
   .map-overlay {
     width: 90%; }
@@ -6431,6 +6443,13 @@ button.waypoint-remove {
   .mobile-collapse > *:not(.overlay-control) {
     opacity: 0; }
     .mobile-collapse > *:not(.overlay-control) .collapse-overlay > .overlay-control > span > span {
-      transform: rotate(180deg); } }
+      transform: rotate(180deg); }
+
+  .splash-half {
+    width: 100%;
+    border-right: none; }
+
+  .splash-login {
+    border-top: 1px solid #c8c8c8; } }
 
 /*# sourceMappingURL=app.css.map */

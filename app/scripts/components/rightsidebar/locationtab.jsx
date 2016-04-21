@@ -187,7 +187,7 @@ var LocationTab = React.createClass({
           <Accordion toggle={waypointsToggle} title={"Find A Stop Near A Waypoint"}
             jsx={waypointsJSX} panel="waypoints"
             toggleAccordion={this.toggleAccordion} disabled={waypointDisable} />
-        
+          {waypointSettings}
         </div>
       </div>
     );

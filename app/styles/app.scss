@@ -140,6 +140,7 @@ html, body{
   left: 0;
   right: 0;
   background: rgba(212, 212, 212, .8);
+  overflow-y: auto;
 }
 .splash-container{
   width: 50%;
@@ -754,12 +755,24 @@ button.waypoint-remove{
   .map-overlay{
     width: 35%;
   }
+
 }
 
 @media (max-width: 900px) {
   //setup sidebars to take up 50% of the screen width when open
   .map-overlay{
     width: 45%;
+  }
+  .geolocation-logo{
+    display: none;
+  }
+  .geolocation-info{
+    width: 100%;
+    margin: 0;
+    text-align: center;
+  }
+  .splash-container{
+    margin: 5% auto 40% auto;
   }
 }
 
@@ -784,9 +797,20 @@ button.waypoint-remove{
         }
       }
     }
+  }
 
+
+
+  .splash-half{
+    width: 100%;
+    border-right: none;
+  }
+
+  .splash-login{
+    border-top: 1px solid rgb(200,200,200);
   }
 }
+
 //
 // @media (min-width: 550px) and (max-width: 1200px;) {
 //   //setup sidebars to take up 50% of the screen width when open

@@ -5,7 +5,9 @@ var Login = require('../login.jsx');
 var ProfileTab = React.createClass({
   render: function(){
     return (
-      <Login callback={this.props.resetUser} />
+      <div className="sidebar-login">
+        <Login callback={this.props.resetUser} />
+      </div>
     );
   }
 });

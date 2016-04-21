@@ -6123,6 +6123,9 @@ html, body {
   text-transform: capitalize;
   margin: 14px 0; }
 
+.sidebar-login {
+  margin: 14px 0; }
+
 .waypoint-container {
   position: relative; }
 

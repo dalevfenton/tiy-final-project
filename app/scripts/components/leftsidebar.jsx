@@ -158,7 +158,8 @@ var LeftSidebar = React.createClass({
             currentRoute={this.props.state.currentRoute} />
         );
       }
-
+      console.log('routes check');
+      console.log(this.props.state.routes);
       if(!this.props.state.routes || this.props.state.routes.length < 1){
         savedRoutes = "selector selector-saved selector-disabled";
       }

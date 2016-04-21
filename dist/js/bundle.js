@@ -44,6 +44,7 @@ var Interface = React.createClass({displayName: "Interface",
     this.userLayer = L.featureGroup().addTo(this.props.map);
     if(Parse.User.current()){
       this.loadRoutes();
+      // this.loadUser();
     }
     if(this.state.userLocationEnabled){
       this.setUserLocation(this.state.userLocation);
@@ -265,8 +266,11 @@ var Interface = React.createClass({displayName: "Interface",
   deleteRoute: function(index, cb){
     var routes = this.state.routes;
     var route = routes.splice(index, 1)[0];
+    console.log(route);
+    console.log(Parse.User.current());
     route.destroy().then(function(data){
       cb('success', data);
+      this.resetRoute();
     }.bind(this), function(error){
       console.log('error destroying route');
       cb('error', error);
@@ -282,6 +286,22 @@ var Interface = React.createClass({displayName: "Interface",
       //build out an alert to the user here
       console.log('error fetching user routes on load', error);
     });
+  },
+  loadUser: function(){
+    // console.log(Parse.User.current().attributes);
+    var query = new Parse.Query(Parse.User);
+    query.equalTo('objectId', Parse.User.current().id );
+    query.find().then(
+      function(user){
+        console.log('user loaded from server');
+        console.log(user);
+        // console.log(Parse.User.current().attributes);
+      },
+      function(error){
+        console.log('error loading user');
+        console.log(error);
+      }
+    )
   },
   setupGeo: function(bool){
     if ( bool && "geolocation" in navigator) {
@@ -690,7 +710,8 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
             currentRoute: this.props.state.currentRoute})
         );
       }
-
+      console.log('routes check');
+      console.log(this.props.state.routes);
       if(!this.props.state.routes || this.props.state.routes.length < 1){
         savedRoutes = "selector selector-saved selector-disabled";
       }
@@ -834,7 +855,9 @@ var Login = require('../login.jsx');
 var ProfileTab = React.createClass({displayName: "ProfileTab",
   render: function(){
     return (
-      React.createElement(Login, {callback: this.props.resetUser})
+      React.createElement("div", {className: "sidebar-login"}, 
+        React.createElement(Login, {callback: this.props.resetUser})
+      )
     );
   }
 });
@@ -1329,16 +1352,48 @@ var React = require('react');
 var Parse = require('parse');
 var LinkedStateMixin = require('react/lib/LinkedStateMixin');
 
+function getExtension(filename) {
+    var parts = filename.split('.');
+    return parts[parts.length - 1];
+}
+
 var MiniProfile = React.createClass({displayName: "MiniProfile",
+  getInitialState: function(){
+    return {
+      file: null
+    }
+  },
   componentWillMount: function(){
 
+  },
+  handleFile: function(e){
+    e.preventDefault();
+    var extension = getExtension(e.target.files[0].name);
+    var name = Parse.User.current().id + Date.now() + "." + extension;
+    var file = new Parse.File(name, e.target.files[0]);
+    file.save().then(function(file){
+      var user = Parse.User.current();
+      user.set('avatar', file);
+      user.save();
+      this.forceUpdate();
+    }.bind(this),
+    function(error){
+      //this should output some error to the screen
+      console.log('error saving file', error);
+    });
   },
   render: function(){
     var user = Parse.User.current();
     var avatar = "";
+    console.log('user in render: ');
+    console.log(user);
+    console.log(user.attributes);
     if(user.get('avatar')){
+      console.log('user avatar detected');
+      console.log(user.get('avatar'));
+      console.log(user.get('avatar').url());
       //show user's image avatar
-      avatar = (React.createElement("img", {src: user.get('avatar').get('url')}));
+      avatar = (React.createElement("img", {src: user.get('avatar').url()}));
     }
     var locationCallToAction = "";
     if(localStorage.getItem('geolocation') === undefined){
@@ -1354,6 +1409,11 @@ var MiniProfile = React.createClass({displayName: "MiniProfile",
         React.createElement("div", {className: "login-profile-avatar-wrapper"}, 
           React.createElement("div", {className: "login-profile-avatar"}, 
             avatar
+          ), 
+          React.createElement("form", null, 
+            React.createElement("input", {id: "photo-input", type: "file", 
+            accept: "image/gif, image/jpg, image/jpeg, image/png, image/bmp", 
+            onChange: this.handleFile})
           )
         ), 
         React.createElement("div", {className: "login-welcome dtr-title"}, 
@@ -1391,9 +1451,6 @@ var Login = React.createClass({displayName: "Login",
       user.set("username", this.state.username);
       user.set("password", this.state.password);
       user.set("email", this.state.email);
-      var acl = new Parse.ACL();
-      acl.setPublicReadAccess(false);
-      user.setACL(acl);
       user.signUp()
       .then(
         this.userSuccess.bind(this, 'signup'),

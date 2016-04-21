@@ -66,6 +66,7 @@ var LeftSidebar = React.createClass({
     }
     var self = this;
     route.save().then(function(route){
+      console.log('route saved');
       self.doCb('success', route, cb);
       self.props.addRoute(route);
     }, function(error){
@@ -158,8 +159,7 @@ var LeftSidebar = React.createClass({
             currentRoute={this.props.state.currentRoute} />
         );
       }
-      console.log('routes check');
-      console.log(this.props.state.routes);
+
       if(!this.props.state.routes || this.props.state.routes.length < 1){
         savedRoutes = "selector selector-saved selector-disabled";
       }

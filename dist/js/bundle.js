@@ -210,7 +210,7 @@ var Interface = React.createClass({displayName: "Interface",
     if(this.state.splash && localStorage.getItem("geolocation") === null ){
       return (
         React.createElement(Splash, {setupGeo: this.setupGeo, 
-          resetUser: this.props.resetUser}
+          resetUser: this.resetUser}
         )
       );
     }
@@ -266,8 +266,6 @@ var Interface = React.createClass({displayName: "Interface",
   deleteRoute: function(index, cb){
     var routes = this.state.routes;
     var route = routes.splice(index, 1)[0];
-    console.log(route);
-    console.log(Parse.User.current());
     route.destroy().then(function(data){
       cb('success', data);
       this.resetRoute();
@@ -618,6 +616,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     }
     var self = this;
     route.save().then(function(route){
+      console.log('route saved');
       self.doCb('success', route, cb);
       self.props.addRoute(route);
     }, function(error){
@@ -710,8 +709,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
             currentRoute: this.props.state.currentRoute})
         );
       }
-      console.log('routes check');
-      console.log(this.props.state.routes);
+
       if(!this.props.state.routes || this.props.state.routes.length < 1){
         savedRoutes = "selector selector-saved selector-disabled";
       }

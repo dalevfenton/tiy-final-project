@@ -208,7 +208,7 @@ var Interface = React.createClass({
     if(this.state.splash && localStorage.getItem("geolocation") === null ){
       return (
         <Splash setupGeo={this.setupGeo}
-          resetUser={this.props.resetUser}
+          resetUser={this.resetUser}
         />
       );
     }
@@ -264,8 +264,6 @@ var Interface = React.createClass({
   deleteRoute: function(index, cb){
     var routes = this.state.routes;
     var route = routes.splice(index, 1)[0];
-    console.log(route);
-    console.log(Parse.User.current());
     route.destroy().then(function(data){
       cb('success', data);
       this.resetRoute();

@@ -6119,6 +6119,9 @@ html, body {
     top: 10%;
     position: absolute; }
 
+.user-avatar-img {
+  border-radius: 50%; }
+
 .login-welcome {
   text-transform: capitalize;
   margin: 14px 0; }

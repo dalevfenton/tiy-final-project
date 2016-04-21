@@ -1403,16 +1403,12 @@ var MiniProfile = React.createClass({displayName: "MiniProfile",
   },
   render: function(){
     var user = Parse.User.current();
-    var avatar = "";
-    console.log('user in render: ');
-    console.log(user);
-    console.log(user.attributes);
+    var avatar = (
+      React.createElement("div", {className: "login-profile-avatar"})
+    );
     if(user.get('avatar')){
-      console.log('user avatar detected');
-      console.log(user.get('avatar'));
-      console.log(user.get('avatar').url());
       //show user's image avatar
-      avatar = (React.createElement("img", {src: user.get('avatar').url()}));
+      avatar = (React.createElement("img", {className: "user-avatar-img", src: user.get('avatar').url()}));
     }
     var locationCallToAction = "";
     if(localStorage.getItem('geolocation') === undefined){
@@ -1428,14 +1424,11 @@ var MiniProfile = React.createClass({displayName: "MiniProfile",
     //   accept="image/gif, image/jpg, image/jpeg, image/png, image/bmp"
     //   onChange={this.handleFile} />
     // </form>
-    
+
     return (
       React.createElement("div", {className: "login-profile"}, 
         React.createElement("div", {className: "login-profile-avatar-wrapper"}, 
-          React.createElement("div", {className: "login-profile-avatar"}, 
-            avatar
-          )
-
+          avatar
         ), 
         React.createElement("div", {className: "login-welcome dtr-title"}, 
           "Hi " + user.get('username') + " Let's Hit The Road!"

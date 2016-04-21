@@ -34,16 +34,12 @@ var MiniProfile = React.createClass({
   },
   render: function(){
     var user = Parse.User.current();
-    var avatar = "";
-    console.log('user in render: ');
-    console.log(user);
-    console.log(user.attributes);
+    var avatar = (
+      <div className="login-profile-avatar"></div>
+    );
     if(user.get('avatar')){
-      console.log('user avatar detected');
-      console.log(user.get('avatar'));
-      console.log(user.get('avatar').url());
       //show user's image avatar
-      avatar = (<img src={user.get('avatar').url()} />);
+      avatar = (<img className="user-avatar-img" src={user.get('avatar').url()} />);
     }
     var locationCallToAction = "";
     if(localStorage.getItem('geolocation') === undefined){
@@ -59,14 +55,11 @@ var MiniProfile = React.createClass({
     //   accept="image/gif, image/jpg, image/jpeg, image/png, image/bmp"
     //   onChange={this.handleFile} />
     // </form>
-    
+
     return (
       <div className="login-profile">
         <div className="login-profile-avatar-wrapper">
-          <div className="login-profile-avatar">
-            {avatar}
-          </div>
-
+          {avatar}
         </div>
         <div className="login-welcome dtr-title">
           {"Hi " + user.get('username') + " Let's Hit The Road!"}

@@ -131,7 +131,7 @@ var RightSidebar = React.createClass({
       console.log(error);
     });
   },
-  loadMarkers(type){
+  loadMarkers: function(type){
     if(type === 'all'){
       this.setMarkers(this.state.hotels, 'hotels');
       this.setMarkers(this.state.restaurants, 'restaurants');
@@ -266,7 +266,7 @@ var RightSidebar = React.createClass({
       this.state.markerLayer.addLayer(marker);
     }.bind(this));
   },
-  setLocation(waypoint, index){
+  setLocation: function(waypoint, index){
     this.state.markerLayer.clearLayers();
     //do location offset if needed here
     this.props.setLoading(true);

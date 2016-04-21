@@ -72,7 +72,7 @@ var LeftSidebar = React.createClass({
       self.doCb('error', error, cb);
     });
   },
-  doCb(type, obj, cb){
+  doCb: function(type, obj, cb){
     //callback goes to handleSave in WaypointsTab component for adding /editing Route
     if(cb){
       cb(type, obj);

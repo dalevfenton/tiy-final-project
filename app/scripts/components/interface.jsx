@@ -30,7 +30,7 @@ var Interface = React.createClass({
       numPoints: 2,
       loginToggle: false,
       toggleLeft: false,
-      toggleRight: false,
+      toggleRight: true,
       priorityTab: 'left',
       activePoint: 0,
       currentLocation: {},
@@ -145,7 +145,6 @@ var Interface = React.createClass({
     // console.log('setMapView called', newpoint);
     if(this.props.directionsLayer._currentWaypoint !== undefined){
       //a drag is happening so don't reset view
-      console.log('drag detected');
       return newpoint;
     }
     var origin = this.props.directions.getOrigin();

@@ -9,7 +9,10 @@ var WaypointsTab = React.createClass({
   getInitialState: function(){
     return {
       toggleSaveInput: false,
-      saveName: ''
+      saveName: '',
+      message: '',
+      inError: null,
+      error: null
     }
   },
   componentDidUpdate: function(){
@@ -31,7 +34,10 @@ var WaypointsTab = React.createClass({
     this.props.resetRoute();
     this.setState({
       toggleSaveInput: false,
-      saveName: ''
+      saveName: '',
+      inError: false,
+      error: '',
+      message: ''
     });
   },
   saveRoute: function(e){
@@ -119,7 +125,6 @@ var WaypointsTab = React.createClass({
           Create New Route
         </button>
       );
-      // routeName = this.props.props.state.currentRoute.get('route_name');
     }
 
     var errorMessage = "";

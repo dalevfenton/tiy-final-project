@@ -270,7 +270,7 @@ var Interface = React.createClass({
       routes = [];
     }
     routes.push(route);
-    this.setState({'routes': routes});
+    this.setState({'routes': routes, 'currentRoute': routes[routes.length-1] });
   },
   deleteRoute: function(index, cb){
     var routes = this.state.routes;
@@ -392,6 +392,8 @@ var Interface = React.createClass({
     this.props.directions.setDestination(destination);
     this.props.directions.setWaypoints(waypoints);
     this.updateMap();
+    console.log('setRoute index', index);
+    console.log('setRoute routes', this.state.routes);
     this.setState({currentRoute: this.state.routes[index]});
   },
   setUserLocation: function(position){

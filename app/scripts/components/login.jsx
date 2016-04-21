@@ -30,7 +30,7 @@ var MiniProfile = React.createClass({
           </div>
         </div>
         <div className="login-welcome dtr-title">
-          {"Welcome Back " + user.get('username') + "!"}
+          {"Hi " + user.get('username') + " Let's Hit The Road!"}
         </div>
         {locationCallToAction}
         <button className="geo-auth-button geolocation-authorize" onClick={this.props.logOut}
@@ -86,9 +86,9 @@ var Login = React.createClass({
     this.setState({inError: false, error: '', username: '',
        email: '', password: ''});
   },
-  userError: function(type, error, code, info){
+  userError: function(type, error){
     // console.log('user login failed');
-    console.log(type, error, code, info);
+    // console.log(type, error);
     this.setState({inError: true, error: error});
     this.callback('error', type);
   },

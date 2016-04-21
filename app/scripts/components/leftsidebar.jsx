@@ -20,19 +20,22 @@ var LeftSidebar = React.createClass({
     }
   },
   setCurrent: function(e){
-    // console.log(e);
+    console.log('inside setCurrent');
+    console.log(this.props.state.routes.length);
     if($(e.target).hasClass('glyphicon-user')){
       this.setState({currentTab: 'profile'})
     }
     if($(e.target).hasClass('glyphicon-map-marker')){
       this.setState({currentTab: 'route'})
     }
-    if($(e.target).hasClass('glyphicon-road')){
-      this.setState({currentTab: 'savedRoutes'})
+    if($(e.target).hasClass('glyphicon-road') &&
+      this.props.state.routes &&
+      this.props.state.routes.length > 0 ){
+        this.setState({currentTab: 'savedRoutes'})
     }
   },
   saveRoute: function(name, cb, type){
-    console.log(this.props);
+    // console.log(this.props);
     var route;
     if(type == 'new'){
       var Route = new Parse.Object.extend("Routes");

@@ -14,7 +14,7 @@ var Accordion = React.createClass({
     if(!this.props.toggle){
       bodyClass = "sidebar-accordion-body"
     }
-    var titleClass = "sidebar-accordion-title dtr-title";
+    var titleClass = "sidebar-accordion-title dtr-title sidebar-title-clickable";
     if(this.props.disabled){
       titleClass += " selector-disabled"
     }

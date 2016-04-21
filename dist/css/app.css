@@ -6284,10 +6284,12 @@ button.waypoint-remove {
 .sidebar-accordion-title {
   padding: 10px;
   background-color: #f0f0f0;
-  color: #207185;
+  color: #207185; }
+
+.sidebar-title-clickable {
   transition: .5s ease-in-out;
   cursor: pointer; }
-  .sidebar-accordion-title:hover {
+  .sidebar-title-clickable:hover {
     color: #3bb2d0; }
 
 .panel {
@@ -6341,7 +6343,8 @@ button.waypoint-remove {
   .sidebar-waypoint-picker button {
     width: 100%;
     background-color: #207185;
-    color: white; }
+    color: white;
+    transition: .5s ease-in-out; }
     .sidebar-waypoint-picker button:hover {
       background-color: #3bb2d0; }
   .sidebar-waypoint-picker .waypoint-remove {

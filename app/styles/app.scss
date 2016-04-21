@@ -593,6 +593,8 @@ button.waypoint-remove{
   padding: 10px;
   background-color: $bg-color-lighten;
   color: $accent-color-darken;
+}
+.sidebar-title-clickable{
   transition: .5s ease-in-out;
   cursor: pointer;
   &:hover{
@@ -661,6 +663,7 @@ button.waypoint-remove{
     width: 100%;
     background-color: $accent-color-darken;
     color: white;
+    transition: .5s ease-in-out;
     &:hover{
       background-color: $accent-color;
     }

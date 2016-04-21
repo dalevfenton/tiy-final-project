@@ -20,8 +20,6 @@ var LeftSidebar = React.createClass({
     }
   },
   setCurrent: function(e){
-    console.log('inside setCurrent');
-    console.log(this.props.state.routes.length);
     if($(e.target).hasClass('glyphicon-user')){
       this.setState({currentTab: 'profile'})
     }

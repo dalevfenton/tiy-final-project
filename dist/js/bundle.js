@@ -552,8 +552,6 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     }
   },
   setCurrent: function(e){
-    console.log('inside setCurrent');
-    console.log(this.props.state.routes.length);
     if($(e.target).hasClass('glyphicon-user')){
       this.setState({currentTab: 'profile'})
     }
@@ -1754,9 +1752,7 @@ var RightSidebar = React.createClass({displayName: "RightSidebar",
   setLocation(waypoint, index){
     this.state.markerLayer.clearLayers();
     //do location offset if needed here
-    // console.log('setLocation call area');
-    // console.log(waypoint);
-    waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
+    // waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
     // console.log(waypoint);
     // console.log('props inside right sidebar');
     // console.log(this.props);
@@ -1901,7 +1897,7 @@ var Accordion = React.createClass({displayName: "Accordion",
     if(!this.props.toggle){
       bodyClass = "sidebar-accordion-body"
     }
-    var titleClass = "sidebar-accordion-title dtr-title";
+    var titleClass = "sidebar-accordion-title dtr-title sidebar-title-clickable";
     if(this.props.disabled){
       titleClass += " selector-disabled"
     }
@@ -2200,7 +2196,7 @@ var LocationTab = React.createClass({displayName: "LocationTab",
     }
 
 
-
+    var waypointforJSXPlaceholder = "{waypointSettings}";
     return (
       React.createElement("div", {className: "sidebar-tab"}, 
         React.createElement("div", {className: "waypoint-container waypoint-active"}, 
@@ -2212,8 +2208,8 @@ var LocationTab = React.createClass({displayName: "LocationTab",
             toggleAccordion: this.toggleAccordion, disabled: false}), 
           React.createElement(Accordion, {toggle: waypointsToggle, title: "Find A Stop Near A Waypoint", 
             jsx: waypointsJSX, panel: "waypoints", 
-            toggleAccordion: this.toggleAccordion, disabled: waypointDisable}), 
-          waypointSettings
+            toggleAccordion: this.toggleAccordion, disabled: waypointDisable})
+
         )
       )
     );

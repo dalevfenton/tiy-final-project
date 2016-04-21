@@ -66,7 +66,6 @@ var LeftSidebar = React.createClass({
     }
     var self = this;
     route.save().then(function(route){
-      console.log('route saved');
       self.doCb('success', route, cb);
       self.props.addRoute(route);
     }, function(error){
@@ -74,11 +73,12 @@ var LeftSidebar = React.createClass({
     });
   },
   doCb(type, obj, cb){
+    //callback goes to handleSave in WaypointsTab component for adding /editing Route
     if(cb){
       cb(type, obj);
     }else{
-      console.log('route saved with no callback provided');
-      console.log(type, obj);
+      // console.log('route saved with no callback provided');
+      // console.log(type, obj);
     }
   },
   setParseProps: function(waypoints, parseObj){

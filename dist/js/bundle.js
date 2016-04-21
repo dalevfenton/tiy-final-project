@@ -12,6 +12,7 @@ var LeftSidebar = require('./leftsidebar.jsx');
 
 var Splash = require('./splash.jsx');
 var Login = require('./login.jsx');
+var Loading = require('./loading.jsx');
 
 // var GEOCODER_BASE = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
 // use the old v4 api in order to match up with the format retrieved by the
@@ -34,7 +35,8 @@ var Interface = React.createClass({displayName: "Interface",
       toggleRight: false,
       priorityTab: 'left',
       activePoint: 0,
-      currentLocation: {}
+      currentLocation: {},
+      loading: true
     }
   },
   componentWillMount: function(){
@@ -48,6 +50,8 @@ var Interface = React.createClass({displayName: "Interface",
     }
     if(this.state.userLocationEnabled){
       this.setUserLocation(this.state.userLocation);
+    }else{
+      this.setState({loading: false});
     }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
@@ -214,7 +218,10 @@ var Interface = React.createClass({displayName: "Interface",
         )
       );
     }
-
+    var loadingComponent = "";
+    if(this.state.loading){
+      loadingComponent = (React.createElement(Loading, null));
+    }
     //check if the user's location is known and if so update their marker on the map
     var userLocation = null;
     if(this.state.userLocationEnabled){
@@ -234,6 +241,7 @@ var Interface = React.createClass({displayName: "Interface",
 
     return (
       React.createElement("div", null, 
+        loadingComponent, 
         React.createElement(LeftSidebar, {toggleLeft: this.toggleLeft, 
           addPoint: this.addPoint, addRoute: this.addRoute, state: this.state, 
           directions: this.props.directions, 
@@ -260,6 +268,9 @@ var Interface = React.createClass({displayName: "Interface",
   },
   addRoute: function(route){
     var routes = this.state.routes;
+    if(!routes){
+      routes = [];
+    }
     routes.push(route);
     this.setState({'routes': routes});
   },
@@ -306,6 +317,7 @@ var Interface = React.createClass({displayName: "Interface",
       localStorage.setItem("geolocation", "true");
       /* geolocation is available */
       navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
+      this.setState({loading: true});
     } else {
       /* geolocation IS NOT available */
       localStorage.setItem("geolocation", "false");
@@ -398,6 +410,9 @@ var Interface = React.createClass({displayName: "Interface",
       this.setMapView(userLocation);
       this.setState({splash:false});
     }
+    if(this.state.loading){
+      this.setState({loading: false})
+    }
   },
   toggleLeft: function(e){
     var priority = 'none';
@@ -436,7 +451,8 @@ var Interface = React.createClass({displayName: "Interface",
     this.setState({
       'userLocationEnabled': false,
       'userLocationError': error.message,
-      'splash': false
+      'splash': false,
+      'loading': false
     });
   },
   callback: function(e){
@@ -546,7 +562,7 @@ var Interface = React.createClass({displayName: "Interface",
 
 module.exports = Interface;
 
-},{"./leftsidebar.jsx":2,"./login.jsx":8,"./rightsidebar.jsx":9,"./splash.jsx":20,"jquery":176,"parse":278,"react":568,"sortablejs":569,"underscore":573}],2:[function(require,module,exports){
+},{"./leftsidebar.jsx":2,"./loading.jsx":7,"./login.jsx":8,"./rightsidebar.jsx":9,"./splash.jsx":20,"jquery":176,"parse":278,"react":568,"sortablejs":569,"underscore":573}],2:[function(require,module,exports){
 "use strict";
 var $ = require('jquery');
 var _ = require('underscore');
@@ -616,7 +632,6 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     }
     var self = this;
     route.save().then(function(route){
-      console.log('route saved');
       self.doCb('success', route, cb);
       self.props.addRoute(route);
     }, function(error){
@@ -624,11 +639,12 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     });
   },
   doCb(type, obj, cb){
+    //callback goes to handleSave in WaypointsTab component for adding /editing Route
     if(cb){
       cb(type, obj);
     }else{
-      console.log('route saved with no callback provided');
-      console.log(type, obj);
+      // console.log('route saved with no callback provided');
+      // console.log(type, obj);
     }
   },
   setParseProps: function(waypoints, parseObj){
@@ -1334,9 +1350,11 @@ var Glyphicon = require('react-bootstrap').Glyphicon;
 var Loading = React.createClass({displayName: "Loading",
   render: function(){
     return (
-      React.createElement("div", {className: "loading"}, 
-        React.createElement("h3", null, "Loading..."), 
-        React.createElement(Glyphicon, {className: "icon-refresh-animate", glyph: "refresh"})
+      React.createElement("div", {className: "hourglass-wrapper"}, 
+          React.createElement("svg", {className: "hourglass", xmlns: "http://www.w3.org/2000/svg", viewBox: "0 0 120 206", preserveAspectRatio: "none"}, 
+              React.createElement("path", {className: "middle", d: "M120 0H0v206h120V0zM77.1 133.2C87.5 140.9 92 145 92 152.6V178H28v-25.4c0-7.6 4.5-11.7 14.9-19.4 6-4.5 13-9.6 17.1-17 4.1 7.4 11.1 12.6 17.1 17zM60 89.7c-4.1-7.3-11.1-12.5-17.1-17C32.5 65.1 28 61 28 53.4V28h64v25.4c0 7.6-4.5 11.7-14.9 19.4-6 4.4-13 9.6-17.1 16.9z"}), 
+              React.createElement("path", {className: "outer", d: "M93.7 95.3c10.5-7.7 26.3-19.4 26.3-41.9V0H0v53.4c0 22.5 15.8 34.2 26.3 41.9 3 2.2 7.9 5.8 9 7.7-1.1 1.9-6 5.5-9 7.7C15.8 118.4 0 130.1 0 152.6V206h120v-53.4c0-22.5-15.8-34.2-26.3-41.9-3-2.2-7.9-5.8-9-7.7 1.1-2 6-5.5 9-7.7zM70.6 103c0 18 35.4 21.8 35.4 49.6V192H14v-39.4c0-27.9 35.4-31.6 35.4-49.6S14 81.2 14 53.4V14h92v39.4C106 81.2 70.6 85 70.6 103z"})
+          )
       )
     );
   }
@@ -2450,8 +2468,8 @@ var Login = require('./login.jsx');
 
 var Splash = React.createClass({displayName: "Splash",
   callLocationSetup: function(bool, e){
-    console.log(e);
-    console.log(bool);
+    // console.log(e);
+    // console.log(bool);
     e.preventDefault();
     this.props.setupGeo(bool);
   },

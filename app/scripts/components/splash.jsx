@@ -4,8 +4,8 @@ var Login = require('./login.jsx');
 
 var Splash = React.createClass({
   callLocationSetup: function(bool, e){
-    console.log(e);
-    console.log(bool);
+    // console.log(e);
+    // console.log(bool);
     e.preventDefault();
     this.props.setupGeo(bool);
   },

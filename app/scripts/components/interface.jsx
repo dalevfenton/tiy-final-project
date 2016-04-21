@@ -10,6 +10,7 @@ var LeftSidebar = require('./leftsidebar.jsx');
 
 var Splash = require('./splash.jsx');
 var Login = require('./login.jsx');
+var Loading = require('./loading.jsx');
 
 // var GEOCODER_BASE = 'https://api.mapbox.com/geocoding/v5/mapbox.places/';
 // use the old v4 api in order to match up with the format retrieved by the
@@ -32,7 +33,8 @@ var Interface = React.createClass({
       toggleRight: false,
       priorityTab: 'left',
       activePoint: 0,
-      currentLocation: {}
+      currentLocation: {},
+      loading: true
     }
   },
   componentWillMount: function(){
@@ -46,6 +48,8 @@ var Interface = React.createClass({
     }
     if(this.state.userLocationEnabled){
       this.setUserLocation(this.state.userLocation);
+    }else{
+      this.setState({loading: false});
     }
     // this.props.directions.on('destination', this.destinationSet);
     // this.props.directions.on('waypoint', this.waypointSet);
@@ -212,7 +216,10 @@ var Interface = React.createClass({
         />
       );
     }
-
+    var loadingComponent = "";
+    if(this.state.loading){
+      loadingComponent = (<Loading />);
+    }
     //check if the user's location is known and if so update their marker on the map
     var userLocation = null;
     if(this.state.userLocationEnabled){
@@ -232,6 +239,7 @@ var Interface = React.createClass({
 
     return (
       <div>
+        {loadingComponent}
         <LeftSidebar toggleLeft={this.toggleLeft}
           addPoint={this.addPoint} addRoute={this.addRoute} state={this.state}
           directions={this.props.directions}
@@ -258,6 +266,9 @@ var Interface = React.createClass({
   },
   addRoute: function(route){
     var routes = this.state.routes;
+    if(!routes){
+      routes = [];
+    }
     routes.push(route);
     this.setState({'routes': routes});
   },
@@ -304,6 +315,7 @@ var Interface = React.createClass({
       localStorage.setItem("geolocation", "true");
       /* geolocation is available */
       navigator.geolocation.watchPosition( this.setUserLocation, this.userLocationError);
+      this.setState({loading: true});
     } else {
       /* geolocation IS NOT available */
       localStorage.setItem("geolocation", "false");
@@ -396,6 +408,9 @@ var Interface = React.createClass({
       this.setMapView(userLocation);
       this.setState({splash:false});
     }
+    if(this.state.loading){
+      this.setState({loading: false})
+    }
   },
   toggleLeft: function(e){
     var priority = 'none';
@@ -434,7 +449,8 @@ var Interface = React.createClass({
     this.setState({
       'userLocationEnabled': false,
       'userLocationError': error.message,
-      'splash': false
+      'splash': false,
+      'loading': false
     });
   },
   callback: function(e){

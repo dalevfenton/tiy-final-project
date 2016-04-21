@@ -39,12 +39,12 @@ var RightSidebar = React.createClass({
   },
   componentDidUpdate: function(){
     if(this.props.activePoint < 0 || this.props.activePoint > this.props.numPoints-1 ){
-      console.log('current location not set');
+      // console.log('current location not set');
       return 'no current location set, aborting RightSidebar queries';
     }
     if(this.props.state.resetRightSidebar){
       //reset the state of this sidebar
-      console.log('reseting right sidebar');
+      // console.log('resetting right sidebar');
       this.setState({
         currentBusiness: null,
         currentTab: "location",
@@ -86,10 +86,11 @@ var RightSidebar = React.createClass({
     var url = url+endpointStr;
     $.ajax( url ).then(function(data){
       var gas = $.extend({}, JSON.parse(data));
-      console.log('data from gas feed api');
-      console.log(gas);
+      // console.log('data from gas feed api');
+      // console.log(gas);
       this.setMarkers(gas.stations.slice(0, 20), 'gas');
       this.setState({'stations': gas.stations.slice(0,20)});
+      this.props.setLoading(false);
     }.bind(this), function(error){
       console.log('error getting gas info');
       console.log(error);
@@ -118,12 +119,13 @@ var RightSidebar = React.createClass({
     var url = url+endpointStr;
     // console.log( url );
     $.ajax( url ).then(function(data){
-      console.log('data from yelp api');
-      console.log(data);
+      // console.log('data from yelp api');
+      // console.log(data);
       var obj = {};
       obj[category] = data;
       this.setMarkers(data, category);
       this.setState(obj);
+      this.props.setLoading(false);
     }.bind(this), function(error){
       console.log('error getting yelp info');
       console.log(error);
@@ -146,15 +148,15 @@ var RightSidebar = React.createClass({
     }
   },
   offsetWaypoint: function(waypoint, offset, type){
-    console.log('inside offsetWaypoint');
+    // console.log('inside offsetWaypoint');
     var original = waypoint;
-    console.log(this.state.currentLocation);
-    console.log(waypoint);
+    // console.log(this.state.currentLocation);
+    // console.log(waypoint);
     // if(!this.state.currentLocation){
     //   return waypoint;
     // }
     var check = this.props.directions.directions;
-    console.log(check);
+    // console.log(check);
     if(!check){
       return waypoint;
     }
@@ -163,8 +165,8 @@ var RightSidebar = React.createClass({
     var coords = check.routes[0].geometry.coordinates;
 
     var memo = findClosest(waypoint, coords);
-    console.log('result from findClosest in rightsidebar.offsetWaypoint');
-    console.log(memo);
+    // console.log('result from findClosest in rightsidebar.offsetWaypoint');
+    // console.log(memo);
     var curIndex = memo[1];
     var curCoords = memo[2];
 
@@ -189,7 +191,7 @@ var RightSidebar = React.createClass({
     this.state.offsetLayer.addLayer(offsetFound);
     this.state.offsetLayer.addLayer(offsetOrigin);
     newPt = this.props.directions._normalizeWaypoint(L.latLng(newPt[0], newPt[1]));
-    console.log(newPt);
+    // console.log(newPt);
     return newPt;
   },
   setBusiness: function(type, index){
@@ -262,15 +264,12 @@ var RightSidebar = React.createClass({
         '</div>';
       marker.bindPopup(popupContent).openPopup();
       this.state.markerLayer.addLayer(marker);
-      // marker.addTo(this.props.markerLayer);
-      // this.props.directionsLayer.addLayer(marker);
     }.bind(this));
-    // console.log(this.props);
-    // console.log(this.state);
   },
   setLocation(waypoint, index){
     this.state.markerLayer.clearLayers();
     //do location offset if needed here
+    this.props.setLoading(true);
     // waypoint = this.offsetWaypoint(waypoint, this.state.distance, this.state.offsetType);
     // console.log(waypoint);
     // console.log('props inside right sidebar');
@@ -280,13 +279,14 @@ var RightSidebar = React.createClass({
   },
   handleGeocode: function(waypoint){
     this.setState({'currentLocation': waypoint});
+    this.props.setMapView(waypoint);
     // console.log(this.state);
     this.getStations(waypoint);
     this.getRestaurants(waypoint);
     this.getHotels(waypoint);
   },
   setSearch: function(field, e){
-    console.log(field, e.target.value);
+    // console.log(field, e.target.value);
     var obj = {};
     obj[field] = e.target.value;
     this.setState(obj);

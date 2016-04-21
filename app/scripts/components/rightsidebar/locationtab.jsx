@@ -28,12 +28,10 @@ var LocationTab = React.createClass({
   },
   handleUserLocation: function(e){
     e.preventDefault();
-    console.log(e.target.value);
     this.props.setLocation(this.props.userLocation);
     // this.setState({'loading': 'userLocation'});
   },
   handleWaypointLocation: function(waypointProps){
-    console.log(waypointProps);
     this.props.setLocation(waypointProps.waypoint, waypointProps.index);
   },
   toggleAccordion: function(panel){

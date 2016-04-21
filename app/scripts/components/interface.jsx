@@ -254,8 +254,9 @@ var Interface = React.createClass({
           directions={this.props.directions} activePoint={this.state.activePoint}
           numPoints={this.state.numPoints} doGeocode={this.doGeocode}
           setupGeo={this.setupGeo} setLocation={this.setLocation}
+          setMapView={this.setMapView}
           directionsLayer={this.props.directionsLayer} map={this.props.map}
-          resetRightSidebarDone={this.resetRightSidebarDone}
+          resetRightSidebarDone={this.resetRightSidebarDone} setLoading={this.setLoading}
           userLocation={this.state.userLocation} state={this.state} props={this.props} />
       </div>
     );
@@ -389,6 +390,9 @@ var Interface = React.createClass({
   },
   setLogin: function(e){
     this.setState({login: !this.state.login});
+  },
+  setLoading: function(bool){
+    this.setState({loading: bool});
   },
   setRoute: function(index){
     var waypoints = this.state.routes[index].get('waypoints');

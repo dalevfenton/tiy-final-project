@@ -6257,16 +6257,6 @@ button.waypoint-remove {
   color: #207185;
   fill: #207185; }
 
-.selector-disabled {
-  color: #b3b3b3;
-  fill: #b3b3b3;
-  cursor: default; }
-  .selector-disabled:hover {
-    color: #b3b3b3; }
-  .selector-disabled > span:hover, .selector-disabled > svg:hover, .selector-disabled > svg:active {
-    color: #b3b3b3;
-    fill: #b3b3b3; }
-
 .selector-indicator {
   width: 16px;
   height: 16px;
@@ -6294,6 +6284,16 @@ button.waypoint-remove {
   cursor: pointer; }
   .sidebar-title-clickable:hover {
     color: #3bb2d0; }
+
+.selector-disabled {
+  color: #b3b3b3;
+  fill: #b3b3b3;
+  cursor: default; }
+  .selector-disabled:hover {
+    color: #b3b3b3; }
+  .selector-disabled > span:hover, .selector-disabled > svg:hover, .selector-disabled > svg:active {
+    color: #b3b3b3;
+    fill: #b3b3b3; }
 
 .panel {
   margin: 0; }

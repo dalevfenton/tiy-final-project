@@ -1182,6 +1182,7 @@ module.exports = Waypoint;
 },{"jquery":176,"react":568}],6:[function(require,module,exports){
 "use strict";
 var $ = require('jquery');
+var Parse = require('parse');
 var React = require('react');
 
 
@@ -1288,7 +1289,9 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
         saveInput = "route-name-input";
         buttonText = "Set A Name";
       }
-      save = "trip-button geo-auth-button geolocation-deny";
+      if(Parse.User.current()){
+        save = "trip-button geo-auth-button geolocation-deny";
+      }
     }
     var newButton;
     if(this.props.props.state.currentRoute){
@@ -1342,7 +1345,7 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
 
 module.exports = WaypointsTab;
 
-},{"./waypoint.jsx":5,"jquery":176,"react":568}],7:[function(require,module,exports){
+},{"./waypoint.jsx":5,"jquery":176,"parse":278,"react":568}],7:[function(require,module,exports){
 "use strict";
 var React = require('react');
 var Glyphicon = require('react-bootstrap').Glyphicon;
@@ -1420,17 +1423,19 @@ var MiniProfile = React.createClass({displayName: "MiniProfile",
         )
       );
     }
+    // <form>
+    //   <input id="photo-input" type="file"
+    //   accept="image/gif, image/jpg, image/jpeg, image/png, image/bmp"
+    //   onChange={this.handleFile} />
+    // </form>
+    
     return (
       React.createElement("div", {className: "login-profile"}, 
         React.createElement("div", {className: "login-profile-avatar-wrapper"}, 
           React.createElement("div", {className: "login-profile-avatar"}, 
             avatar
-          ), 
-          React.createElement("form", null, 
-            React.createElement("input", {id: "photo-input", type: "file", 
-            accept: "image/gif, image/jpg, image/jpeg, image/png, image/bmp", 
-            onChange: this.handleFile})
           )
+
         ), 
         React.createElement("div", {className: "login-welcome dtr-title"}, 
           "Hi " + user.get('username') + " Let's Hit The Road!"

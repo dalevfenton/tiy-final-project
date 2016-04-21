@@ -54,17 +54,19 @@ var MiniProfile = React.createClass({
         </div>
       );
     }
+    // <form>
+    //   <input id="photo-input" type="file"
+    //   accept="image/gif, image/jpg, image/jpeg, image/png, image/bmp"
+    //   onChange={this.handleFile} />
+    // </form>
+    
     return (
       <div className="login-profile">
         <div className="login-profile-avatar-wrapper">
           <div className="login-profile-avatar">
             {avatar}
           </div>
-          <form>
-            <input id="photo-input" type="file"
-            accept="image/gif, image/jpg, image/jpeg, image/png, image/bmp"
-            onChange={this.handleFile} />
-          </form>
+
         </div>
         <div className="login-welcome dtr-title">
           {"Hi " + user.get('username') + " Let's Hit The Road!"}

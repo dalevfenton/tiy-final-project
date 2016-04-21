@@ -1,4 +1,5 @@
 var $ = require('jquery');
+var Parse = require('parse');
 var React = require('react');
 
 
@@ -105,7 +106,9 @@ var WaypointsTab = React.createClass({
         saveInput = "route-name-input";
         buttonText = "Set A Name";
       }
-      save = "trip-button geo-auth-button geolocation-deny";
+      if(Parse.User.current()){
+        save = "trip-button geo-auth-button geolocation-deny";
+      }
     }
     var newButton;
     if(this.props.props.state.currentRoute){

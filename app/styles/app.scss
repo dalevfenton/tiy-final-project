@@ -394,7 +394,7 @@ html, body{
   margin: 14px 0;
 }
 .sidebar-login{
-  margin: 14px 0; 
+  margin: 14px 0;
 }
 
 //------------------------------------------------------------------------------
@@ -562,18 +562,7 @@ button.waypoint-remove{
   color: $accent-color-darken;
   fill: $accent-color-darken;
 }
-.selector-disabled{
-  color: lighten(black, 70%);
-  fill: lighten(black, 70%);
-  cursor: default;
-  &:hover{
-    color: lighten(black, 70%);
-  }
-  & > span:hover, & > svg:hover, & > svg:active{
-    color: lighten(black, 70%);
-    fill: lighten(black, 70%);
-  }
-}
+
 .selector-indicator{
   width: 16px;
   height: 16px;
@@ -602,6 +591,18 @@ button.waypoint-remove{
   cursor: pointer;
   &:hover{
     color: $accent-color;
+  }
+}
+.selector-disabled{
+  color: lighten(black, 70%);
+  fill: lighten(black, 70%);
+  cursor: default;
+  &:hover{
+    color: lighten(black, 70%);
+  }
+  & > span:hover, & > svg:hover, & > svg:active{
+    color: lighten(black, 70%);
+    fill: lighten(black, 70%);
   }
 }
 .panel{

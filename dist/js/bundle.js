@@ -2425,7 +2425,7 @@ var YelpDetail = React.createClass({displayName: "YelpDetail",
     var business = this.props.business;
     return (
       React.createElement("div", {className: "business-detail detail-item", key: this.props.index, onClick: this.setBusiness}, 
-        React.createElement("a", {href: business.url}, 
+        React.createElement("a", {href: business.url, target: "_blank"}, 
           React.createElement("h6", {className: "business-detail-title dtr-title"}, business.name)
         ), 
         React.createElement("div", {className: "business-detail-info"}, 

@@ -8,7 +8,7 @@ var YelpDetail = React.createClass({
     var business = this.props.business;
     return (
       <div className="business-detail detail-item" key={this.props.index} onClick={this.setBusiness}>
-        <a href={business.url}>
+        <a href={business.url} target="_blank">
           <h6 className="business-detail-title dtr-title">{business.name}</h6>
         </a>
         <div className="business-detail-info">

@@ -16,14 +16,17 @@ var WaypointsTab = React.createClass({
     }
   },
   componentDidUpdate: function(){
-    if(this.props.props.state.currentRoute){
+    if(this.props.props.state.currentRoute && this.props.props.state.updateRoute){
       var saveName = this.props.props.state.currentRoute.get('route_name');
       if(this.state.saveName !== saveName){
         this.setState({'saveName': saveName});
       }
+      this.props.props.unsetUpdateRoute();
     }
   },
   handleInput: function(e){
+    console.log('handle input called');
+    console.log(e.target.value);
     this.setState({saveName: e.target.value});
   },
   toggleSaveInput: function(e){

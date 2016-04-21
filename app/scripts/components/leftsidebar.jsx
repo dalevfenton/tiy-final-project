@@ -67,7 +67,7 @@ var LeftSidebar = React.createClass({
     var self = this;
     route.save().then(function(route){
       self.doCb('success', route, cb);
-      self.props.addRoute(route);
+      self.props.addRoute(route, type);
     }, function(error){
       self.doCb('error', error, cb);
     });
@@ -142,7 +142,8 @@ var LeftSidebar = React.createClass({
       route = "selector selector-route selector-active";
       tab = (
         <WaypointsTab props={this.props} state={this.state}
-          saveRoute={this.saveRoute} resetRoute={this.props.resetRoute} />
+          saveRoute={this.saveRoute} resetRoute={this.props.resetRoute}
+          />
       );
     }
 

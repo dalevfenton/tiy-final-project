@@ -246,7 +246,8 @@ var Interface = React.createClass({
           updateMap={this.updateMap} setActive={this.setActive}
           removePoint={this.removePoint} setRoute={this.setRoute}
           resetRoute={this.resetRoute}
-          resetUser={this.resetUser} deleteRoute={this.deleteRoute} />
+          resetUser={this.resetUser} deleteRoute={this.deleteRoute}
+          unsetUpdateRoute={this.unsetUpdateRoute} />
 
         <RightSidebar toggle={this.state.toggleRight} toggleRight={this.toggleRight}
           directions={this.props.directions} activePoint={this.state.activePoint}
@@ -264,13 +265,17 @@ var Interface = React.createClass({
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
   },
-  addRoute: function(route){
+  addRoute: function(route, type){
     var routes = this.state.routes;
-    if(!routes){
-      routes = [];
+    var index;
+    if(type == 'new'){
+      if(!routes){
+        routes = [];
+      }
+      routes.push(route);
+      index = routes.length-1;
     }
-    routes.push(route);
-    this.setState({'routes': routes, 'currentRoute': routes[routes.length-1] });
+    this.setState({'routes': routes, 'currentRoute': route });
   },
   deleteRoute: function(index, cb){
     var routes = this.state.routes;
@@ -394,7 +399,7 @@ var Interface = React.createClass({
     this.updateMap();
     console.log('setRoute index', index);
     console.log('setRoute routes', this.state.routes);
-    this.setState({currentRoute: this.state.routes[index]});
+    this.setState({currentRoute: this.state.routes[index], updateRoute: true });
   },
   setUserLocation: function(position){
     if(position.coords){
@@ -403,6 +408,9 @@ var Interface = React.createClass({
       );
     }
     this.doGeocode(position, this.userGeocoded);
+  },
+  unsetUpdateRoute: function(){
+    this.setState({updateRoute: false });
   },
   userGeocoded: function(userLocation){
     this.setState({'userLocation': userLocation, 'userLocationEnabled': true});

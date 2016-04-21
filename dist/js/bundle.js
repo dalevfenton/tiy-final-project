@@ -248,7 +248,8 @@ var Interface = React.createClass({displayName: "Interface",
           updateMap: this.updateMap, setActive: this.setActive, 
           removePoint: this.removePoint, setRoute: this.setRoute, 
           resetRoute: this.resetRoute, 
-          resetUser: this.resetUser, deleteRoute: this.deleteRoute}), 
+          resetUser: this.resetUser, deleteRoute: this.deleteRoute, 
+          unsetUpdateRoute: this.unsetUpdateRoute}), 
 
         React.createElement(RightSidebar, {toggle: this.state.toggleRight, toggleRight: this.toggleRight, 
           directions: this.props.directions, activePoint: this.state.activePoint, 
@@ -266,13 +267,17 @@ var Interface = React.createClass({displayName: "Interface",
   addPoint: function(){
     this.setState({'numPoints': this.state.numPoints+1});
   },
-  addRoute: function(route){
+  addRoute: function(route, type){
     var routes = this.state.routes;
-    if(!routes){
-      routes = [];
+    var index;
+    if(type == 'new'){
+      if(!routes){
+        routes = [];
+      }
+      routes.push(route);
+      index = routes.length-1;
     }
-    routes.push(route);
-    this.setState({'routes': routes, 'currentRoute': routes[routes.length-1] });
+    this.setState({'routes': routes, 'currentRoute': route });
   },
   deleteRoute: function(index, cb){
     var routes = this.state.routes;
@@ -396,7 +401,7 @@ var Interface = React.createClass({displayName: "Interface",
     this.updateMap();
     console.log('setRoute index', index);
     console.log('setRoute routes', this.state.routes);
-    this.setState({currentRoute: this.state.routes[index]});
+    this.setState({currentRoute: this.state.routes[index], updateRoute: true });
   },
   setUserLocation: function(position){
     if(position.coords){
@@ -405,6 +410,9 @@ var Interface = React.createClass({displayName: "Interface",
       );
     }
     this.doGeocode(position, this.userGeocoded);
+  },
+  unsetUpdateRoute: function(){
+    this.setState({updateRoute: false });
   },
   userGeocoded: function(userLocation){
     this.setState({'userLocation': userLocation, 'userLocationEnabled': true});
@@ -635,7 +643,7 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
     var self = this;
     route.save().then(function(route){
       self.doCb('success', route, cb);
-      self.props.addRoute(route);
+      self.props.addRoute(route, type);
     }, function(error){
       self.doCb('error', error, cb);
     });
@@ -710,7 +718,8 @@ var LeftSidebar = React.createClass({displayName: "LeftSidebar",
       route = "selector selector-route selector-active";
       tab = (
         React.createElement(WaypointsTab, {props: this.props, state: this.state, 
-          saveRoute: this.saveRoute, resetRoute: this.props.resetRoute})
+          saveRoute: this.saveRoute, resetRoute: this.props.resetRoute}
+          )
       );
     }
 
@@ -1201,14 +1210,17 @@ var WaypointsTab = React.createClass({displayName: "WaypointsTab",
     }
   },
   componentDidUpdate: function(){
-    if(this.props.props.state.currentRoute){
+    if(this.props.props.state.currentRoute && this.props.props.state.updateRoute){
       var saveName = this.props.props.state.currentRoute.get('route_name');
       if(this.state.saveName !== saveName){
         this.setState({'saveName': saveName});
       }
+      this.props.props.unsetUpdateRoute();
     }
   },
   handleInput: function(e){
+    console.log('handle input called');
+    console.log(e.target.value);
     this.setState({saveName: e.target.value});
   },
   toggleSaveInput: function(e){
